@@ -1,0 +1,32 @@
+# Sensitive files
+.env
+**/auth-profiles.json
+**/models.json
+**/*.bak
+**/*.log
+
+# Browser/Media caches
+browser/
+media/
+qqbot/downloads/
+logs/
+
+# Node/Python deps
+**/node_modules/
+**/.venv/
+
+# Build/cache outputs
+**/.logs/
+**/dist/
+**/build/
+**/.cache/
+
+# Large temp outputs
+workspace/_tmp_*/
+workspace/Star-Office-UI/.venv/
+workspace/Star-Office-UI/.logs/
+
+# Session logs (may contain secrets)
+agents/main/sessions/
+qqbot/data/ref-index.jsonl
+

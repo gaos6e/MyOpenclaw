@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "2026-03-18T03:16:15.360Z"
+  },
+  "env": {
+    "shellEnv": {
+      "enabled": true
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-15T14:30:56.431Z",
+    "lastRunVersion": "2026.3.13",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "cli": {
+    "banner": {
+      "taglineMode": "default"
+    }
+  },
+  "update": {
+    "channel": "stable",
+    "checkOnStart": true,
+    "auto": {
+      "enabled": true
+    }
+  },
+  "browser": {
+    "attachOnly": false
+  },
+  "auth": {
+    "profiles": {
+      "openai-codex:default": {
+        "provider": "openai-codex",
+        "mode": "oauth"
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openai/gpt-5.4-pro"
+      },
+      "models": {
+        "openai-codex/gpt-5.2-codex": {
+          "params": {
+            "responsesServerCompaction": true,
+            "responsesCompactThreshold": 217600
+          }
+        },
+        "openai/gpt-5.4": {},
+        "openai/gpt-5.4-pro": {}
+      },
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace",
+      "memorySearch": {
+        "enabled": true,
+        "sources": [
+          "memory"
+        ],
+        "provider": "openai",
+        "query": {
+          "maxResults": 10,
+          "minScore": 0.3
+        }
+      },
+      "contextPruning": {
+        "mode": "cache-ttl",
+        "ttl": "1h"
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 54400
+      },
+      "heartbeat": {
+        "every": "30m"
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "model": "openai-codex/gpt-5.2-codex",
+        "tools": {
+          "alsoAllow": [
+            "browser",
+            "message",
+            "tts"
+          ]
+        }
+      }
+    ]
+  },
+  "tools": {
+    "profile": "coding"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "self-improvement": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "web": {
+    "enabled": true
+  },
+  "channels": {
+    "qqbot": {
+      "enabled": true,
+      "allowFrom": [
+        "*"
+      ],
+      "appId": "1903522532",
+      "clientSecret": "X0HKAoKekdJn9QUP"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "none",
+      "token": "cd7cb2770a0700f4a50c838d96da9ff53cce2eda9bdddc11"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "entries": {
+      "openclaw-tavily-search": {
+        "apiKey": "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",
+        "env": {
+          "TAVILY_API_KEY": "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"
+        }
+      },
+      "tavily-search": {
+        "env": {
+          "TAVILY_API_KEY": "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"
+        }
+      },
+      "agent-browser": {
+        "env": {
+          "AGENT_BROWSER_EXECUTABLE_PATH": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+        }
+      }
+    }
+  },
+  "plugins": {
+    "allow": [
+      "openclaw-qqbot",
+      "memory-lancedb"
+    ],
+    "slots": {
+      "memory": "memory-lancedb"
+    },
+    "entries": {
+      "openclaw-qqbot": {
+        "enabled": true
+      },
+      "memory-lancedb": {
+        "enabled": true,
+        "config": {
+          "embedding": {
+            "apiKey": "${OPENAI_API_KEY}",
+            "model": "text-embedding-3-small"
+          },
+          "autoCapture": false,
+          "autoRecall": true
+        }
+      }
+    },
+    "installs": {
+      "openclaw-qqbot": {
+        "source": "npm",
+        "spec": "@tencent-connect/openclaw-qqbot@latest",
+        "installPath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-qqbot",
+        "version": "1.5.7",
+        "resolvedName": "@tencent-connect/openclaw-qqbot",
+        "resolvedVersion": "1.5.7",
+        "resolvedSpec": "@tencent-connect/openclaw-qqbot@1.5.7",
+        "integrity": "sha512-L7FmpZFRCPE8rx5T4QXeAKfoOv+UTkOBIyIcur4VPR4WVfEWAN+GMCa88VZYUf89zy834BaNzJNkHbYdasMqIg==",
+        "shasum": "e9ecfe9edd661bad52c78d01abd4f0817f3cbfae",
+        "resolvedAt": "2026-03-15T15:19:34.221Z",
+        "installedAt": "2026-03-15T15:20:32.361Z"
+      }
+    }
+  }
+}
