@@ -1,0 +1,96 @@
+name: 每周审核 (Weekly Review)
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # 每周一上午9点运行 (Every Monday at 9:00 AM UTC)
+  workflow_dispatch:       # 支持手动触发 (Allow manual trigger)
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  weekly-review:
+    name: 每周审核
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码 (Checkout repository)
+        uses: actions/checkout@v4
+
+      - name: 收集仓库信息 (Collect repository info)
+        id: repo-info
+        run: |
+          echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+          echo "week=$(date +'%Y 第%V周')" >> "$GITHUB_OUTPUT"
+          echo "commit_count=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+          echo "last_commit=$(git log -1 --format='%s')" >> "$GITHUB_OUTPUT"
+          echo "last_commit_date=$(git log -1 --format='%ci')" >> "$GITHUB_OUTPUT"
+
+      - name: 创建每周审核 Issue (Create weekly review issue)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = '${{ steps.repo-info.outputs.date }}';
+            const week = '${{ steps.repo-info.outputs.week }}';
+            const commitCount = '${{ steps.repo-info.outputs.commit_count }}';
+            const lastCommit = '${{ steps.repo-info.outputs.last_commit }}';
+            const lastCommitDate = '${{ steps.repo-info.outputs.last_commit_date }}';
+
+            // 确保标签存在 (Ensure the label exists)
+            const labelName = 'weekly-review';
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: labelName,
+              });
+            } catch (e) {
+              if (e.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: labelName,
+                  color: '0075ca',
+                  description: '每周审核自动生成的 Issue',
+                });
+              }
+            }
+
+            const issueBody = `## 每周审核报告 📋
+
+**审核周期**: ${week}
+**生成日期**: ${date}
+
+---
+
+### 仓库概况
+
+| 指标 | 数值 |
+|------|------|
+| 总提交数 | ${commitCount} |
+| 最近提交 | ${lastCommit} |
+| 最近提交时间 | ${lastCommitDate} |
+
+---
+
+### 审核清单
+
+- [ ] 代码质量检查
+- [ ] 安全漏洞扫描
+- [ ] 依赖项更新检查
+- [ ] 文档完整性检查
+- [ ] 开放 Issue 梳理
+- [ ] 待合并 PR 审查
+
+---
+
+> 此 Issue 由每周审核工作流自动生成。请团队成员完成上方审核清单后关闭此 Issue。`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `每周审核 - ${date}`,
+              body: issueBody,
+              labels: [labelName],
+            });
