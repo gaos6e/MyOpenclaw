@@ -30,3 +30,7 @@ workspace/Star-Office-UI/.logs/
 agents/main/sessions/
 qqbot/data/ref-index.jsonl
 
+
+# Backup configs containing secrets
+backup/openclaw.json.bak*
+
