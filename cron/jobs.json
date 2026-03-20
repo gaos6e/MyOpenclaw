@@ -151,7 +151,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "agentTurn",
-        "message": "请使用exec工具执行：powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\\桌面\\openclaw\\backup_openclaw.ps1\"。执行后用简短中文回复结果（成功或失败原因）。如果出现需要批准的命令，请按系统要求提示用户/approve。"
+        "message": "请使用exec工具执行：powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\20961\\.openclaw\\workspace\\scripts\\backup_openclaw.ps1\"。执行后用简短中文回复结果（成功或失败原因）。如果出现需要批准的命令，请按系统要求提示用户/approve。"
       },
       "delivery": {
         "mode": "announce",

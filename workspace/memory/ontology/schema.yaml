@@ -1,0 +1,28 @@
+types:
+  Task:
+    required: [title, status]
+    status_enum: [open, in_progress, blocked, done]
+  Project:
+    required: [name]
+  Person:
+    required: [name]
+  Event:
+    required: [title, start]
+  Document:
+    required: [title]
+  Credential:
+    required: [service, secret_ref]
+    forbidden_properties: [password, secret, token]
+relations:
+  has_owner:
+    from_types: [Project, Task]
+    to_types: [Person]
+    cardinality: many_to_one
+  has_task:
+    from_types: [Project]
+    to_types: [Task]
+    cardinality: one_to_many
+  blocks:
+    from_types: [Task]
+    to_types: [Task]
+    acyclic: true
