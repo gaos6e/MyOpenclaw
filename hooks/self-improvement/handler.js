@@ -41,6 +41,12 @@ const handler = async (event) => {
     return;
   }
 
+  // Skip sub-agent sessions to avoid duplicating reminders in delegated runs.
+  const sessionKey = event.sessionKey || '';
+  if (sessionKey.includes(':subagent:')) {
+    return;
+  }
+
   // Inject the reminder as a virtual bootstrap file
   // Check that bootstrapFiles is an array before pushing
   if (Array.isArray(event.context.bootstrapFiles)) {

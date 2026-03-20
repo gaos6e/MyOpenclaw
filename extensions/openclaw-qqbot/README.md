@@ -208,7 +208,7 @@ bash ./scripts/upgrade-via-source.sh --appid YOUR_APPID --secret YOUR_SECRET
 | `--self-version` | Install the version from local `package.json` (npm script only) |
 | `-h` / `--help` | Show full usage |
 
-> Environment variables `QQBOT_APPID` / `QQBOT_SECRET` are also supported.
+> Environment variables `QQBOT_APP_ID` / `QQBOT_CLIENT_SECRET` are also supported.
 
 **Option C: Manual Install / Upgrade**
 

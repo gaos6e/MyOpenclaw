@@ -205,7 +205,7 @@ bash ./scripts/upgrade-via-source.sh --appid YOUR_APPID --secret YOUR_SECRET
 | `--self-version` | 安装本地 `package.json` 中的版本（仅 npm 脚本） |
 | `-h` / `--help` | 查看完整用法 |
 
-> 也可通过环境变量 `QQBOT_APPID` / `QQBOT_SECRET` 设置。
+> 也可通过环境变量 `QQBOT_APP_ID` / `QQBOT_CLIENT_SECRET` 设置。
 
 **方式三：手动安装 / 升级**
 

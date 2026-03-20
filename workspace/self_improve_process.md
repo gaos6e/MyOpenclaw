@@ -41,6 +41,15 @@
 - 避免因 skill 升级/替换导致行为漂移
 - 方便审计与复盘，减少重复沟通成本
 
-## 5. 变更规则
+## 5. 记录格式
+- `self_improve_todo.md`: `- [高|中|低] 动作 -> 价值`
+- `self_improve_status.md`: `- status | 标题 | YYYY-MM-DD [| note]`
+- `self_improve_quality.md`: `- YYYY-MM-DD | 场景 | 问题 | 影响 | 优先级 | 处理动作`
+
+## 6. 校验
+- 轻量校验脚本：`node scripts/validate-self-improve.cjs`
+- 修改 todo/status/quality 结构后，优先跑一次校验
+
+## 7. 变更规则
 - 任何规则变更都需同步到 MEMORY.md 与 HEARTBEAT.md
 - 重要变更记录到 .learnings/LEARNINGS.md

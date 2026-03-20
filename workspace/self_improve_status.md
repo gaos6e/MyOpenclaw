@@ -10,6 +10,7 @@
 - parked：暂缓/搁置
 
 ## 事项列表
+- done | ai-daily-brief 技能重构并完成源验证 | 2026-03-20 | 高风险网络 skill；补齐 source registry / quality rules / source health check
 - done | 搜索/抓取分层流程落地（workflows/search-scrape-stack.md） | 2026-03-19
 - done | 文档/表格自动化流程落地（workflows/document-automation.md） | 2026-03-19
 - done | 自动化工作流模板落地（workflows/automation-templates.md） | 2026-03-19
@@ -27,3 +28,5 @@
 - 完成后移到 done
 - 受阻则移到 blocked，并注明原因
 - 超过30天无进展转为 parked
+- 行格式：`- status | 标题 | YYYY-MM-DD [| note]`
+- 状态集固定为：todo / doing / done / blocked / parked

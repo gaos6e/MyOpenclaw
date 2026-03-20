@@ -23,7 +23,9 @@ node scripts/mem0_bridge.js "本次对话摘要" --user xiaogao
 - **Mem0 只负责抽取**
 - 结果先写入当日 `memory/YYYY-MM-DD.md`
 - 再人工挑选沉淀到 `MEMORY.md`
+- daily memory 结构以 `memory/README.md` 和 `memory/TEMPLATE.md` 为准
 
 ## 注意
 - Mem0 可能误抽，建议先人工筛选再落盘
 - 自动化写入可后续再启用（避免噪音）
+- `mem0_capture.js` 与 `mem0_bridge.js` 可直接在当前 workspace Node 环境执行

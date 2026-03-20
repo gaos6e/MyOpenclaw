@@ -1,10 +1,11 @@
 {
   "name": "workspace",
   "version": "1.0.0",
-  "description": "",
-  "main": "tmp_evo_hello.js",
+  "description": "OpenClaw workspace governance helpers and local runtime scripts",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test scripts/mem0_scripts.test.cjs scripts/validate-self-improve.test.cjs ../hooks/self-improvement/handler.test.cjs",
+    "validate:self-improve": "node scripts/validate-self-improve.cjs"
   },
   "keywords": [],
   "author": "",

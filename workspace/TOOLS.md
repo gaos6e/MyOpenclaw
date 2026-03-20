@@ -32,7 +32,7 @@ Things like:
 ```
 
 ## Tool gotchas
-- image 工具不能直接读取 `C:\Users\20961\.openclaw\qqbot\downloads`，需先复制到 `C:\Users\20961\.openclaw\workspace` 再识别
+- image 工具应直接读取 `C:\Users\20961\.openclaw\qqbot\downloads` 下的绝对路径；不要为了识图再复制到 `C:\Users\20961\.openclaw\workspace`
 
 ## Why Separate?
 

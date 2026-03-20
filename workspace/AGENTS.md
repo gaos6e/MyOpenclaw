@@ -17,6 +17,13 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
+## Canonical Docs
+
+- `self_improve_process.md` is the authority for self-improvement flow.
+- `memory/README.md` defines memory layers and the daily memory template.
+- `scripts/README.md`, `workflows/README.md`, and `skills/README.md` define local governance surfaces.
+- `VENDOR.md` defines how imported/vendor content should be treated.
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:
@@ -35,6 +42,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - Write significant events, thoughts, decisions, opinions, lessons learned
 - This is your curated memory — the distilled essence, not raw logs
 - Over time, review your daily files and update MEMORY.md with what's worth keeping
+- Daily memory format lives in `memory/README.md` and `memory/TEMPLATE.md`
 
 ### 📝 Write It Down - No "Mental Notes"!
 
@@ -54,6 +62,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - 临时文件一律放在 **D:\桌面\openclaw**（先确认路径再写）
 - 清理前先列清单，避免误移包含非临时项目的目录（如 _tmp_cli_anything）
 - qqbot 下载缓存需先确认是否迁移/清空
+- 识图时直接读取 `C:\Users\20961\.openclaw\qqbot\downloads` 中附件的绝对路径，禁止为了工具调用再复制到 `workspace`
 
 ## External vs Internal
 
@@ -129,6 +138,8 @@ Skills provide your tools. When you need one, check its `SKILL.md`. Keep local n
 - **WhatsApp:** No headers — use **bold** or CAPS for emphasis
 
 ## 💓 Heartbeats - Be Proactive!
+
+Detailed definitions for self-improvement cadence, state files, and recording rules live in `self_improve_process.md`. `HEARTBEAT.md` should stay as the execution checklist, not a second SOP.
 
 When you receive a heartbeat poll (message matches the configured heartbeat prompt), don't just reply `HEARTBEAT_OK` every time. Use heartbeats productively!
 

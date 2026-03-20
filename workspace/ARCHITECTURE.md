@@ -1,0 +1,60 @@
+# openclaw Architecture
+
+## Layering
+
+### 1. Runtime / State Layer
+
+位于仓库根目录，面向框架运行和本地状态持久化：
+
+- `agents/`: agent session/runtime state
+- `identity/`: device identity and local auth state
+- `memory/`: 检索索引和嵌入缓存
+- `cron/`: 本地任务定义和运行记录
+- `devices/`: 配对与待处理设备状态
+- `qqbot/`: QQBot runtime data
+
+这些目录不搬家，但默认按 local runtime/state 处理。
+
+### 1.5 Runtime config vs derived agent state
+
+- `openclaw.json` 视为本地 runtime config 入口。
+- `agents/main/agent/*` 视为 agent-local 派生态或状态面，不单独当成第二套人工维护配置。
+- 当两者出现概念重叠时，以 runtime config 的设计意图为先，再决定是否需要同步或清理派生态。
+
+### 2. Governance / Workspace Layer
+
+位于 `workspace/`，面向长期维护：
+
+- bootstrap 入口: `AGENTS.md`, `SOUL.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `MEMORY.md`
+- 自我提升治理: `self_improve_process.md`, `self_improve_todo.md`, `self_improve_status.md`, `self_improve_quality.md`
+- 工作流与脚本: `workflows/`, `scripts/`
+- skills 与 vendor 索引: `skills/`, `VENDOR.md`
+
+## Memory Model
+
+### Human-readable memory
+
+- `workspace/memory/*.md`: 日记式原始事实
+- `workspace/MEMORY.md`: 长期沉淀、偏好、稳定上下文
+- `workspace/.learnings/*`: 错误/教训/需求池，本地运行态记录
+
+### Retrieval-only memory
+
+- `memory/main.sqlite`: 检索索引
+- `workspace/memory/ontology/schema.yaml`: ontology schema
+- `workspace/memory/ontology/graph.jsonl`: ontology runtime graph
+
+原则：`memory/main.sqlite` 是检索层，不是人工编辑事实源。
+
+## Self-improvement Model
+
+- Hook 只负责 bootstrap 提示，不负责复杂执行。
+- `HEARTBEAT.md` 负责可漂移检查清单。
+- `self_improve_process.md` 是唯一 SOP。
+- `self_improve_todo.md`, `self_improve_status.md`, `self_improve_quality.md` 是结构化治理面。
+- cron 负责定时执行和总结，不承载重复规则定义。
+
+## Vendor / Imported Content
+
+- `workspace/skills/` 是 mixed ownership 目录，不默认视为全部 first-party。
+- `workspace/Star-Office-UI/` 和 `workspace/_tmp_*` 属于 vendor/archive 类内容，优先本地保存和隔离治理。

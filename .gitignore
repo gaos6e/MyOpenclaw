@@ -1,36 +1,48 @@
-# Sensitive files
+# Local runtime config and secrets
 .env
-**/auth-profiles.json
-**/models.json
-**/*.bak
-**/*.log
-
-# Browser/Media caches
+openclaw.json
+exec-approvals.json
+update-check.json
+agents/
+identity/
+memory/
+devices/
+qqbot/
+cron/jobs.json
+cron/runs/
+backup/
 browser/
-media/
-qqbot/downloads/
 logs/
+media/
+delivery-queue/
 
-# Node/Python deps
+# Workspace runtime state
+workspace/.clawhub/
+workspace/.openclaw/
+workspace/.openclaw.lnk
+workspace/.learnings/
+workspace/memory/20*.md
+workspace/memory/ontology/graph.jsonl
+workspace/Star-Office-UI/
+workspace/_tmp_*/
+workspace/tmp_*.png
+
+# Dependencies and caches
 **/node_modules/
 **/.venv/
-
-# Build/cache outputs
+**/.cache/
 **/.logs/
 **/dist/
 **/build/
-**/.cache/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
 
-# Large temp outputs
-workspace/_tmp_*/
-workspace/Star-Office-UI/.venv/
-workspace/Star-Office-UI/.logs/
+# Generic backups and logs
+**/*.bak
+**/*.log
 
-# Session logs (may contain secrets)
-agents/main/sessions/
-qqbot/data/ref-index.jsonl
-
-
-# Backup configs containing secrets
-backup/openclaw.json.bak*
-
+# Keep tracked governance/docs/templates
+!workspace/memory/README.md
+!workspace/memory/TEMPLATE.md
+!workspace/memory/ontology/schema.yaml
