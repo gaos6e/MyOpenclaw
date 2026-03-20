@@ -6,7 +6,7 @@
       "name": "广州黄埔区天气(每2小时)",
       "enabled": true,
       "createdAtMs": 1773638441289,
-      "updatedAtMs": 1773936181436,
+      "updatedAtMs": 1773993802355,
       "schedule": {
         "kind": "cron",
         "expr": "0 */2 * * *",
@@ -25,11 +25,11 @@
         "to": "qqbot:c2c:9A053C1350854286F832A03D38E111FD"
       },
       "state": {
-        "nextRunAtMs": 1773943347134,
-        "lastRunAtMs": 1773936147322,
+        "nextRunAtMs": 1774000947134,
+        "lastRunAtMs": 1773993747138,
         "lastRunStatus": "ok",
         "lastStatus": "ok",
-        "lastDurationMs": 34114,
+        "lastDurationMs": 55217,
         "lastDelivered": true,
         "lastDeliveryStatus": "delivered",
         "consecutiveErrors": 0
@@ -40,7 +40,7 @@
       "name": "国际大事-午间",
       "enabled": true,
       "createdAtMs": 1773661163352,
-      "updatedAtMs": 1773893425152,
+      "updatedAtMs": 1773979304084,
       "schedule": {
         "kind": "cron",
         "expr": "0 12 * * *",
@@ -58,11 +58,11 @@
         "to": "qqbot:c2c:9A053C1350854286F832A03D38E111FD"
       },
       "state": {
-        "nextRunAtMs": 1773979200000,
-        "lastRunAtMs": 1773893371924,
+        "nextRunAtMs": 1774065600000,
+        "lastRunAtMs": 1773979200004,
         "lastRunStatus": "ok",
         "lastStatus": "ok",
-        "lastDurationMs": 53228,
+        "lastDurationMs": 104080,
         "lastDelivered": true,
         "lastDeliveryStatus": "delivered",
         "consecutiveErrors": 0
