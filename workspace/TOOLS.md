@@ -33,6 +33,7 @@ Things like:
 
 ## Tool gotchas
 - image 工具应直接读取 `C:\Users\20961\.openclaw\qqbot\downloads` 下的绝对路径；不要为了识图再复制到 `C:\Users\20961\.openclaw\workspace`
+- 使用 `package_skill.py` 打包时需要 Python 依赖 `pyyaml`（缺失会报 ModuleNotFoundError: yaml）。
 
 ## Why Separate?
 
