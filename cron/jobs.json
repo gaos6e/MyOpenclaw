@@ -134,6 +134,33 @@
         "lastDeliveryStatus": "delivered",
         "consecutiveErrors": 0
       }
+    },
+    {
+      "id": "55512402-025f-4277-899a-1fd03c2211bd",
+      "agentId": "main",
+      "name": "openclaw-git-backup-2300",
+      "enabled": true,
+      "createdAtMs": 1773996199723,
+      "updatedAtMs": 1773996199723,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 23 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "请使用exec工具执行：powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\\桌面\\openclaw\\backup_openclaw.ps1\"。执行后用简短中文回复结果（成功或失败原因）。如果出现需要批准的命令，请按系统要求提示用户/approve。"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "qqbot",
+        "to": "qqbot:c2c:9A053C1350854286F832A03D38E111FD"
+      },
+      "state": {
+        "nextRunAtMs": 1774018800000
+      }
     }
   ]
 }
