@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+gitlinks="$(git ls-files --stage | awk '$1 == "160000" { print $4 }')"
+if [ -n "$gitlinks" ]; then
+  echo "ERROR: gitlinks/submodules are not allowed in this repository:" >&2
+  echo "$gitlinks" >&2
+  echo "Remove nested repositories before committing." >&2
+  exit 1
+fi
