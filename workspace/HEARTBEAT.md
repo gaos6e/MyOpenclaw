@@ -19,7 +19,8 @@
 - [ ] 社区扫描：给 1–3 个候选 + 简短理由（先询问再安装）
 - [ ] 用量趋势复盘：检查最近用量/额度变化，必要时调整降频策略
 - [ ] 响应质量自检：抽查 1–2 次近期答复，记录到 self_improve_quality.md（含优先级+处理动作）
-- [ ] Mem0 自动抽取（触发：仅在自我提升时执行）：对近期对话做轻量抽取（仅在有新事实/偏好时）→ 写入当日 memory/YYYY-MM-DD.md
+- [ ] 候选记忆抽取（触发：仅在自我提升时执行）：仅通过显式调用 `memory_extract_candidates` 对近期对话做轻量抽取 → 写入 `memory/inbox/*.jsonl`
+- [ ] 候选审核与沉淀：必要时用 `memory_list_candidates` / `memory_promote_candidate` 审核并提升到 `MEMORY.md`
 - [ ] 风险/异常复盘：查看近期错误或失败记录，产出 1 条避免复发的行动
 
 ## 执行后动作

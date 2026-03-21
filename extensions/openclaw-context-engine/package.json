@@ -1,0 +1,12 @@
+{
+  "name": "@local/openclaw-context-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Session-aware context engine for OpenClaw workspace governance",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

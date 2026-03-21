@@ -6,6 +6,7 @@
 - `skills-governance.md`: skills 入场/更新治理
 - `automation-templates.md`: 自动化模板
 - `document-automation.md`: 文档/表格处理链
+- `moltbook-routine.md`: Moltbook 日常社交自动化 playbook
 - `search-scrape-stack.md`: 搜索/抓取分层策略
 - `temp-files-policy.md`: 临时文件落盘与清理规则
 

@@ -15,6 +15,9 @@ browser/
 logs/
 media/
 delivery-queue/
+moltbook/credentials.json
+moltbook/state.json
+moltbook/activity.jsonl
 
 # Workspace runtime state
 workspace/.clawhub/

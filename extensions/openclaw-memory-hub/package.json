@@ -1,0 +1,12 @@
+{
+  "name": "@local/openclaw-memory-hub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "First-party memory hub plugin for OpenClaw",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

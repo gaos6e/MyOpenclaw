@@ -1,0 +1,12 @@
+{
+  "name": "@local/openclaw-checkpoint-guardian",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Checkpoint reminders and reset audit for OpenClaw runs",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

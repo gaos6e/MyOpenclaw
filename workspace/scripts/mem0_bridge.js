@@ -1,4 +1,7 @@
-// Mem0 bridge: extract memories and append to daily log
+// Deprecated experimental bridge.
+// This script is retained for compatibility/manual experiments only.
+// Canonical self-improvement memory flow is:
+//   openclaw memory-hub extract -> candidates -> promote
 // Usage: node scripts/mem0_bridge.js "conversation chunk" --user xiaogao
 
 const fs = require("node:fs");
@@ -90,6 +93,10 @@ function buildEntry(now, userId, text, result) {
 
 async function main() {
   const { userId, text } = parseArgs(process.argv);
+
+  console.error(
+    "[deprecated] mem0_bridge.js is no longer part of the default self-improvement flow. Prefer `openclaw memory-hub extract`.",
+  );
 
   if (!process.env.MEM0_API_KEY) {
     console.error("MEM0_API_KEY not set");

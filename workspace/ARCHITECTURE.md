@@ -40,15 +40,24 @@
 
 ### Retrieval-only memory
 
-- `memory/main.sqlite`: 检索索引
+- `memory/main.sqlite`: 旧检索索引（保留）
+- `memory/main.v2.sqlite`: memory hub v2 检索索引
 - `workspace/memory/ontology/schema.yaml`: ontology schema
-- `workspace/memory/ontology/graph.jsonl`: ontology runtime graph
+- `workspace/memory/ontology/graph.jsonl`: reviewed memory/history 派生出的 ontology graph
+- `workspace/memory/history.jsonl`: durable memory / ontology promotion history
+- `workspace/memory/inbox/*.jsonl`: candidate inbox（抽取结果待审核）
+- `workspace/memory/index-manifest.json`: memory v2 index 白名单/黑名单
 
-原则：`memory/main.sqlite` 是检索层，不是人工编辑事实源。
+原则：
+- `MEMORY.md` 与 `workspace/memory/YYYY-MM-DD.md` 仍是事实真源
+- `memory/main*.sqlite` 都是可重建检索层，不是人工编辑事实源
+- `workspace/memory/ontology/graph.jsonl` 是派生视图，不是原始真源
 
 ## Self-improvement Model
 
 - Hook 只负责 bootstrap 提示，不负责复杂执行。
+- `contextEngine` 负责为 direct/cron/subagent 组装 session-aware 上下文快照，shared session 默认走安全裁剪。
+- `checkpoint-guardian` 负责在长探索链路后注入 checkpoint 提醒，并在 reset 前记录未落盘探索审计。
 - `HEARTBEAT.md` 负责可漂移检查清单。
 - `self_improve_process.md` 是唯一 SOP。
 - `self_improve_todo.md`, `self_improve_status.md`, `self_improve_quality.md` 是结构化治理面。

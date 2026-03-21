@@ -10,6 +10,7 @@
 - parked：暂缓/搁置
 
 ## 事项列表
+- done | 修复 Star-Office state JSON 解析问题 | 2026-03-21 | set_state.py 增加 JSONDecodeError 容错+备份
 - done | OpenClaw Daily Push 任务排查并完成一次成功测试 | 2026-03-20 | 267009=任务运行中；手动执行后结果为 0
 - done | 技能运行级自检（quick_validate） | 2026-03-20 | 共36个技能，失败18个（多为前置元数据字段不符合当前校验规则）
 - done | ai-daily-brief 技能重构并完成源验证 | 2026-03-20 | 高风险网络 skill；补齐 source registry / quality rules / source health check

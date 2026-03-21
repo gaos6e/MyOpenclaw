@@ -1,0 +1,20 @@
+{
+  "id": "openclaw-context-engine",
+  "kind": "context-engine",
+  "name": "OpenClaw Context Engine",
+  "description": "Session-aware workspace context assembly with legacy compaction delegation.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "maxChars": {
+        "type": "integer",
+        "minimum": 256
+      },
+      "explorationReminderThreshold": {
+        "type": "integer",
+        "minimum": 1
+      }
+    }
+  }
+}

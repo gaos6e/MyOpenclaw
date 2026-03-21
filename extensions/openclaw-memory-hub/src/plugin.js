@@ -1,0 +1,452 @@
+import path from "node:path";
+import { jsonResult } from "./json-result.js";
+import { MemoryHubIndexer } from "./indexer.js";
+import { inferSessionScope } from "./session-scope.js";
+import {
+  collectCurrentSessionUserTexts,
+  readSessionTranscriptSnippet,
+  searchSessionTranscript,
+} from "./session-recall.js";
+import { extractHeuristicCandidates } from "./candidates.js";
+import { lookupOntology, rebuildOntologyGraph } from "./ontology.js";
+import { backfillTranscriptCandidates, snapshotMemorySources } from "./backfill.js";
+import { appendCandidates, listInboxCandidates, promoteCandidate } from "./stores.js";
+import { ensureMemoryHubFiles, resolveMemoryHubPaths } from "./runtime-paths.js";
+
+const INDEXERS = new Map();
+
+function makeError(message, extra = {}) {
+  return jsonResult({ disabled: true, error: message, ...extra });
+}
+
+function getIndexer(paths) {
+  const key = paths.dbPath;
+  if (!INDEXERS.has(key)) {
+    INDEXERS.set(key, new MemoryHubIndexer({ workspaceDir: paths.workspaceDir, dbPath: paths.dbPath }));
+  }
+  return INDEXERS.get(key);
+}
+
+async function preparePaths(api, toolContext) {
+  const paths = resolveMemoryHubPaths({
+    config: api.config,
+    pluginConfig: api.pluginConfig,
+    toolContext,
+  });
+  ensureMemoryHubFiles(paths);
+  return paths;
+}
+
+function toolSchema(properties, required = []) {
+  return {
+    type: "object",
+    additionalProperties: false,
+    properties,
+    required,
+  };
+}
+
+async function ensureOntologyAndIndex(paths) {
+  await rebuildOntologyGraph({
+    workspaceDir: paths.workspaceDir,
+    historyPath: paths.historyPath,
+    ontologyPath: paths.ontologyPath,
+  });
+  await getIndexer(paths).reindex({ force: true });
+}
+
+const plugin = {
+  id: "openclaw-memory-hub",
+  name: "OpenClaw Memory Hub",
+  description: "Scoped durable memory, session recall, ontology lookup, and candidate extraction.",
+  kind: "memory",
+  configSchema: {
+    parse(value) {
+      return value ?? {};
+    },
+    jsonSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        dbPath: { type: "string" },
+        manifestPath: { type: "string" },
+        historyPath: { type: "string" },
+        ontologyPath: { type: "string" },
+        inboxDir: { type: "string" },
+        snapshotDir: { type: "string" },
+        transcriptBackfillLimit: { type: "integer", minimum: 1 },
+        sessionRecallWindow: { type: "integer", minimum: 1 },
+      },
+    },
+  },
+  register(api) {
+    api.registerTool(
+      (ctx) => {
+        return [
+          {
+            name: "memory_search",
+            label: "Memory Search",
+            description:
+              "Search durable memory, daily memory, and reviewed ontology facts. In shared contexts this tool is disabled for privacy.",
+            parameters: toolSchema(
+              {
+                query: { type: "string" },
+                maxResults: { type: "integer", minimum: 1 },
+                minScore: { type: "number", minimum: 0 },
+              },
+              ["query"],
+            ),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              const scope = inferSessionScope(ctx.sessionKey);
+              if (scope.isShared) {
+                return makeError("global memory search is disabled in shared contexts; use session_recall_search instead");
+              }
+              const indexer = getIndexer(paths);
+              await indexer.reindex();
+              const results = await indexer.search(params.query, { maxResults: params.maxResults });
+              return jsonResult({
+                backend: "memory-hub-v2",
+                mode: "fts-weighted",
+                results,
+              });
+            },
+          },
+          {
+            name: "memory_get",
+            label: "Memory Get",
+            description: "Read a snippet from durable memory, daily memory, or ontology-backed file sources.",
+            parameters: toolSchema(
+              {
+                path: { type: "string" },
+                from: { type: "integer", minimum: 1 },
+                lines: { type: "integer", minimum: 1 },
+              },
+              ["path"],
+            ),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              const scope = inferSessionScope(ctx.sessionKey);
+              if (scope.isShared) {
+                return makeError("memory_get is disabled in shared contexts");
+              }
+              const result = await getIndexer(paths).readFile({
+                relPath: params.path,
+                from: params.from,
+                lines: params.lines,
+              });
+              return jsonResult(result);
+            },
+          },
+          {
+            name: "session_recall_search",
+            label: "Session Recall Search",
+            description: "Search only the current session transcript.",
+            parameters: toolSchema(
+              {
+                query: { type: "string" },
+                maxResults: { type: "integer", minimum: 1 },
+              },
+              ["query"],
+            ),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              if (!ctx.sessionKey) {
+                return makeError("session_recall_search requires a session context");
+              }
+              const results = await searchSessionTranscript({
+                stateDir: paths.stateDir,
+                agentId: ctx.agentId ?? "main",
+                sessionKey: ctx.sessionKey,
+                query: params.query,
+                maxResults: params.maxResults,
+              });
+              return jsonResult({ results });
+            },
+          },
+          {
+            name: "session_recall_get",
+            label: "Session Recall Get",
+            description: "Read a snippet from the current session transcript only.",
+            parameters: toolSchema({
+              path: { type: "string" },
+              from: { type: "integer", minimum: 1 },
+              lines: { type: "integer", minimum: 1 },
+            }),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              if (!ctx.sessionKey) {
+                return makeError("session_recall_get requires a session context");
+              }
+              const result = await readSessionTranscriptSnippet({
+                stateDir: paths.stateDir,
+                agentId: ctx.agentId ?? "main",
+                sessionKey: ctx.sessionKey,
+                path: params.path,
+                from: params.from,
+                lines: params.lines,
+              });
+              return jsonResult(result);
+            },
+          },
+          {
+            name: "ontology_lookup",
+            label: "Ontology Lookup",
+            description: "Search reviewed ontology entities and relations derived from durable memory/history.",
+            parameters: toolSchema(
+              {
+                query: { type: "string" },
+                limit: { type: "integer", minimum: 1 },
+              },
+              ["query"],
+            ),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              const scope = inferSessionScope(ctx.sessionKey);
+              if (scope.isShared) {
+                return makeError("ontology lookup is disabled in shared contexts");
+              }
+              await rebuildOntologyGraph({
+                workspaceDir: paths.workspaceDir,
+                historyPath: paths.historyPath,
+                ontologyPath: paths.ontologyPath,
+              });
+              const results = await lookupOntology({
+                ontologyPath: paths.ontologyPath,
+                query: params.query,
+                limit: params.limit,
+              });
+              return jsonResult({ results });
+            },
+          },
+          {
+            name: "memory_extract_candidates",
+            label: "Memory Extract Candidates",
+            description: "Extract stable memory candidates from current session context and write them to the inbox.",
+            parameters: toolSchema({
+              sourceText: { type: "string" },
+              maxCandidates: { type: "integer", minimum: 1 },
+            }),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              const texts = params.sourceText
+                ? [String(params.sourceText)]
+                : ctx.sessionKey
+                  ? await collectCurrentSessionUserTexts({
+                      stateDir: paths.stateDir,
+                      agentId: ctx.agentId ?? "main",
+                      sessionKey: ctx.sessionKey,
+                    })
+                  : [];
+              const candidates = extractHeuristicCandidates({
+                sourceKind: ctx.sessionKey ? "session" : "manual",
+                sourceRef: ctx.sessionKey ?? "manual",
+                texts,
+              }).slice(0, Math.max(1, Number(params.maxCandidates ?? 5)));
+              const fileStem = new Date().toISOString().slice(0, 10);
+              const writeResult = appendCandidates({
+                inboxDir: paths.inboxDir,
+                fileStem,
+                candidates,
+              });
+              return jsonResult({ ...writeResult, candidates });
+            },
+          },
+          {
+            name: "memory_list_candidates",
+            label: "Memory List Candidates",
+            description: "List pending memory candidates from inbox JSONL files.",
+            parameters: toolSchema({
+              limit: { type: "integer", minimum: 1 },
+            }),
+            async execute() {
+              const paths = await preparePaths(api, ctx);
+              const candidates = listInboxCandidates({ workspaceDir: paths.workspaceDir }).filter(
+                (candidate) => candidate.reviewed !== true,
+              );
+              return jsonResult({ candidates: candidates.slice(0, Math.max(1, 20)) });
+            },
+          },
+          {
+            name: "memory_promote_candidate",
+            label: "Memory Promote Candidate",
+            description: "Mark an inbox candidate reviewed, write it into durable memory, append history, rebuild ontology, and refresh index.",
+            parameters: toolSchema(
+              {
+                candidateId: { type: "string" },
+                target: { type: "string", enum: ["durable"] },
+              },
+              ["candidateId"],
+            ),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              const scope = inferSessionScope(ctx.sessionKey);
+              if (scope.isShared) {
+                return makeError("candidate promotion is disabled in shared contexts");
+              }
+              const result = await promoteCandidate({
+                workspaceDir: paths.workspaceDir,
+                candidateId: params.candidateId,
+                target: params.target ?? "durable",
+              });
+              await ensureOntologyAndIndex(paths);
+              return jsonResult(result);
+            },
+          },
+        ];
+      },
+      {
+        names: [
+          "memory_search",
+          "memory_get",
+          "session_recall_search",
+          "session_recall_get",
+          "ontology_lookup",
+          "memory_extract_candidates",
+          "memory_list_candidates",
+          "memory_promote_candidate",
+        ],
+      },
+    );
+
+    api.registerCli(
+      ({ program }) => {
+        const command = program.command("memory-hub").description("OpenClaw memory hub commands");
+
+        command
+          .command("status")
+          .option("--json", "output json")
+          .action(async (opts) => {
+            const paths = await preparePaths(api, {});
+            const status = {
+              ...getIndexer(paths).status(),
+              inboxDir: paths.inboxDir,
+              historyPath: paths.historyPath,
+              ontologyPath: paths.ontologyPath,
+              candidates: listInboxCandidates({ workspaceDir: paths.workspaceDir }).filter(
+                (candidate) => candidate.reviewed !== true,
+              ).length,
+            };
+            if (opts.json) {
+              console.log(JSON.stringify(status, null, 2));
+              return;
+            }
+            console.log(`backend: ${status.backend}`);
+            console.log(`docs: ${status.docs}`);
+            console.log(`chunks: ${status.chunks}`);
+            console.log(`db: ${status.dbPath}`);
+            console.log(`pending candidates: ${status.candidates}`);
+          });
+
+        command
+          .command("index")
+          .option("--force", "force full reindex")
+          .action(async (opts) => {
+            const paths = await preparePaths(api, {});
+            await ensureOntologyAndIndex(paths);
+            const status = await getIndexer(paths).reindex({ force: Boolean(opts.force) });
+            console.log(JSON.stringify(status, null, 2));
+          });
+
+        command
+          .command("search")
+          .argument("[query]", "query")
+          .option("--query <text>", "query text")
+          .option("--max-results <n>", "max results", "5")
+          .option("--json", "output json")
+          .action(async (queryArg, opts) => {
+            const query = opts.query ?? queryArg;
+            if (!query) {
+              throw new Error("query required");
+            }
+            const paths = await preparePaths(api, {});
+            await getIndexer(paths).reindex();
+            const results = await getIndexer(paths).search(query, { maxResults: Number(opts.maxResults) });
+            if (opts.json) {
+              console.log(JSON.stringify({ results }, null, 2));
+              return;
+            }
+            for (const item of results) {
+              console.log(`${item.path}:${item.startLine}-${item.endLine} [${item.namespace}] ${item.score.toFixed(2)}`);
+              console.log(item.snippet);
+              console.log("");
+            }
+          });
+
+        command
+          .command("backfill")
+          .option("--json", "output json")
+          .action(async (opts) => {
+            const paths = await preparePaths(api, {});
+            const snapshot = await snapshotMemorySources({
+              workspaceDir: paths.workspaceDir,
+              stateDir: paths.stateDir,
+              snapshotDir: paths.snapshotDir,
+              agentId: "main",
+            });
+            const result = await backfillTranscriptCandidates({
+              stateDir: paths.stateDir,
+              agentId: "main",
+              inboxDir: paths.inboxDir,
+              limit: paths.transcriptBackfillLimit,
+            });
+            const payload = { snapshot, result };
+            console.log(opts.json ? JSON.stringify(payload, null, 2) : `snapshot: ${snapshot.snapshotDir}\nappended: ${result.appended}`);
+          });
+
+        command
+          .command("candidates")
+          .option("--json", "output json")
+          .action(async (opts) => {
+            const paths = await preparePaths(api, {});
+            const candidates = listInboxCandidates({ workspaceDir: paths.workspaceDir }).filter(
+              (candidate) => candidate.reviewed !== true,
+            );
+            console.log(opts.json ? JSON.stringify({ candidates }, null, 2) : candidates.map((entry) => `${entry.id} ${entry.candidate_kind} ${entry.normalized}`).join("\n"));
+          });
+
+        command
+          .command("extract")
+          .requiredOption("--source <text>", "source text")
+          .option("--max-candidates <n>", "max candidates", "5")
+          .action(async (opts) => {
+            const paths = await preparePaths(api, {});
+            const candidates = extractHeuristicCandidates({
+              sourceKind: "manual",
+              sourceRef: "memory-cli",
+              texts: [opts.source],
+            }).slice(0, Math.max(1, Number(opts.maxCandidates)));
+            const result = appendCandidates({
+              inboxDir: paths.inboxDir,
+              fileStem: new Date().toISOString().slice(0, 10),
+              candidates,
+            });
+            console.log(JSON.stringify({ ...result, candidates }, null, 2));
+          });
+
+        command
+          .command("promote")
+          .argument("<candidateId>", "candidate id")
+          .option("--target <target>", "promotion target", "durable")
+          .action(async (candidateId, opts) => {
+            const paths = await preparePaths(api, {});
+            const result = await promoteCandidate({
+              workspaceDir: paths.workspaceDir,
+              candidateId,
+              target: opts.target,
+            });
+            await ensureOntologyAndIndex(paths);
+            console.log(JSON.stringify(result, null, 2));
+          });
+      },
+      { commands: ["memory-hub"] },
+    );
+
+    api.on("gateway_start", async () => {
+      const paths = await preparePaths(api, {});
+      ensureMemoryHubFiles(paths);
+    });
+  },
+};
+
+export default plugin;

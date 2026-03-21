@@ -2,6 +2,10 @@
 
 > 目的：把「规则层 / 调度层 / 执行层」打通，确保自我提升可重复、可审计、可迭代。
 
+## 0. 运行时机制
+- `openclaw-context-engine`：为 private/direct/cron/subagent 会话注入压缩后的工作区上下文快照；shared 会话默认不注入私人 durable memory。
+- `openclaw-checkpoint-guardian`：在长探索链路后提醒做 checkpoint，并在 reset 前记录未落盘探索审计。
+
 ## 1. 触发条件（来自 MEMORY.md）
 - 空闲≥30分钟且无新任务时主动提升
 - 每天 22:00 进行日结总结
@@ -26,7 +30,8 @@
    - 关注 ClawHub/GitHub/Discord 新工具/插件（先询问再安装）
 4) **记录与留痕**
    - 重要规则/偏好 → MEMORY.md
-   - Mem0 抽取结果 → 先写入当日 memory/YYYY-MM-DD.md，再人工挑选沉淀到 MEMORY.md
+   - canonical candidate flow：`memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
+   - 候选抽取结果 → 先写入 `memory/inbox/*.jsonl`，再人工审核沉淀到 `MEMORY.md`
    - 操作失误/失败 → .learnings/ERRORS.md
    - 方法论改进 → .learnings/LEARNINGS.md / AGENTS.md
    - 质量自检问题 → self_improve_quality.md
@@ -35,6 +40,7 @@
 5) **汇报原则**
    - 有阶段性进展即告知
    - 日结中控制条数（提升≤10、未执行≤10）
+   - 22:00 日结只汇报已经落入 `todo/status/quality/inbox/history` 的结果
 
 ## 4. 为什么要“流程文档化”
 - skill 是“能力模块”，流程文档是“本地 SOP”，可将你的偏好、约束、习惯稳定固化
@@ -49,6 +55,7 @@
 ## 6. 校验
 - 轻量校验脚本：`node scripts/validate-self-improve.cjs`
 - 修改 todo/status/quality 结构后，优先跑一次校验
+- 记忆系统变更后，优先跑一次 `openclaw memory-hub status --json` 与 `openclaw memory-hub candidates --json`
 
 ## 7. 变更规则
 - 任何规则变更都需同步到 MEMORY.md 与 HEARTBEAT.md
