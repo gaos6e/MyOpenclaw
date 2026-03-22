@@ -153,3 +153,61 @@ test("context engine delegates compaction to legacy engine", async () =>
     assert.equal(result.compacted, true);
     assert.equal(result.reason, "legacy-delegate");
   }));
+
+test("context engine falls back to compact runtime bundle when legacy context-engine entry is missing", async () =>
+  withTempWorkspace(async ({ workspaceDir }) => {
+    const { OpenClawWorkspaceContextEngine } = await import(moduleUrl);
+    const tempDistRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-dist-"));
+    const pluginSdkDir = path.join(tempDistRoot, "plugin-sdk");
+    const previousDistDir = process.env.OPENCLAW_DIST_DIR;
+
+    try {
+      fs.mkdirSync(pluginSdkDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(pluginSdkDir, "compact.runtime-test.js"),
+        [
+          "export async function compactEmbeddedPiSessionDirect(params) {",
+          "  return {",
+          "    ok: true,",
+          "    compacted: true,",
+          "    reason: 'runtime-fallback',",
+          "    result: {",
+          "      summary: 'ok',",
+          "      firstKeptEntryId: 'entry-1',",
+          "      tokensBefore: params.currentTokenCount ?? 0,",
+          "      tokensAfter: 42,",
+          "      details: { workspaceDir: params.workspaceDir }",
+          "    }",
+          "  };",
+          "}",
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      process.env.OPENCLAW_DIST_DIR = tempDistRoot;
+
+      const engine = new OpenClawWorkspaceContextEngine({ workspaceDir });
+      const result = await engine.compact({
+        sessionId: "sess-4",
+        sessionKey: "agent:main:test",
+        sessionFile: "session.jsonl",
+        tokenBudget: 2000,
+        currentTokenCount: 123,
+        runtimeContext: { workspaceDir },
+      });
+
+      assert.equal(result.ok, true);
+      assert.equal(result.compacted, true);
+      assert.equal(result.reason, "runtime-fallback");
+      assert.equal(result.result.tokensBefore, 123);
+      assert.equal(result.result.tokensAfter, 42);
+      assert.equal(result.result.details.workspaceDir, workspaceDir);
+    } finally {
+      if (previousDistDir === undefined) {
+        delete process.env.OPENCLAW_DIST_DIR;
+      } else {
+        process.env.OPENCLAW_DIST_DIR = previousDistDir;
+      }
+      fs.rmSync(tempDistRoot, { recursive: true, force: true });
+    }
+  }));

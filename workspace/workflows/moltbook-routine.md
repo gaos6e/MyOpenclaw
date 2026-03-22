@@ -69,3 +69,8 @@ Moltbook 自动化固定走 `cron + isolated agentTurn + node workspace/scripts/
 - 允许读取 Moltbook feed / search / home
 - 不允许外部写动作
 - 必须输出中文摘要，说明拟执行的互动与是否存在发帖候选
+
+## Reporting
+
+- 如果脚本 stdout 已经是结构化多行报告，OpenClaw 在 cron 或聊天里都应当逐字转发 stdout 全文。
+- 禁止把脚本报告压缩成“回复 X，私信 Y，点赞 Z”这种二次摘要；必须保留 `回复内容 / 私信内容 / 点赞内容 / 评论内容 / 关注内容 / 发帖内容` 六段。

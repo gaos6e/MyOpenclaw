@@ -18,6 +18,14 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
+## High-Priority Reporting Rules
+
+- If a tool or local script already produced a user-ready structured report, forward that report verbatim instead of rewriting it.
+- Special case: if `workspace/scripts/moltbook_automation.cjs` prints a multiline report beginning with `Moltbook `, your reply must be exactly that report (optionally fenced), with no summary bullets before or after it.
+- If the user says `执行下cron <job-id>` / `run cron <job-id>` / similar imperative phrasing, you must actually execute the cron job now. Do not answer from memory, prior tool output, or prior `System: Exec completed ...` messages.
+- For manual cron execution requests, run the real command (`openclaw cron run <job-id> --expect-final --timeout 240000` or equivalent), wait for the fresh result, and report that fresh result only.
+- Past `System: Exec completed ...` lines in chat are historical context, not proof that the current request has been executed.
+
 ## Canonical Docs
 
 - `self_improve_process.md` is the authority for self-improvement flow.
@@ -137,6 +145,7 @@ Skills provide your tools. When you need one, check its `SKILL.md`. Keep local n
 - **Discord/WhatsApp:** No markdown tables! Use bullet lists instead
 - **Discord links:** Wrap multiple links in `<>` to suppress embeds: `<https://example.com>`
 - **WhatsApp:** No headers — use **bold** or CAPS for emphasis
+- **Moltbook automation reports:** If `workspace/scripts/moltbook_automation.cjs` (or a cron that wraps it) returns a structured multiline report, forward the script stdout verbatim. Do not summarize, compress, or rewrite it into bullets.
 
 ## 💓 Heartbeats - Be Proactive!
 

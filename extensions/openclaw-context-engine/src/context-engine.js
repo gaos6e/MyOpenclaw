@@ -182,6 +182,39 @@ async function createHostLegacyContextEngine() {
   for (const distDir of candidateOpenClawDistDirs()) {
     const modulePath = path.join(distDir, "plugin-sdk", "context-engine", "index.js");
     if (!fs.existsSync(modulePath)) {
+      const pluginSdkDir = path.join(distDir, "plugin-sdk");
+      if (!fs.existsSync(pluginSdkDir)) {
+        continue;
+      }
+      const compactRuntimeFile = fs.readdirSync(pluginSdkDir).find((entry) => /^compact\.runtime-.*\.js$/i.test(entry));
+      if (!compactRuntimeFile) {
+        continue;
+      }
+      const compactRuntimePath = path.join(pluginSdkDir, compactRuntimeFile);
+      const compactRuntime = await import(pathToFileURL(compactRuntimePath).href);
+      if (typeof compactRuntime.compactEmbeddedPiSessionDirect === "function") {
+        return {
+          async compact(params) {
+            const runtimeContext = params.runtimeContext ?? {};
+            const currentTokenCount = params.currentTokenCount
+              ?? (typeof runtimeContext.currentTokenCount === "number"
+                && Number.isFinite(runtimeContext.currentTokenCount)
+                && runtimeContext.currentTokenCount > 0
+                ? Math.floor(runtimeContext.currentTokenCount)
+                : undefined);
+            return compactRuntime.compactEmbeddedPiSessionDirect({
+              ...runtimeContext,
+              sessionId: params.sessionId,
+              sessionFile: params.sessionFile,
+              tokenBudget: params.tokenBudget,
+              ...(currentTokenCount !== undefined ? { currentTokenCount } : {}),
+              force: params.force,
+              customInstructions: params.customInstructions,
+              workspaceDir: runtimeContext.workspaceDir ?? process.cwd(),
+            });
+          },
+        };
+      }
       continue;
     }
     const module = await import(pathToFileURL(modulePath).href);

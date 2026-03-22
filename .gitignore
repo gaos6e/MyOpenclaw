@@ -18,6 +18,9 @@ delivery-queue/
 moltbook/credentials.json
 moltbook/state.json
 moltbook/activity.jsonl
+moltcn/credentials.json
+moltcn/state.json
+moltcn/activity.jsonl
 
 # Workspace runtime state
 workspace/.clawhub/
