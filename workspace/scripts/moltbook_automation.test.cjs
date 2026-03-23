@@ -23,6 +23,11 @@ const {
   ensurePublishedStatus,
   runSlot,
   createApiClient,
+  resolveGenerationConfig,
+  selectCommentTarget,
+  resolveSiteProfile,
+  getQualifiedPostCandidates,
+  selectCommentTargets,
 } = require("./moltbook_automation.cjs");
 
 function makeTempRoot() {
@@ -91,16 +96,43 @@ test("canPostInSlot enforces slot and daily limits", () => {
   const state = createDefaultState("2026-03-21");
 
   assert.equal(canPostInSlot(state, "morning").allowed, true);
-  assert.equal(canPostInSlot(state, "afternoon").allowed, false);
+  assert.equal(canPostInSlot(state, "afternoon").allowed, true);
+  assert.equal(canPostInSlot(state, "evening").allowed, true);
 
   state.daily_counts.posts = 1;
   state.posts_by_slot.morning = 1;
   assert.equal(canPostInSlot(state, "morning").allowed, false);
+  assert.equal(canPostInSlot(state, "afternoon").allowed, true);
   assert.equal(canPostInSlot(state, "evening").allowed, true);
 
   state.daily_counts.posts = 2;
+  state.posts_by_slot.afternoon = 1;
+  assert.equal(canPostInSlot(state, "afternoon").allowed, false);
   state.posts_by_slot.evening = 1;
   assert.equal(canPostInSlot(state, "evening").allowed, false);
+});
+
+test("resolveGenerationConfig reads env-backed provider api keys from openclaw config", () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "openclaw.json"), {
+    models: {
+      providers: {
+        qwen: {
+          baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+          apiKey: { source: "env", provider: "default", id: "QWEN_API_KEY" },
+          models: [{ id: "qwen3-vl-plus" }],
+        },
+      },
+    },
+  });
+
+  const result = resolveGenerationConfig(rootDir, { QWEN_API_KEY: "qwen-test-key" });
+
+  assert.deepEqual(result, {
+    baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    apiKey: "qwen-test-key",
+    model: "qwen3-vl-plus",
+  });
 });
 
 test("classifySubmolt maps target communities into required buckets", () => {
@@ -342,6 +374,59 @@ test("createApiClient prefers curl when proxy env is present", async () => {
   assert.equal(payload.ok, true);
 });
 
+test("createApiClient falls back to fetch when curl proxy request fails", async () => {
+  let fetchCalls = 0;
+  let curlCalls = 0;
+  const client = createApiClient({
+    apiKey: "test-key",
+    baseUrl: "https://example.com",
+    env: { HTTPS_PROXY: "http://127.0.0.1:7890" },
+    fetchImpl: async () => {
+      fetchCalls += 1;
+      return new Response(JSON.stringify({ success: true, ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+    curlImpl: () => {
+      curlCalls += 1;
+      return {
+        status: 35,
+        stdout: "",
+        stderr: "curl: (35) schannel: failed to receive handshake, SSL/TLS connection failed",
+      };
+    },
+  });
+
+  const payload = await client.getJson("/home");
+  assert.equal(curlCalls, 1);
+  assert.equal(fetchCalls, 1);
+  assert.equal(payload.ok, true);
+});
+
+test("createApiClient preserves endpoint context when proxy curl and fetch both fail", async () => {
+  const client = createApiClient({
+    apiKey: "test-key",
+    baseUrl: "https://example.com",
+    env: { HTTPS_PROXY: "http://127.0.0.1:7890" },
+    fetchImpl: async () => {
+      throw new TypeError("fetch failed");
+    },
+    curlImpl: () => {
+      return {
+        status: 35,
+        stdout: "",
+        stderr: "curl: (35) schannel: failed to receive handshake, SSL/TLS connection failed",
+      };
+    },
+  });
+
+  await assert.rejects(
+    () => client.getJson("/home"),
+    /Network request failed for GET \/home: fetch failed; curl proxy request failed: curl: \(35\) schannel: failed to receive handshake, SSL\/TLS connection failed/i,
+  );
+});
+
 test("selectQualifiedPostCandidate rejects low-quality drafts and picks the best allowed one", () => {
   const state = createDefaultState("2026-03-21");
   const lowQuality = selectQualifiedPostCandidate({
@@ -379,6 +464,27 @@ test("selectQualifiedPostCandidate rejects low-quality drafts and picks the best
   assert.equal(highQuality.title, "Good one");
 });
 
+test("selectCommentTarget falls back to relevant zero-comment posts when no active thread exists", () => {
+  const target = selectCommentTarget([
+    {
+      id: "post-1",
+      title: "Fresh OpenClaw note",
+      submolt: { name: "openclaw-explorers" },
+      comment_count: 0,
+      upvotes: 3,
+    },
+    {
+      id: "post-2",
+      title: "Off-topic",
+      submolt: { name: "random" },
+      comment_count: 9,
+      upvotes: 100,
+    },
+  ]);
+
+  assert.equal(target.id, "post-1");
+});
+
 test("selectUpvoteTargets respects per-run and daily budgets", () => {
   const state = createDefaultState("2026-03-21");
   const posts = Array.from({ length: 10 }, (_, index) => ({
@@ -389,12 +495,69 @@ test("selectUpvoteTargets respects per-run and daily budgets", () => {
     upvotes: 10 - index,
   }));
 
-  const freshTargets = selectUpvoteTargets({ posts, state });
-  assert.equal(freshTargets.length, 5);
+  const freshTargets = selectUpvoteTargets({ posts, state, siteProfile: resolveSiteProfile("moltbook") });
+  assert.equal(freshTargets.length, 6);
 
-  state.daily_counts.upvotes = 10;
-  const limitedTargets = selectUpvoteTargets({ posts, state });
+  state.daily_counts.upvotes = 16;
+  const limitedTargets = selectUpvoteTargets({ posts, state, siteProfile: resolveSiteProfile("moltbook") });
   assert.equal(limitedTargets.length, 2);
+});
+
+test("selectCommentTargets returns up to two targets and skips already engaged posts", () => {
+  const targets = selectCommentTargets({
+    posts: [
+      { id: "p1", title: "One", submolt: { name: "openclaw-explorers" }, comment_count: 3, upvotes: 5 },
+      { id: "p2", title: "Two", submolt: { name: "agentops" }, comment_count: 0, upvotes: 8 },
+      { id: "p3", title: "Three", submolt: { name: "general" }, comment_count: 1, upvotes: 4 },
+      { id: "p4", title: "Other", submolt: { name: "random" }, comment_count: 9, upvotes: 20 },
+    ],
+    state: {
+      engaged_post_ids_today: ["p1"],
+    },
+    siteProfile: resolveSiteProfile("moltbook"),
+  });
+
+  assert.deepEqual(targets.map((post) => post.id), ["p3", "p2"]);
+});
+
+test("getQualifiedPostCandidates uses relaxed thresholds before the site reaches two daily posts", () => {
+  const lowButAcceptable = getQualifiedPostCandidates({
+    candidates: [
+      {
+        title: "Borderline candidate",
+        content: "still actionable",
+        submolt_name: "general",
+        scores: { relevance: 6, novelty: 5, specificity: 5 },
+      },
+    ],
+    state: {
+      daily_counts: { posts: 0 },
+      posts_by_slot: { morning: 0, afternoon: 0, evening: 0 },
+    },
+    slot: "morning",
+    siteProfile: resolveSiteProfile("moltbook"),
+  });
+
+  assert.equal(lowButAcceptable.length, 1);
+
+  const blockedAfterQuota = getQualifiedPostCandidates({
+    candidates: [
+      {
+        title: "Borderline candidate",
+        content: "still actionable",
+        submolt_name: "general",
+        scores: { relevance: 6, novelty: 5, specificity: 5 },
+      },
+    ],
+    state: {
+      daily_counts: { posts: 2 },
+      posts_by_slot: { morning: 0, afternoon: 0, evening: 0 },
+    },
+    slot: "evening",
+    siteProfile: resolveSiteProfile("moltbook"),
+  });
+
+  assert.equal(blockedAfterQuota.length, 0);
 });
 
 test("parseGeneratedJson repairs bad backslash escapes in model output", () => {
@@ -436,6 +599,60 @@ test("ensurePublishedStatus treats visible Moltcn posts without verification_sta
 
   assert.equal(result.published, true);
   assert.equal(result.status, "visible");
+});
+
+test("ensurePublishedStatus treats failed-but-visible Moltbook posts as published", async () => {
+  const result = await ensurePublishedStatus({
+    client: {
+      async getJson(endpoint) {
+        assert.equal(endpoint, "/posts/post-1");
+        return {
+          success: true,
+          post: {
+            id: "post-1",
+            verification_status: "failed",
+            is_deleted: false,
+          },
+        };
+      },
+    },
+    postId: "post-1",
+    reportErrors: [],
+  });
+
+  assert.equal(result.published, true);
+  assert.equal(result.status, "failed");
+});
+
+test("ensurePublishedStatus retries when post lookup is temporarily unavailable", async () => {
+  let calls = 0;
+  const reportErrors = [];
+  const result = await ensurePublishedStatus({
+    client: {
+      async getJson(endpoint) {
+        calls += 1;
+        assert.equal(endpoint, "/posts/post-1");
+        if (calls === 1) {
+          throw new Error("GET /posts/post-1 failed (404): Not found");
+        }
+        return {
+          success: true,
+          data: {
+            id: "post-1",
+            is_deleted: false,
+          },
+        };
+      },
+    },
+    postId: "post-1",
+    reportErrors,
+    attempts: 2,
+    retryDelayMs: 0,
+  });
+
+  assert.equal(calls, 2);
+  assert.equal(result.published, true);
+  assert.deepEqual(reportErrors, []);
 });
 
 test("runSlot dry-run initializes runtime files and avoids write endpoints", async () => {
@@ -550,6 +767,193 @@ test("runSlot uses Moltcn runtime isolation and skips unsupported DM/following f
   const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltcn", "state.json"), "utf8"));
   assert.equal(state.local_date, "2026-03-21");
   assert.equal(fs.existsSync(path.join(rootDir, "moltcn", "activity.jsonl")), true);
+});
+
+test("runSlot enables Moltcn probed features when the endpoints are available", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "little_furball",
+  });
+
+  const client = createFakeClient({
+    "/agents/me": { success: true, agent: { id: "agent-cn", name: "little_furball", description: "desc" } },
+    "/agents/status": { success: true, status: "claimed" },
+    "/home": {
+      your_account: { name: "little_furball", karma: 7, unread_notification_count: 0 },
+      activity_on_your_posts: [],
+      latest_moltbook_announcement: { title: "中文站公告" },
+    },
+    "/feed?filter=following&sort=new&limit=5": {
+      success: true,
+      posts: [
+        { id: "fp1", title: "Followed post", content: "workflow", submolt: { name: "agent-patterns" }, author: { name: "FollowedAuthor" }, comment_count: 1, upvotes: 5 },
+      ],
+    },
+    "/feed?sort=new&limit=12": {
+      success: true,
+      posts: [
+        { id: "p1", title: "OpenClaw 中文经验", content: "workflow", submolt: { name: "agent-patterns" }, author: { name: "a1" }, comment_count: 2, upvotes: 5 },
+      ],
+    },
+    "/agents/dm/requests": {
+      success: true,
+      incoming: {
+        requests: [
+          {
+            conversation_id: "conv-req-1",
+            from: { name: "HelpfulCn" },
+            message_preview: "想交流一下自动化巡检。",
+          },
+        ],
+      },
+      outgoing: { requests: [] },
+    },
+    "/agents/dm/conversations": {
+      success: true,
+      total_unread: "1",
+      conversations: {
+        items: [
+          {
+            conversation_id: "conv-1",
+            unread_count: 1,
+            with_agent: { name: "HelpfulCn", description: "desc" },
+          },
+        ],
+      },
+    },
+    "/agents/dm/conversations/conv-1": {
+      success: true,
+      conversation: {
+        messages: [
+          { sender: "HelpfulCn", message: "你怎么安排每日发帖节奏？", created_at: "2026-03-21T13:40:00.000Z" },
+        ],
+      },
+    },
+    "/search?q=%E8%87%AA%E5%8A%A8%E5%8C%96&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=OpenClaw&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=Agent&type=posts&limit=3": { success: true, results: [] },
+    "POST /agents/dm/requests/conv-req-1/approve": { success: true },
+    "POST /agents/dm/conversations/conv-1/send": { success: true },
+    "POST /posts/p1/upvote": { success: true },
+    "POST /posts/fp1/comments": { success: true, comment: { id: "comment-cn", verification_status: "verified" } },
+  });
+
+  const result = await runSlot({
+    slot: "morning",
+    site: "moltcn",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T01:30:00.000Z"),
+    client,
+    generator: {
+      async replyToDm() {
+        return "我会把发帖拆到固定 slot，并保留保底候选。";
+      },
+      async commentOnPost() {
+        return "这个拆法挺稳，适合持续运营。";
+      },
+      async buildPostCandidates() {
+        return [];
+      },
+    },
+  });
+
+  assert.match(result.summary, /私信 1/);
+  assert.match(result.summary, /评论 1/);
+  assert.equal(
+    client.writes.some((call) => call.endpoint === "/agents/dm/requests/conv-req-1/approve"),
+    true,
+  );
+  assert.equal(
+    client.writes.some((call) => call.endpoint === "/agents/dm/conversations/conv-1/send"),
+    true,
+  );
+  const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltcn", "state.json"), "utf8"));
+  assert.equal(state.feature_support_cache.dmRequests.supported, true);
+  assert.equal(state.feature_support_cache.dmConversations.supported, true);
+  assert.equal(state.feature_support_cache.followingFeed.supported, true);
+});
+
+test("runSlot follows one relevant author and tracks follow state", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltbook", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "melancholic_claw",
+  });
+
+  const client = createFakeClient({
+    "/agents/me": { success: true, agent: { id: "agent-1", name: "melancholic_claw", description: "desc" } },
+    "/agents/status": { success: true, status: "claimed" },
+    "/home": {
+      your_account: { name: "melancholic_claw", karma: 7, unread_notification_count: 0 },
+      activity_on_your_posts: [],
+      your_direct_messages: { pending_request_count: "0", unread_message_count: "0" },
+      latest_moltbook_announcement: { title: "Announcement" },
+      posts_from_accounts_you_follow: { posts: [] },
+    },
+    "/feed?filter=following&sort=new&limit=5": { success: true, posts: [] },
+    "/feed?sort=new&limit=12": {
+      success: true,
+      posts: [
+        { id: "p1", title: "Tooling post", content: "workflow", submolt: { name: "tooling" }, author: { name: "Ting_Fodder" }, comment_count: 3, upvotes: 9 },
+      ],
+    },
+    "/agents/profile?name=Ting_Fodder": {
+      success: true,
+      agent: {
+        id: "author-1",
+        name: "Ting_Fodder",
+        follower_count: 320,
+        following_count: 1,
+        posts_count: 21,
+        comments_count: 56379,
+        last_active: "2026-03-23T14:04:56.901Z",
+      },
+      recentPosts: [{ id: "rp1" }],
+      recentComments: [{ id: "rc1" }],
+    },
+    "/agents/profile?name=a1": {
+      success: true,
+      agent: { id: "a1", name: "a1", follower_count: 2, following_count: 1, posts_count: 1, comments_count: 2 },
+      recentPosts: [],
+      recentComments: [],
+    },
+    "/agents/dm/requests": { success: true, incoming: { requests: [] }, outgoing: { requests: [] } },
+    "/agents/dm/conversations": { success: true, conversations: { items: [] }, total_unread: "0" },
+    "/search?q=openclaw&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=agentops&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=debugging&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=memory&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=skills&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=workflow&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=automation&type=posts&limit=3": { success: true, results: [] },
+    "POST /posts/p1/upvote": { success: true, author: { name: "Ting_Fodder" }, already_following: false },
+    "POST /posts/p1/comments": { success: true, comment: { id: "comment-1", verification_status: "verified" } },
+    "POST /agents/Ting_Fodder/follow": { success: true },
+  });
+
+  const result = await runSlot({
+    slot: "morning",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T01:30:00.000Z"),
+    client,
+    generator: {
+      async commentOnPost() {
+        return "这类工程拆解值得继续跟。";
+      },
+      async buildPostCandidates() {
+        return [];
+      },
+    },
+  });
+
+  assert.match(result.summary, /关注 1/);
+  assert.equal(client.writes.some((call) => call.endpoint === "/agents/Ting_Fodder/follow"), true);
+  const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltbook", "state.json"), "utf8"));
+  assert.deepEqual(state.followed_agent_ids_today, ["Ting_Fodder"]);
+  assert.equal(state.daily_counts.follows, 1);
 });
 
 test("runSlot degrades gracefully when post candidate generation fails", async () => {
@@ -856,6 +1260,222 @@ test("runSlot does not count a post as published when verification stays pending
   assert.equal(state.daily_counts.posts, 0);
 });
 
+test("runSlot stops post retries after a verification failure creates a pending post", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltbook", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "melancholic_claw",
+  });
+
+  const postWrites = [];
+  const client = {
+    async getJson(endpoint) {
+      const fixtures = {
+        "/agents/me": { success: true, agent: { id: "agent-1", name: "melancholic_claw", description: "desc" } },
+        "/agents/status": { success: true, status: "claimed" },
+        "/home": {
+          your_account: { name: "melancholic_claw", karma: 7, unread_notification_count: 0 },
+          activity_on_your_posts: [],
+          your_direct_messages: { pending_request_count: "0", unread_message_count: "0" },
+          latest_moltbook_announcement: { title: "Announcement" },
+          posts_from_accounts_you_follow: { posts: [] },
+        },
+        "/feed?filter=following&sort=new&limit=5": { success: true, posts: [] },
+        "/feed?sort=new&limit=12": {
+          success: true,
+          posts: [
+            { id: "p1", title: "OpenClaw cron trick", content: "workflow", submolt: { name: "openclaw-explorers" }, author: { name: "a1" }, comment_count: 1, upvotes: 5 },
+          ],
+        },
+        "/agents/dm/requests": { success: true, incoming: { requests: [] }, outgoing: { requests: [] } },
+        "/agents/dm/conversations": { success: true, conversations: { items: [] }, total_unread: "0" },
+        "/search?q=openclaw&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=agentops&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=debugging&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=memory&type=posts&limit=3": { success: true, results: [] },
+        "/posts/p1/upvote": { success: true },
+        "/posts/p1/comments": { success: true, comment: { id: "comment-1", verification_status: "verified" } },
+        "/posts/pending-post": {
+          success: true,
+          post: { id: "pending-post", verification_status: "pending" },
+        },
+      };
+      if (!(endpoint in fixtures)) {
+        throw new Error(`Missing fixture for ${endpoint}`);
+      }
+      return JSON.parse(JSON.stringify(fixtures[endpoint]));
+    },
+    async postJson(endpoint, body) {
+      postWrites.push({ endpoint, body });
+      if (endpoint === "/posts") {
+        return {
+          success: true,
+          post: {
+            id: "pending-post",
+            verification_status: "pending",
+            verification: {
+              verification_code: "verify-1",
+              challenge_text: "twenty one plus six",
+              instructions: "return the number with 2 decimals",
+            },
+          },
+        };
+      }
+      if (endpoint === "/verify") {
+        throw new Error("POST /verify failed (400): Incorrect answer");
+      }
+      if (endpoint === "/posts/p1/upvote") {
+        return { success: true };
+      }
+      if (endpoint === "/posts/p1/comments") {
+        return { success: true, comment: { id: "comment-1", verification_status: "verified" } };
+      }
+      throw new Error(`Unexpected POST ${endpoint}`);
+    },
+    async deleteJson(endpoint) {
+      throw new Error(`Unexpected DELETE ${endpoint}`);
+    },
+  };
+
+  const result = await runSlot({
+    slot: "evening",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T13:30:00.000Z"),
+    client,
+    generator: {
+      async commentOnPost() {
+        return "Useful operational note.";
+      },
+      async buildPostCandidates() {
+        return [
+          {
+            title: "First candidate",
+            content: "content one",
+            submolt_name: "openclaw-explorers",
+            scores: { relevance: 9, novelty: 8, specificity: 9 },
+          },
+          {
+            title: "Second candidate",
+            content: "content two",
+            submolt_name: "agentops",
+            scores: { relevance: 9, novelty: 8, specificity: 9 },
+          },
+        ];
+      },
+      async solveVerification() {
+        return "99.00";
+      },
+    },
+  });
+
+  assert.equal(postWrites.filter((call) => call.endpoint === "/posts").length, 1);
+  assert.match(result.summary, /POST \/verify failed \(400\): Incorrect answer/);
+  assert.doesNotMatch(result.summary, /429/);
+});
+
+test("runSlot retries post submission with a sanitized fallback after a platform 500", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltbook", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "melancholic_claw",
+  });
+
+  const reads = [];
+  const postWrites = [];
+  const client = {
+    async getJson(endpoint) {
+      reads.push(endpoint);
+      const fixtures = {
+        "/agents/me": { success: true, agent: { id: "agent-1", name: "melancholic_claw", description: "desc" } },
+        "/agents/status": { success: true, status: "claimed" },
+        "/home": {
+          your_account: { name: "melancholic_claw", karma: 7, unread_notification_count: 0 },
+          activity_on_your_posts: [],
+          your_direct_messages: { pending_request_count: "0", unread_message_count: "0" },
+          latest_moltbook_announcement: { title: "Announcement" },
+          posts_from_accounts_you_follow: { posts: [] },
+        },
+        "/feed?filter=following&sort=new&limit=5": { success: true, posts: [] },
+        "/feed?sort=new&limit=12": {
+          success: true,
+          posts: [
+            { id: "p1", title: "OpenClaw cron trick", content: "workflow", submolt: { name: "openclaw-explorers" }, author: { name: "a1" }, comment_count: 1, upvotes: 5 },
+          ],
+        },
+        "/agents/dm/requests": { success: true, incoming: { requests: [] }, outgoing: { requests: [] } },
+        "/agents/dm/conversations": { success: true, conversations: { items: [] }, total_unread: "0" },
+        "/search?q=openclaw&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=agentops&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=debugging&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=memory&type=posts&limit=3": { success: true, results: [] },
+        "/posts/p1/comments?sort=new&limit=20": { success: true, comments: [] },
+        "/posts/safe-post": {
+          success: true,
+          post: { id: "safe-post", verification_status: "verified" },
+        },
+      };
+      if (!(endpoint in fixtures)) {
+        throw new Error(`Missing fixture for ${endpoint}`);
+      }
+      return JSON.parse(JSON.stringify(fixtures[endpoint]));
+    },
+    async postJson(endpoint, body) {
+      postWrites.push({ endpoint, body });
+      if (endpoint === "/posts/p1/upvote") {
+        return { success: true };
+      }
+      if (endpoint === "/posts/p1/comments") {
+        return { success: true, comment: { id: "comment-1", verification_status: "verified" } };
+      }
+      if (endpoint === "/posts") {
+        if (postWrites.filter((call) => call.endpoint === "/posts").length === 1) {
+          throw new Error("POST /posts failed (500): Error");
+        }
+        return { success: true, post: { id: "safe-post", verification_status: "verified" } };
+      }
+      throw new Error(`Unexpected POST ${endpoint}`);
+    },
+    async deleteJson(endpoint) {
+      throw new Error(`Unexpected DELETE ${endpoint}`);
+    },
+  };
+
+  const result = await runSlot({
+    slot: "evening",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T13:30:00.000Z"),
+    client,
+    generator: {
+      async commentOnPost() {
+        return "Useful operational note.";
+      },
+      async buildPostCandidates() {
+        return [
+          {
+            title: "Gateway Refactor: From `gateway.cmd` to Hidden PowerShell + TypeScript Integration",
+            content:
+              "Just shipped a stealthy upgrade to the OpenClaw gateway layer: replaced the brittle `gateway.cmd` with a hidden wrapper. #tooling #openclaw",
+            submolt_name: "tooling",
+            scores: { relevance: 9, novelty: 8, specificity: 9 },
+          },
+        ];
+      },
+    },
+  });
+
+  const postCalls = postWrites.filter((call) => call.endpoint === "/posts");
+  assert.equal(postCalls.length, 2);
+  assert.match(result.summary, /发帖 1/);
+  assert.doesNotMatch(result.summary, /POST \/posts failed/);
+  assert.equal(postCalls[0].body.title.includes("`"), true);
+  assert.equal(postCalls[0].body.content.includes("#tooling"), true);
+  assert.equal(postCalls[1].body.title.includes("`"), false);
+  assert.equal(postCalls[1].body.content.includes("#tooling"), false);
+  assert.equal(postCalls[1].body.content.includes("gateway.cmd"), true);
+});
+
 test("runSlot posts to Moltcn using submolt field", async () => {
   const rootDir = makeTempRoot();
   writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
@@ -883,6 +1503,7 @@ test("runSlot posts to Moltcn using submolt field", async () => {
     "/search?q=%E8%87%AA%E5%8A%A8%E5%8C%96&type=posts&limit=3": { success: true, results: [] },
     "/search?q=OpenClaw&type=posts&limit=3": { success: true, results: [] },
     "/search?q=Agent&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B&type=posts&limit=3": { success: true, results: [] },
     "POST /posts/p1/upvote": { success: true },
     "POST /posts/p1/comments": {
       success: true,
@@ -928,4 +1549,98 @@ test("runSlot posts to Moltcn using submolt field", async () => {
     title: "OpenClaw 中文巡检模式",
     content: "把巡检拆成固定 slot 之后，执行和复盘都更稳定。",
   });
+});
+
+test("runSlot handles wrapped Moltcn payloads and post_id-only publish responses", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "little_furball",
+  });
+
+  const client = createFakeClient({
+    "/agents/me": {
+      success: true,
+      data: { id: "agent-cn", name: "little_furball", description: "desc" },
+    },
+    "/agents/status": { status: "claimed" },
+    "/home": {
+      success: true,
+      data: {
+        your_account: { name: "little_furball", score: 7, status: "claimed" },
+        latest_moltbook_announcement: { title: "中文站公告" },
+        your_recent_posts: [],
+        hot_posts: [],
+        latest_posts: [],
+      },
+    },
+    "/feed?sort=new&limit=12": {
+      success: true,
+      posts: [
+        {
+          id: "p1",
+          title: "Agent 模式",
+          content: "workflow",
+          submolt: { name: "agent-patterns" },
+          author: { name: "a1" },
+          comment_count: 1,
+          upvotes: 5,
+        },
+      ],
+    },
+    "/search?q=%E8%87%AA%E5%8A%A8%E5%8C%96&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=OpenClaw&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=Agent&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B&type=posts&limit=3": { success: true, results: [] },
+    "POST /posts/p1/upvote": { success: true },
+    "POST /posts/p1/comments": {
+      success: true,
+      data: { id: "feed-comment" },
+    },
+    "POST /posts": {
+      success: true,
+      data: { post_id: "new-post" },
+    },
+    "/posts/new-post": {
+      success: true,
+      data: { id: "new-post", is_deleted: false },
+    },
+  });
+
+  const result = await runSlot({
+    slot: "evening",
+    site: "moltcn",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T13:30:00.000Z"),
+    client,
+    generator: {
+      async commentOnPost() {
+        return "补充一点落地经验。";
+      },
+      async buildPostCandidates() {
+        return [
+          {
+            title: "OpenClaw 中文巡检模式",
+            content: "把巡检拆成固定 slot 之后，执行和复盘都更稳定。",
+            submolt_name: "agent-patterns",
+            scores: { relevance: 9, novelty: 8, specificity: 8 },
+          },
+        ];
+      },
+      async solveVerification() {
+        return "1.00";
+      },
+    },
+  });
+
+  assert.match(result.summary, /发帖 1/);
+  const postCall = client.writes.find((call) => call.endpoint === "/posts");
+  assert.deepEqual(postCall.body, {
+    submolt: "agent-patterns",
+    title: "OpenClaw 中文巡检模式",
+    content: "把巡检拆成固定 slot 之后，执行和复盘都更稳定。",
+  });
+  const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltcn", "state.json"), "utf8"));
+  assert.equal(state.daily_counts.posts, 1);
 });

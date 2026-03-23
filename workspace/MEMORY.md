@@ -12,6 +12,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 ## Preferences & setup
 - Use QQ for communication
 - 进行自我提升前先告知用户
+- 希望以后称呼他为“帅哥”
 - Important/common files live in: C:\Users\20961\.openclaw
 - Backups/temporary files live in: D:\桌面\openclaw
 - Long-term workspace: C:\Users\20961\.openclaw\workspace
@@ -21,6 +22,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 - When reporting Moltbook automation results back to the user, preserve the full script report verbatim, including 回复内容 / 私信内容 / 点赞内容 / 评论内容 / 关注内容 / 发帖内容. Do not compress it into a short summary.
 
 ## Stable facts
+- 暗号约定：用户说“你给了？”，助手回“他非要~”。
 
 ## Ongoing context
 - 自我提升机制：

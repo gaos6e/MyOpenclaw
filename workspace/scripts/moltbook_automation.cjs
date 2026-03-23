@@ -60,6 +60,16 @@ const SITE_PROFILES = Object.freeze({
       followingFeed: true,
       readNotifications: true,
     },
+    postingPolicy: {
+      allowedSlots: ["morning", "afternoon", "evening"],
+      maxPostsPerDay: 2,
+      maxPostsPerSlot: 1,
+      scoreThresholds: {
+        relevance: 8,
+        novelty: 7,
+        specificity: 7,
+      },
+    },
     scheduleOffsetMinutes: 30,
   },
   moltcn: {
@@ -77,6 +87,16 @@ const SITE_PROFILES = Object.freeze({
       followingFeed: false,
       readNotifications: true,
     },
+    postingPolicy: {
+      allowedSlots: ["morning", "afternoon", "evening"],
+      maxPostsPerDay: 2,
+      maxPostsPerSlot: 1,
+      scoreThresholds: {
+        relevance: 8,
+        novelty: 7,
+        specificity: 7,
+      },
+    },
     scheduleOffsetMinutes: 40,
   },
 });
@@ -93,6 +113,8 @@ const DM_SUSPICIOUS_PATTERNS = [
 const MAX_UPVOTES_PER_RUN = 5;
 const MAX_UPVOTES_PER_DAY = 12;
 const MAX_FETCH_ATTEMPTS = 2;
+const POST_STATUS_CHECK_ATTEMPTS = 4;
+const POST_STATUS_CHECK_DELAY_MS = 500;
 const NUMBER_WORDS = {
   zero: 0,
   one: 1,
@@ -139,6 +161,68 @@ function resolveSiteProfile(site = DEFAULT_SITE_ID) {
 
 function supportsFeature(siteProfile, featureName) {
   return Boolean(siteProfile?.enabledFeatures?.[featureName]);
+}
+
+function unwrapApiEnvelope(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return payload;
+  }
+  if (payload.data && typeof payload.data === "object" && !Array.isArray(payload.data)) {
+    return payload.data;
+  }
+  return payload;
+}
+
+function extractAgentIdentity(payload, fallbackName) {
+  const root = unwrapApiEnvelope(payload);
+  const agent = root?.agent && typeof root.agent === "object" ? root.agent : root;
+  if (agent && typeof agent === "object" && (agent.id || agent.name)) {
+    return agent;
+  }
+  return { id: null, name: fallbackName };
+}
+
+function extractAgentStatus(payload) {
+  const root = unwrapApiEnvelope(payload);
+  return root?.status || payload?.status || null;
+}
+
+function extractHomeState(payload) {
+  const root = unwrapApiEnvelope(payload);
+  if (root && typeof root === "object" && !Array.isArray(root)) {
+    return root;
+  }
+  return {};
+}
+
+function extractSubmissionPayload(submissionResult, contentType) {
+  return (
+    submissionResult?.[contentType] ||
+    submissionResult?.data?.[contentType] ||
+    submissionResult?.payload?.[contentType] ||
+    unwrapApiEnvelope(submissionResult?.payload) ||
+    unwrapApiEnvelope(submissionResult)
+  );
+}
+
+function extractPostEntity(payload) {
+  const root = unwrapApiEnvelope(payload);
+  if (root?.post && typeof root.post === "object") {
+    return root.post;
+  }
+  if (root && typeof root === "object") {
+    return root;
+  }
+  return {};
+}
+
+function extractCreatedPostId(payload) {
+  const entity = extractPostEntity(payload);
+  return entity.id || entity.post_id || payload?.post_id || payload?.data?.post_id || payload?.post?.id || payload?.data?.id || null;
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function createDefaultState(localDate) {
@@ -199,18 +283,21 @@ function normalizeStateForDate(state, localDate) {
   return next;
 }
 
-function canPostInSlot(state, slot) {
-  if (!["morning", "evening"].includes(slot)) {
+function canPostInSlot(state, slot, siteProfile = resolveSiteProfile()) {
+  const allowedSlots = new Set(siteProfile?.postingPolicy?.allowedSlots || Object.keys(SLOT_LABELS));
+  if (!allowedSlots.has(slot)) {
     return { allowed: false, reason: "slot_not_allowed" };
   }
 
+  const maxPostsPerDay = Number(siteProfile?.postingPolicy?.maxPostsPerDay || 2);
   const postsToday = Number(state?.daily_counts?.posts || 0);
-  if (postsToday >= 2) {
+  if (postsToday >= maxPostsPerDay) {
     return { allowed: false, reason: "daily_limit_reached" };
   }
 
+  const maxPostsPerSlot = Number(siteProfile?.postingPolicy?.maxPostsPerSlot || 1);
   const slotPosts = Number(state?.posts_by_slot?.[slot] || 0);
-  if (slotPosts >= 1) {
+  if (slotPosts >= maxPostsPerSlot) {
     return { allowed: false, reason: "slot_limit_reached" };
   }
 
@@ -299,7 +386,7 @@ function isSuspiciousDm(text) {
 }
 
 async function completeVerification({ client, generator, submissionResult, contentType }) {
-  const payload = submissionResult?.[contentType] || submissionResult?.data || submissionResult?.payload;
+  const payload = extractSubmissionPayload(submissionResult, contentType);
   const verification = payload?.verification || submissionResult?.verification;
   if (!verification?.verification_code) {
     return { verified: false, skipped: true };
@@ -700,17 +787,29 @@ function extractConversationMessages(payload) {
   return [];
 }
 
-function selectQualifiedPostCandidate({ candidates, state, slot }) {
-  const permission = canPostInSlot(state, slot);
+function selectCommentTarget(posts, submoltBuckets = resolveSiteProfile().submoltBuckets) {
+  const relevantPosts = (posts || []).filter(
+    (post) => classifySubmolt(getSubmoltName(post), submoltBuckets) !== "other",
+  );
+  return relevantPosts.find((post) => parseCount(post.comment_count) > 0) || relevantPosts[0] || null;
+}
+
+function getQualifiedPostCandidates({ candidates, state, slot, siteProfile = resolveSiteProfile() }) {
+  const permission = canPostInSlot(state, slot, siteProfile);
   if (!permission.allowed) {
-    return null;
+    return [];
   }
+  const thresholds = siteProfile?.postingPolicy?.scoreThresholds || {
+    relevance: 8,
+    novelty: 7,
+    specificity: 7,
+  };
   const qualified = (candidates || []).filter((candidate) => {
     const scores = candidate?.scores || {};
     return (
-      Number(scores.relevance || 0) >= 8 &&
-      Number(scores.novelty || 0) >= 7 &&
-      Number(scores.specificity || 0) >= 7
+      Number(scores.relevance || 0) >= Number(thresholds.relevance || 0) &&
+      Number(scores.novelty || 0) >= Number(thresholds.novelty || 0) &&
+      Number(scores.specificity || 0) >= Number(thresholds.specificity || 0)
     );
   });
 
@@ -726,7 +825,61 @@ function selectQualifiedPostCandidate({ candidates, state, slot }) {
     return rightScore - leftScore;
   });
 
-  return qualified[0] || null;
+  return qualified;
+}
+
+function selectQualifiedPostCandidate({ candidates, state, slot, siteProfile = resolveSiteProfile() }) {
+  return getQualifiedPostCandidates({ candidates, state, slot, siteProfile })[0] || null;
+}
+
+function normalizePostText(text, { removeHashtags = false, maxLength = 600 } = {}) {
+  const replacements = [
+    [/\r\n/g, "\n"],
+    [/[“”]/g, '"'],
+    [/[‘’]/g, "'"],
+    [/[–—]/g, "-"],
+    [/…/g, "..."],
+    [/`+/g, ""],
+    [/\*+/g, ""],
+    [/_+/g, "_"],
+  ];
+  let normalized = String(text || "");
+  for (const [pattern, value] of replacements) {
+    normalized = normalized.replace(pattern, value);
+  }
+  if (removeHashtags) {
+    normalized = normalized.replace(/(^|\s)#[A-Za-z0-9_-]+/g, "$1");
+  }
+  normalized = normalized
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+  return clipText(normalized, maxLength);
+}
+
+function buildPostSubmissionVariants(candidate) {
+  const original = {
+    title: String(candidate?.title || "").trim(),
+    content: String(candidate?.content || "").trim(),
+  };
+  const sanitized = {
+    title: normalizePostText(original.title, { removeHashtags: true, maxLength: 96 }),
+    content: normalizePostText(original.content, { removeHashtags: true, maxLength: 640 }),
+  };
+  const variants = [original];
+  if (sanitized.title && sanitized.content) {
+    const sameAsOriginal = sanitized.title === original.title && sanitized.content === original.content;
+    if (!sameAsOriginal) {
+      variants.push(sanitized);
+    }
+  }
+  return variants;
+}
+
+function isRetryablePostPublishError(error) {
+  const message = String(error?.message || error || "");
+  return /POST \/posts failed \((5\d\d)\)/i.test(message) || /Network request failed for POST \/posts/i.test(message);
 }
 
 function mapErrorToSummary(error) {
@@ -838,28 +991,55 @@ async function localizeReportDetails(report, generator, fallbackGenerator = buil
   }
 }
 
-async function ensurePublishedStatus({ client, postId, reportErrors }) {
+async function ensurePublishedStatus({
+  client,
+  postId,
+  reportErrors,
+  attempts = 1,
+  retryDelayMs = 0,
+}) {
   if (!postId) {
     return { published: false, reason: "missing_post_id" };
   }
-  try {
-    const payload = await client.getJson(`/posts/${postId}`);
-    const entity = payload?.post || payload?.data || {};
-    const status = entity.verification_status || entity.verificationStatus || null;
-    const isVisibleWithoutVerification =
-      !status &&
-      Boolean(entity.id) &&
-      entity.is_deleted !== true &&
-      payload?.success !== false;
-    return {
-      published: status === "verified" || isVisibleWithoutVerification,
-      status: status || (isVisibleWithoutVerification ? "visible" : "unknown"),
-      payload,
-    };
-  } catch (error) {
-    reportErrors.push(mapErrorToSummary(error));
-    return { published: false, reason: "status_fetch_failed" };
+
+  const maxAttempts = Math.max(1, Number.parseInt(String(attempts || 1), 10) || 1);
+  let lastError = null;
+  let lastResult = { published: false, reason: "status_fetch_failed" };
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const payload = await client.getJson(`/posts/${postId}`);
+      const entity = extractPostEntity(payload);
+      const status = entity.verification_status || entity.verificationStatus || null;
+      const isVisiblePost =
+        status !== "pending" &&
+        Boolean(entity.id || entity.post_id) &&
+        entity.is_deleted !== true &&
+        payload?.success !== false;
+      const result = {
+        published: status === "verified" || isVisiblePost,
+        status: status || (isVisiblePost ? "visible" : "unknown"),
+        payload,
+      };
+      if (result.published) {
+        return result;
+      }
+      lastResult = result;
+      lastError = null;
+    } catch (error) {
+      lastError = error;
+      lastResult = { published: false, reason: "status_fetch_failed" };
+    }
+
+    if (attempt < maxAttempts && retryDelayMs > 0) {
+      await delay(retryDelayMs);
+    }
   }
+
+  if (lastError) {
+    reportErrors.push(mapErrorToSummary(lastError));
+  }
+  return lastResult;
 }
 
 function loadOpenClawConfig(configPath) {
@@ -869,16 +1049,34 @@ function loadOpenClawConfig(configPath) {
   return JSON.parse(fs.readFileSync(configPath, "utf8"));
 }
 
-function resolveGenerationConfig(rootDir) {
+function resolveProviderApiKey(apiKeyConfig, env = process.env) {
+  if (typeof apiKeyConfig === "string") {
+    return apiKeyConfig.trim() || null;
+  }
+  if (!apiKeyConfig || typeof apiKeyConfig !== "object") {
+    return null;
+  }
+  if (apiKeyConfig.source === "env" && typeof apiKeyConfig.id === "string") {
+    const value = env?.[apiKeyConfig.id];
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  }
+  if (typeof apiKeyConfig.value === "string") {
+    return apiKeyConfig.value.trim() || null;
+  }
+  return null;
+}
+
+function resolveGenerationConfig(rootDir, env = process.env) {
   const config = loadOpenClawConfig(path.join(rootDir, "openclaw.json"));
   const provider = config?.models?.providers?.qwen;
   const modelId = provider?.models?.[0]?.id;
-  if (!provider?.baseUrl || !provider?.apiKey || !modelId) {
+  const apiKey = resolveProviderApiKey(provider?.apiKey, env);
+  if (!provider?.baseUrl || !apiKey || !modelId) {
     return null;
   }
   return {
     baseUrl: provider.baseUrl.replace(/\/+$/, ""),
-    apiKey: provider.apiKey,
+    apiKey,
     model: modelId,
   };
 }
@@ -1160,6 +1358,22 @@ async function fetchWithRetries({ label, perform, curlRequest, curlImpl = spawnS
     try {
       return runCurlRequest({ ...curlRequest, curlImpl });
     } catch (curlError) {
+      let lastFetchError = null;
+      for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
+        try {
+          return await perform();
+        } catch (fetchError) {
+          lastFetchError = fetchError;
+          if (attempt >= MAX_FETCH_ATTEMPTS) {
+            break;
+          }
+        }
+      }
+      if (lastFetchError) {
+        throw new Error(
+          `Network request failed for ${label}: ${String(lastFetchError?.message || lastFetchError)}; curl proxy request failed: ${String(curlError?.message || curlError)}`,
+        );
+      }
       throw new Error(`Network request failed for ${label}: curl proxy request failed: ${String(curlError?.message || curlError)}`);
     }
   }
@@ -1196,6 +1410,7 @@ async function maybePostJson({ client, endpoint, body, dryRun, writes, reportErr
     return await client.postJson(endpoint, body);
   } catch (error) {
     reportErrors.push(mapErrorToSummary(error));
+    error.__openclawReported = true;
     throw error;
   }
 }
@@ -1248,12 +1463,14 @@ async function runSlot({
     const statusPayload = await apiClient.getJson("/agents/status");
     const homePayload = await apiClient.getJson("/home");
 
-    if (statusPayload?.status !== "claimed") {
-      throw new Error(`Agent status is not claimed: ${statusPayload?.status || "unknown"}`);
+    const agentStatus = extractAgentStatus(statusPayload);
+    if (agentStatus !== "claimed") {
+      throw new Error(`Agent status is not claimed: ${agentStatus || "unknown"}`);
     }
 
-    const agent = mePayload?.agent || { id: null, name: credentials.agent_name };
-    const activityItems = Array.isArray(homePayload?.activity_on_your_posts) ? homePayload.activity_on_your_posts : [];
+    const agent = extractAgentIdentity(mePayload, credentials.agent_name);
+    const normalizedHome = extractHomeState(homePayload);
+    const activityItems = Array.isArray(normalizedHome.activity_on_your_posts) ? normalizedHome.activity_on_your_posts : [];
     for (const item of activityItems) {
       const commentsPayload = await safeGetJson(
         apiClient,
@@ -1413,8 +1630,8 @@ async function runSlot({
       }
     }
 
-    if (homePayload?.latest_moltbook_announcement?.title) {
-      report.notes.push(`公告：${homePayload.latest_moltbook_announcement.title}`);
+    if (normalizedHome?.latest_moltbook_announcement?.title) {
+      report.notes.push(`公告：${normalizedHome.latest_moltbook_announcement.title}`);
     }
 
     const followingFeed = supportsFeature(siteProfile, "followingFeed")
@@ -1477,9 +1694,7 @@ async function runSlot({
       }
     }
 
-    const commentTarget = rankedPosts.find(
-      (post) => parseCount(post.comment_count) > 0 && classifySubmolt(getSubmoltName(post), siteProfile.submoltBuckets) !== "other",
-    );
+    const commentTarget = selectCommentTarget(rankedPosts, siteProfile.submoltBuckets);
     if (commentTarget) {
       const commentText = await generateWithFallback(
         contentGenerator,
@@ -1539,69 +1754,103 @@ async function runSlot({
       report,
       fallbackGenerator,
     );
-    const selectedCandidate = selectQualifiedPostCandidate({
+    const qualifiedCandidates = getQualifiedPostCandidates({
       candidates: Array.isArray(postCandidates) ? postCandidates : [],
       state: currentState,
       slot,
+      siteProfile,
     });
 
-    if (selectedCandidate) {
-      const candidateSubmolt = getCandidateSubmoltName(selectedCandidate);
+    if (qualifiedCandidates.length > 0) {
       if (!dryRun) {
-        const postResult = await maybePostJson({
-          client: apiClient,
-          endpoint: "/posts",
-          body: {
-            [siteProfile.postFieldName]: candidateSubmolt,
-            title: selectedCandidate.title,
-            content: selectedCandidate.content,
-          },
-          dryRun,
-          writes: stagedWrites,
-          reportErrors: report.errors,
-        });
-        await completeVerification({
-          client: apiClient,
-          generator: contentGenerator,
-          submissionResult: postResult,
-          contentType: "post",
-        }).catch((error) => {
-          report.errors.push(mapErrorToSummary(error));
-        });
-        const publishCheck = await ensurePublishedStatus({
-          client: apiClient,
-          postId: postResult?.post?.id || postResult?.data?.id || null,
-          reportErrors: report.errors,
-        });
+        let publishError = null;
+        let published = false;
+        let stopFurtherPostAttempts = false;
 
-        if (publishCheck.published) {
-          report.post = {
-            created: true,
-            submolt: candidateSubmolt,
-            postId: postResult?.post?.id || postResult?.data?.id || null,
-          };
-          report.details.posts.push(
-            `社区[${candidateSubmolt}] 标题《${clipText(selectedCandidate.title, 60)}》 内容摘要：${clipText(
-              selectedCandidate.content,
-              72,
-            )}`,
-          );
-          currentState.daily_counts.posts += 1;
-          currentState.posts_by_slot[slot] = parseCount(currentState.posts_by_slot[slot]) + 1;
-          currentState.last_post_at = now.toISOString();
-          pushUnique(currentState.recent_post_ids, postResult?.post?.id || postResult?.data?.id || null);
-          pushUnique(currentState.interacted_submolts, candidateSubmolt);
-        } else {
-          report.errors.push(`发帖未发布成功：${publishCheck.status || publishCheck.reason || "pending"}`);
+        for (const candidate of qualifiedCandidates) {
+          const candidateSubmolt = getCandidateSubmoltName(candidate);
+          const variants = buildPostSubmissionVariants(candidate);
+          for (let index = 0; index < variants.length; index += 1) {
+            const variant = variants[index];
+            try {
+              const postResult = await apiClient.postJson("/posts", {
+                [siteProfile.postFieldName]: candidateSubmolt,
+                title: variant.title,
+                content: variant.content,
+              });
+              await completeVerification({
+                client: apiClient,
+                generator: contentGenerator,
+                submissionResult: postResult,
+                contentType: "post",
+              }).catch((error) => {
+                report.errors.push(mapErrorToSummary(error));
+              });
+              const createdPostId = extractCreatedPostId(postResult);
+              const publishCheck = await ensurePublishedStatus({
+                client: apiClient,
+                postId: createdPostId,
+                reportErrors: report.errors,
+                attempts: POST_STATUS_CHECK_ATTEMPTS,
+                retryDelayMs: POST_STATUS_CHECK_DELAY_MS,
+              });
+
+              if (!publishCheck.published) {
+                publishError = new Error(`发帖未发布成功：${publishCheck.status || publishCheck.reason || "pending"}`);
+                if (createdPostId) {
+                  stopFurtherPostAttempts = true;
+                  break;
+                }
+                continue;
+              }
+
+              if (index > 0) {
+                report.notes.push("发帖降级：使用保守 payload 重试成功");
+              }
+              report.post = {
+                created: true,
+                submolt: candidateSubmolt,
+                postId: createdPostId,
+              };
+              report.details.posts.push(
+                `社区[${candidateSubmolt}] 标题《${clipText(variant.title, 60)}》 内容摘要：${clipText(
+                  variant.content,
+                  72,
+                )}`,
+              );
+              currentState.daily_counts.posts += 1;
+              currentState.posts_by_slot[slot] = parseCount(currentState.posts_by_slot[slot]) + 1;
+              currentState.last_post_at = now.toISOString();
+              pushUnique(currentState.recent_post_ids, createdPostId);
+              pushUnique(currentState.interacted_submolts, candidateSubmolt);
+              published = true;
+              break;
+            } catch (error) {
+              publishError = error;
+              if (!isRetryablePostPublishError(error)) {
+                stopFurtherPostAttempts = true;
+                break;
+              }
+            }
+          }
+          if (published || stopFurtherPostAttempts) {
+            break;
+          }
+        }
+
+        if (!published && publishError) {
+          report.errors.push(mapErrorToSummary(publishError));
         }
       } else {
-        report.notes.push(`本轮可发帖候选：${selectedCandidate.title}`);
+        report.notes.push(`本轮可发帖候选：${qualifiedCandidates[0].title}`);
       }
     } else {
       report.notes.push("本轮无合格发帖候选");
     }
   } catch (error) {
-    report.errors.push(mapErrorToSummary(error));
+    if (!error?.__openclawReported) {
+      report.errors.push(mapErrorToSummary(error));
+    }
   }
 
   writeJson(paths.statePath, currentState);
@@ -1665,6 +1914,8 @@ module.exports = {
   isSuspiciousDm,
   completeVerification,
   buildCronJobs,
+  resolveGenerationConfig,
+  selectCommentTarget,
   selectQualifiedPostCandidate,
   selectUpvoteTargets,
   normalizeVerificationAnswer,
