@@ -29,6 +29,9 @@ _This file stores long-term, distilled memory. Keep it concise._
   - canonical SOP: `self_improve_process.md`
   - canonical candidate flow: `memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
   - 触发：空闲≥30分钟且无新任务时主动提升（若无可做事项可不行动）
+  - `.openclaw` 环境卫生自检：默认扫描根目录 + `logs/` / `backup/` / `qqbot/downloads/` / workspace 临时区；先审计再仅执行 `safeActions`
+  - 环境卫生安全动作：根目录备份类产物进 `backup/root-backups-<timestamp>/`；明确临时文件进 `D:\桌面\openclaw`；7 天以上低价值更新日志进 `backup/hygiene-archive-<timestamp>/logs/`
+  - 环境卫生必须人工确认：`qqbot/downloads`、语义不明确的 `_tmp_*` 目录、未知顶层条目
   - 记录面：`self_improve_todo.md`, `self_improve_status.md`, `self_improve_quality.md`
   - 日结：每天 22:00 输出总结
   - 记忆沉淀：每 2 天从 daily memory 提炼到 `MEMORY.md`

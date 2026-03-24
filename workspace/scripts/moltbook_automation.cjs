@@ -22,7 +22,19 @@ const MOLTBOOK_SUBMOLT_BUCKETS = {
   technical: new Set(["agentops", "agent-ops", "debugging", "memory", "tooling", "agentskills"]),
   general: new Set(["buildlogs", "todayilearned", "general", "meta"]),
 };
-const MOLTBOOK_SEARCH_QUERY_POOL = ["openclaw", "agentops", "debugging", "memory", "skills", "workflow", "automation"];
+const MOLTBOOK_SEARCH_QUERY_POOL = [
+  "openclaw",
+  "agentops",
+  "debugging",
+  "memory",
+  "skills",
+  "workflow",
+  "automation",
+  "ai agents",
+  "tooling",
+  "productivity",
+  "engineering",
+];
 const MOLTBOOK_ALLOWED_SUBMOLTS = [
   "openclaw-explorers",
   "openclaw",
@@ -41,7 +53,7 @@ const MOLTCN_SUBMOLT_BUCKETS = {
   technical: new Set(["tech", "prompt-craft", "projects", "agent-challenges"]),
   general: new Set(["intro", "general"]),
 };
-const MOLTCN_SEARCH_QUERY_POOL = ["自动化", "OpenClaw", "Agent", "工作流", "提示词", "记忆", "技术教程"];
+const MOLTCN_SEARCH_QUERY_POOL = ["自动化", "OpenClaw", "Agent", "工作流", "提示词", "记忆", "技术教程", "AI应用", "效率工具", "项目复盘", "工程实践"];
 const MOLTCN_ALLOWED_SUBMOLTS = ["intro", "general", "tech", "agent-patterns", "moltdev", "prompt-craft", "projects"];
 
 const SITE_PROFILES = Object.freeze({
@@ -59,16 +71,33 @@ const SITE_PROFILES = Object.freeze({
       dmConversations: true,
       followingFeed: true,
       readNotifications: true,
+      followAction: true,
     },
+    dynamicFeatures: {},
     postingPolicy: {
       allowedSlots: ["morning", "afternoon", "evening"],
-      maxPostsPerDay: 2,
+      maxPostsPerDay: 3,
       maxPostsPerSlot: 1,
       scoreThresholds: {
-        relevance: 8,
-        novelty: 7,
-        specificity: 7,
+        relevance: 7,
+        novelty: 6,
+        specificity: 6,
       },
+      fallbackScoreThresholds: {
+        relevance: 6,
+        novelty: 5,
+        specificity: 5,
+      },
+    },
+    engagementPolicy: {
+      maxRepliesPerRun: 2,
+      maxCommentsPerRun: 2,
+      maxUpvotesPerRun: 6,
+      maxUpvotesPerDay: 18,
+      maxFollowsPerRun: 1,
+      maxFollowsPerDay: 3,
+      followMinPosts: 3,
+      followMinComments: 10,
     },
     scheduleOffsetMinutes: 30,
   },
@@ -86,16 +115,46 @@ const SITE_PROFILES = Object.freeze({
       dmConversations: false,
       followingFeed: false,
       readNotifications: true,
+      followAction: true,
+    },
+    dynamicFeatures: {
+      dmRequests: {
+        endpoint: "/agents/dm/requests",
+        validator: "dmRequests",
+      },
+      dmConversations: {
+        endpoint: "/agents/dm/conversations",
+        validator: "dmConversations",
+      },
+      followingFeed: {
+        endpoint: "/feed?filter=following&sort=new&limit=5",
+        validator: "followingFeed",
+      },
     },
     postingPolicy: {
       allowedSlots: ["morning", "afternoon", "evening"],
-      maxPostsPerDay: 2,
+      maxPostsPerDay: 3,
       maxPostsPerSlot: 1,
       scoreThresholds: {
-        relevance: 8,
-        novelty: 7,
-        specificity: 7,
+        relevance: 7,
+        novelty: 6,
+        specificity: 6,
       },
+      fallbackScoreThresholds: {
+        relevance: 6,
+        novelty: 5,
+        specificity: 5,
+      },
+    },
+    engagementPolicy: {
+      maxRepliesPerRun: 2,
+      maxCommentsPerRun: 1,
+      maxUpvotesPerRun: 6,
+      maxUpvotesPerDay: 18,
+      maxFollowsPerRun: 1,
+      maxFollowsPerDay: 3,
+      followMinPosts: 3,
+      followMinComments: 10,
     },
     scheduleOffsetMinutes: 40,
   },
@@ -110,11 +169,10 @@ const DM_SUSPICIOUS_PATTERNS = [
   /private key/i,
   /click (this )?link/i,
 ];
-const MAX_UPVOTES_PER_RUN = 5;
-const MAX_UPVOTES_PER_DAY = 12;
 const MAX_FETCH_ATTEMPTS = 2;
 const POST_STATUS_CHECK_ATTEMPTS = 4;
 const POST_STATUS_CHECK_DELAY_MS = 500;
+const FEATURE_SUPPORT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const NUMBER_WORDS = {
   zero: 0,
   one: 1,
@@ -159,8 +217,50 @@ function resolveSiteProfile(site = DEFAULT_SITE_ID) {
   return profile;
 }
 
-function supportsFeature(siteProfile, featureName) {
+function supportsFeature(siteProfile, featureName, state) {
+  const dynamicFeature = siteProfile?.dynamicFeatures?.[featureName];
+  if (dynamicFeature) {
+    return state?.feature_support_cache?.[featureName]?.supported === true;
+  }
   return Boolean(siteProfile?.enabledFeatures?.[featureName]);
+}
+
+function getEngagementPolicy(siteProfile = resolveSiteProfile()) {
+  return siteProfile?.engagementPolicy || {
+    maxRepliesPerRun: 2,
+    maxCommentsPerRun: 2,
+    maxUpvotesPerRun: 6,
+    maxUpvotesPerDay: 18,
+    maxFollowsPerRun: 1,
+    maxFollowsPerDay: 3,
+    followMinPosts: 3,
+    followMinComments: 10,
+  };
+}
+
+function parseTimestamp(value) {
+  const timestamp = new Date(value || 0).getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function isFeatureCacheFresh(entry, now = Date.now()) {
+  if (!entry?.checked_at) {
+    return false;
+  }
+  return now - parseTimestamp(entry.checked_at) < FEATURE_SUPPORT_CACHE_TTL_MS;
+}
+
+function validateFeaturePayload(featureName, payload) {
+  if (featureName === "dmRequests") {
+    return Array.isArray(payload?.incoming?.requests) || Array.isArray(payload?.requests) || Array.isArray(payload?.requests?.items);
+  }
+  if (featureName === "dmConversations") {
+    return Array.isArray(payload?.conversations?.items) || Array.isArray(payload?.conversations);
+  }
+  if (featureName === "followingFeed") {
+    return Array.isArray(payload?.posts);
+  }
+  return false;
 }
 
 function unwrapApiEnvelope(payload) {
@@ -241,9 +341,15 @@ function createDefaultState(localDate) {
     },
     last_post_at: null,
     processed_notification_post_ids: [],
+    processed_notification_ids_today: [],
     processed_dm_request_ids: [],
     interacted_submolts: [],
     recent_post_ids: [],
+    engaged_post_ids_today: [],
+    followed_agent_ids_today: [],
+    upvoted_comment_ids_today: [],
+    visited_modules_today: [],
+    feature_support_cache: {},
     suspicious_agents: {},
   };
 }
@@ -264,11 +370,20 @@ function normalizeStateForDate(state, localDate) {
     processed_notification_post_ids: Array.isArray(base.processed_notification_post_ids)
       ? [...base.processed_notification_post_ids]
       : [],
+    processed_notification_ids_today: Array.isArray(base.processed_notification_ids_today)
+      ? [...base.processed_notification_ids_today]
+      : [],
     processed_dm_request_ids: Array.isArray(base.processed_dm_request_ids)
       ? [...base.processed_dm_request_ids]
       : [],
     interacted_submolts: Array.isArray(base.interacted_submolts) ? [...base.interacted_submolts] : [],
     recent_post_ids: Array.isArray(base.recent_post_ids) ? [...base.recent_post_ids] : [],
+    engaged_post_ids_today: Array.isArray(base.engaged_post_ids_today) ? [...base.engaged_post_ids_today] : [],
+    followed_agent_ids_today: Array.isArray(base.followed_agent_ids_today) ? [...base.followed_agent_ids_today] : [],
+    upvoted_comment_ids_today: Array.isArray(base.upvoted_comment_ids_today) ? [...base.upvoted_comment_ids_today] : [],
+    visited_modules_today: Array.isArray(base.visited_modules_today) ? [...base.visited_modules_today] : [],
+    feature_support_cache:
+      base.feature_support_cache && typeof base.feature_support_cache === "object" ? { ...base.feature_support_cache } : {},
     suspicious_agents:
       base.suspicious_agents && typeof base.suspicious_agents === "object" ? { ...base.suspicious_agents } : {},
   };
@@ -280,6 +395,7 @@ function normalizeStateForDate(state, localDate) {
   const next = createDefaultState(localDate);
   next.last_post_at = null;
   next.suspicious_agents = current.suspicious_agents;
+  next.feature_support_cache = current.feature_support_cache;
   return next;
 }
 
@@ -375,6 +491,38 @@ function chooseSearchQueries({ daySeed = 0, slot = "morning", searchQueryPool = 
     queries.push(searchQueryPool[(offset + index) % searchQueryPool.length]);
   }
   return queries;
+}
+
+async function probeDynamicFeatures({ client, siteProfile, state, now = new Date() }) {
+  const cache = state.feature_support_cache || {};
+  const probeResults = {};
+  const timestamp = now.toISOString();
+  const dynamicFeatures = siteProfile?.dynamicFeatures || {};
+
+  for (const [featureName, config] of Object.entries(dynamicFeatures)) {
+    const cached = cache[featureName];
+    if (cached && isFeatureCacheFresh(cached, now.getTime())) {
+      continue;
+    }
+
+    try {
+      const payload = await client.getJson(config.endpoint);
+      const supported = validateFeaturePayload(config.validator || featureName, payload);
+      cache[featureName] = { supported, checked_at: timestamp };
+      if (supported) {
+        probeResults[featureName] = payload;
+      }
+    } catch (error) {
+      cache[featureName] = {
+        supported: false,
+        checked_at: timestamp,
+        reason: String(error?.message || error || "unknown error"),
+      };
+    }
+  }
+
+  state.feature_support_cache = cache;
+  return probeResults;
 }
 
 function isSuspiciousDm(text) {
@@ -676,6 +824,20 @@ function pushUnique(list, value) {
   }
 }
 
+function markVisitedModule(state, moduleName) {
+  if (!state || !moduleName) {
+    return;
+  }
+  if (!Array.isArray(state.visited_modules_today)) {
+    state.visited_modules_today = [];
+  }
+  pushUnique(state.visited_modules_today, moduleName);
+}
+
+function getPostId(post) {
+  return post?.id || post?.post_id || post?.postId || post?.post?.id || post?.post?.post_id || null;
+}
+
 function getSubmoltName(post) {
   return (typeof post?.submolt === "string" ? post.submolt : post?.submolt?.name) || post?.submolt_name || post?.submoltName || "";
 }
@@ -685,7 +847,23 @@ function getCandidateSubmoltName(candidate) {
 }
 
 function getAuthorName(post) {
-  return post?.author?.name || post?.author_name || post?.with_agent?.name || "";
+  return post?.author?.name || post?.author_name || post?.with_agent?.name || post?.agents?.name || post?.agent_name || "";
+}
+
+function getCommentId(comment) {
+  return comment?.id || comment?.comment_id || null;
+}
+
+function getCommentAuthorId(comment) {
+  return comment?.author_id || comment?.agent_id || comment?.author?.id || null;
+}
+
+function getCommentAuthorName(comment) {
+  return comment?.author?.name || comment?.agent_name || comment?.author_name || "";
+}
+
+function getCommentUpvotes(comment) {
+  return parseCount(comment?.upvotes || comment?.score || 0);
 }
 
 function clipText(text, maxLength = 88) {
@@ -727,13 +905,15 @@ function rankPostForEngagement(post, submoltBuckets = resolveSiteProfile().submo
   return bucketWeight + commentCount * 10 + upvotes;
 }
 
-function selectUpvoteTargets({ posts, state, submoltBuckets = resolveSiteProfile().submoltBuckets }) {
-  const remainingBudget = Math.max(0, MAX_UPVOTES_PER_DAY - parseCount(state?.daily_counts?.upvotes));
-  const limit = Math.min(MAX_UPVOTES_PER_RUN, remainingBudget);
+function selectUpvoteTargets({ posts, state, siteProfile = resolveSiteProfile(), submoltBuckets = siteProfile.submoltBuckets, agentName }) {
+  const policy = getEngagementPolicy(siteProfile);
+  const remainingBudget = Math.max(0, Number(policy.maxUpvotesPerDay || 0) - parseCount(state?.daily_counts?.upvotes));
+  const limit = Math.min(Number(policy.maxUpvotesPerRun || 0), remainingBudget);
   if (limit <= 0) {
     return [];
   }
   return [...(posts || [])]
+    .filter((post) => !agentName || getAuthorName(post) !== agentName)
     .sort((left, right) => rankPostForEngagement(right, submoltBuckets) - rankPostForEngagement(left, submoltBuckets))
     .slice(0, limit);
 }
@@ -749,9 +929,83 @@ function flattenComments(comments, depth = 0) {
 
 function findReplyTarget(comments, agentId, agentName) {
   const flat = flattenComments(comments)
-    .filter((comment) => comment.author_id !== agentId && comment.author?.name !== agentName)
+    .filter((comment) => getCommentAuthorId(comment) !== agentId && getCommentAuthorName(comment) !== agentName)
     .sort((left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0));
   return flat[0] || null;
+}
+
+function findCommentById(comments, commentId) {
+  return flattenComments(comments).find((comment) => getCommentId(comment) === commentId) || null;
+}
+
+function normalizeApiEndpoint(urlOrPath, siteProfile = resolveSiteProfile()) {
+  const raw = String(urlOrPath || "").trim();
+  if (!raw) {
+    return "";
+  }
+  let endpoint = raw;
+  try {
+    if (/^https?:\/\//i.test(raw)) {
+      const parsed = new URL(raw);
+      endpoint = `${parsed.pathname}${parsed.search}`;
+    }
+  } catch {
+    endpoint = raw;
+  }
+  const apiPath = new URL(siteProfile.apiBaseUrl).pathname.replace(/\/$/, "");
+  if (endpoint.startsWith(apiPath)) {
+    endpoint = endpoint.slice(apiPath.length) || "/";
+  }
+  if (!endpoint.startsWith("/")) {
+    endpoint = `/${endpoint}`;
+  }
+  return endpoint;
+}
+
+function normalizeHomeNotifications(payload) {
+  if (Array.isArray(payload?.your_notifications)) {
+    return payload.your_notifications;
+  }
+  if (Array.isArray(payload?.notifications)) {
+    return payload.notifications;
+  }
+  return [];
+}
+
+function normalizeHomeDirectMessages(payload) {
+  if (Array.isArray(payload?.your_direct_messages)) {
+    return payload.your_direct_messages;
+  }
+  if (Array.isArray(payload?.your_direct_messages?.items)) {
+    return payload.your_direct_messages.items;
+  }
+  if (Array.isArray(payload?.direct_messages)) {
+    return payload.direct_messages;
+  }
+  return [];
+}
+
+function normalizeHomeFeedPosts(payload) {
+  const latestPosts = Array.isArray(payload?.latest_posts) ? payload.latest_posts : [];
+  const hotPosts = Array.isArray(payload?.hot_posts) ? payload.hot_posts : [];
+  return [...latestPosts, ...hotPosts];
+}
+
+function extractThreadPost(payload) {
+  return payload?.data?.post || payload?.post || payload?.data?.data?.post || {};
+}
+
+function extractThreadComments(payload) {
+  if (Array.isArray(payload?.data?.comments)) {
+    return payload.data.comments;
+  }
+  if (Array.isArray(payload?.comments)) {
+    return payload.comments;
+  }
+  if (Array.isArray(payload?.data?.data?.comments)) {
+    return payload.data.data.comments;
+  }
+  return [];
 }
 
 function normalizeIncomingRequests(payload) {
@@ -794,16 +1048,70 @@ function selectCommentTarget(posts, submoltBuckets = resolveSiteProfile().submol
   return relevantPosts.find((post) => parseCount(post.comment_count) > 0) || relevantPosts[0] || null;
 }
 
+function selectCommentTargets({ posts, state, siteProfile = resolveSiteProfile(), submoltBuckets = siteProfile.submoltBuckets, agentName }) {
+  const engagedPostIds = new Set(state?.engaged_post_ids_today || []);
+  const relevantPosts = (posts || []).filter((post) => {
+    const postId = getPostId(post);
+    return (
+      postId &&
+      !engagedPostIds.has(postId) &&
+      (!agentName || getAuthorName(post) !== agentName) &&
+      classifySubmolt(getSubmoltName(post), submoltBuckets) !== "other"
+    );
+  });
+  const discussed = relevantPosts
+    .filter((post) => parseCount(post.comment_count) > 0)
+    .sort((left, right) => rankPostForEngagement(right, submoltBuckets) - rankPostForEngagement(left, submoltBuckets));
+  const fresh = relevantPosts
+    .filter((post) => parseCount(post.comment_count) <= 0)
+    .sort((left, right) => rankPostForEngagement(right, submoltBuckets) - rankPostForEngagement(left, submoltBuckets));
+  const ordered = [...discussed, ...fresh];
+  return ordered.slice(0, Number(getEngagementPolicy(siteProfile).maxCommentsPerRun || 0));
+}
+
+function selectCommentUpvoteTargets({ threads, state, agentName, limit = 0 }) {
+  const maxTargets = Math.max(0, Number.parseInt(String(limit || 0), 10) || 0);
+  if (maxTargets <= 0) {
+    return [];
+  }
+  const upvotedCommentIds = new Set(state?.upvoted_comment_ids_today || []);
+  return (threads || [])
+    .flatMap((thread) =>
+      flattenComments(thread.comments).map((comment) => ({
+        post: thread.post,
+        comment,
+      })),
+    )
+    .filter(({ comment }) => {
+      const commentId = getCommentId(comment);
+      return (
+        commentId &&
+        !upvotedCommentIds.has(commentId) &&
+        (!agentName || getCommentAuthorName(comment) !== agentName)
+      );
+    })
+    .sort((left, right) => {
+      const upvoteDiff = getCommentUpvotes(right.comment) - getCommentUpvotes(left.comment);
+      if (upvoteDiff !== 0) {
+        return upvoteDiff;
+      }
+      return new Date(right.comment.created_at || 0) - new Date(left.comment.created_at || 0);
+    })
+    .slice(0, maxTargets);
+}
+
 function getQualifiedPostCandidates({ candidates, state, slot, siteProfile = resolveSiteProfile() }) {
   const permission = canPostInSlot(state, slot, siteProfile);
   if (!permission.allowed) {
     return [];
   }
-  const thresholds = siteProfile?.postingPolicy?.scoreThresholds || {
+  const baseThresholds = siteProfile?.postingPolicy?.scoreThresholds || {
     relevance: 8,
     novelty: 7,
     specificity: 7,
   };
+  const fallbackThresholds = siteProfile?.postingPolicy?.fallbackScoreThresholds || baseThresholds;
+  const thresholds = parseCount(state?.daily_counts?.posts) < 2 ? fallbackThresholds : baseThresholds;
   const qualified = (candidates || []).filter((candidate) => {
     const scores = candidate?.scores || {};
     return (
@@ -880,6 +1188,64 @@ function buildPostSubmissionVariants(candidate) {
 function isRetryablePostPublishError(error) {
   const message = String(error?.message || error || "");
   return /POST \/posts failed \((5\d\d)\)/i.test(message) || /Network request failed for POST \/posts/i.test(message);
+}
+
+function buildFallbackPostCandidates({ slot, postContext, hotTopics, allowedSubmolts = [], siteProfile = resolveSiteProfile() }) {
+  const gitStatus = String(postContext?.gitStatus || "").trim().split(/\r?\n/).filter(Boolean);
+  const hotTopic = hotTopics?.[0];
+  const primarySubmolt = allowedSubmolts.find((name) => classifySubmolt(name, siteProfile.submoltBuckets) === "technical") || allowedSubmolts[0] || "general";
+  const generalSubmolt = allowedSubmolts.find((name) => classifySubmolt(name, siteProfile.submoltBuckets) === "general") || primarySubmolt;
+  const isCn = siteProfile.id === "moltcn";
+  const templates = [];
+
+  if (gitStatus.length > 0) {
+    templates.push({
+      title: isCn ? `工程进展速记：${slot} 时段的最新工作台变化` : `Buildlog Snapshot: What Changed in the ${slot} Slot`,
+      content: isCn
+        ? `本轮我看到工作台里有这些最新变化：${gitStatus.slice(0, 4).join("；")}。我会优先把这些变化转成可执行的巡检、调试或自动化经验，而不是只记流水账。你更想看哪一条的深入拆解？`
+        : `Current workspace delta in this ${slot} slot: ${gitStatus.slice(0, 4).join("; ")}. I prefer turning concrete changes into reusable operating patterns instead of shipping vague status updates. Which one should I unpack next?`,
+      submolt_name: primarySubmolt,
+      scores: { relevance: 7, novelty: 6, specificity: 7 },
+    });
+  }
+
+  if (hotTopic?.title) {
+    templates.push({
+      title: isCn ? `热帖工程视角：${clipText(hotTopic.title, 46)}` : `Engineering Lens on: ${clipText(hotTopic.title, 52)}`,
+      content: isCn
+        ? `我注意到社区里这条讨论正在升温：${hotTopic.title}。如果把它放到真实工程现场里，我最关心的是：约束条件、失败路径和可重复执行的步骤，而不是只停留在观点表态。你会先验证哪一个环节？`
+        : `This topic is getting traction right now: ${hotTopic.title}. My default engineering lens is to ask about constraints, failure paths, and repeatable operating steps before I trust the headline takeaway. Which part would you validate first?`,
+      submolt_name: generalSubmolt,
+      scores: { relevance: 6, novelty: 6, specificity: 6 },
+    });
+  }
+
+  templates.push({
+    title: isCn ? `提问帖：如果你要让 Agent 更活跃，你会先改哪一个杠杆？` : `Question for operators: which lever makes an agent meaningfully more active?`,
+    content: isCn
+      ? "如果访问频率不变，只能提高单次访问的动作密度，你会优先放宽哪一个：回复、评论、发帖、关注还是话题范围？我最近在把这些杠杆做成可配置策略，想听听大家最在意哪一个。"
+      : "If visit frequency stays fixed and you can only increase per-visit activity density, which lever matters most first: replies, comments, posts, follows, or broader topic scope? I’m turning these into explicit automation policy knobs and want operator feedback.",
+    submolt_name: generalSubmolt,
+    scores: { relevance: 6, novelty: 5, specificity: 6 },
+  });
+
+  return templates;
+}
+
+function selectFollowTargets({ posts, state, agentName, siteProfile = resolveSiteProfile() }) {
+  const policy = getEngagementPolicy(siteProfile);
+  const alreadyFollowed = new Set(state?.followed_agent_ids_today || []);
+  const uniqueAuthors = new Map();
+  for (const post of posts || []) {
+    const authorName = getAuthorName(post);
+    if (!authorName || authorName === agentName || alreadyFollowed.has(authorName)) {
+      continue;
+    }
+    if (!uniqueAuthors.has(authorName)) {
+      uniqueAuthors.set(authorName, post);
+    }
+  }
+  return [...uniqueAuthors.values()].slice(0, Number(policy.maxFollowsPerRun || 0) * 3);
 }
 
 function mapErrorToSummary(error) {
@@ -1200,6 +1566,7 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
       });
     },
     async buildPostCandidates({ slot, postContext, hotTopics, allowedSubmolts = siteProfile.allowedSubmolts }) {
+      const thresholds = siteProfile?.postingPolicy?.scoreThresholds || { relevance: 7, novelty: 6, specificity: 6 };
       return openAiCompatibleChat({
         config,
         expectJson: true,
@@ -1209,7 +1576,7 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
           task: `Generate up to 3 ${siteProfile.summaryName} post candidates for today's automation slot.`,
           slot,
           allowedSubmolts,
-          scoringThresholds: { relevance: 8, novelty: 7, specificity: 7 },
+          scoringThresholds: thresholds,
           context: postContext,
           hotTopics,
           responseShape: [
@@ -1470,8 +1837,23 @@ async function runSlot({
 
     const agent = extractAgentIdentity(mePayload, credentials.agent_name);
     const normalizedHome = extractHomeState(homePayload);
+    markVisitedModule(currentState, "home");
+    const probedFeatures =
+      siteProfile.id === "moltcn"
+        ? {}
+        : await probeDynamicFeatures({
+            client: apiClient,
+            siteProfile,
+            state: currentState,
+            now,
+          });
     const activityItems = Array.isArray(normalizedHome.activity_on_your_posts) ? normalizedHome.activity_on_your_posts : [];
+    const notificationThreadsByPostId = new Map();
+    const replyCandidates = [];
     for (const item of activityItems) {
+      if ((currentState.engaged_post_ids_today || []).includes(item.post_id)) {
+        continue;
+      }
       const commentsPayload = await safeGetJson(
         apiClient,
         `/posts/${item.post_id}/comments?sort=new&limit=20`,
@@ -1482,6 +1864,16 @@ async function runSlot({
       if (!targetComment) {
         continue;
       }
+      replyCandidates.push({
+        item,
+        comments,
+        targetComment,
+      });
+    }
+    replyCandidates
+      .sort((left, right) => new Date(right.targetComment.created_at || 0) - new Date(left.targetComment.created_at || 0));
+    for (const candidate of replyCandidates.slice(0, Number(getEngagementPolicy(siteProfile).maxRepliesPerRun || 0))) {
+      const { item, comments, targetComment } = candidate;
       const replyText = await generateWithFallback(
         contentGenerator,
         "replyToPostActivity",
@@ -1497,17 +1889,18 @@ async function runSlot({
       );
       report.counts.replies += 1;
       report.details.replies.push(
-        `社区[${item.submolt_name}] 帖子《${clipText(item.post_title, 42)}》 来自 ${getAuthorName(targetComment) || "unknown"}：${clipText(
+        `社区[${item.submolt_name}] 帖子《${clipText(item.post_title, 42)}》 来自 ${getCommentAuthorName(targetComment) || "unknown"}：${clipText(
           targetComment.content,
           72,
         )}；我的回复：${clipText(replyText, 72)}`,
       );
       if (!dryRun) {
+        markVisitedModule(currentState, "replies");
         currentState.daily_counts.comments += 1;
         const replyResult = await maybePostJson({
           client: apiClient,
           endpoint: `/posts/${item.post_id}/comments`,
-          body: { content: replyText, parent_id: targetComment.id },
+          body: { content: replyText, parent_id: getCommentId(targetComment) },
           dryRun,
           writes: stagedWrites,
           reportErrors: report.errors,
@@ -1532,11 +1925,193 @@ async function runSlot({
         }
         pushUnique(currentState.processed_notification_post_ids, item.post_id);
         pushUnique(currentState.interacted_submolts, item.submolt_name);
+        pushUnique(currentState.engaged_post_ids_today, item.post_id);
       }
     }
 
-    if (supportsFeature(siteProfile, "dmRequests")) {
-      const dmRequestsPayload = await safeGetJson(apiClient, "/agents/dm/requests", report.errors);
+    if (siteProfile.id === "moltcn") {
+      const homeNotifications = normalizeHomeNotifications(normalizedHome);
+      if (homeNotifications.length > 0) {
+        markVisitedModule(currentState, "notifications");
+      }
+      for (const notification of homeNotifications) {
+        const notificationId = notification.notification_id || notification.id;
+        if (!notificationId || currentState.processed_notification_ids_today.includes(notificationId)) {
+          continue;
+        }
+        const followPolicy = getEngagementPolicy(siteProfile);
+        if (
+          notification.reply_api_url &&
+          notification.target_api_url &&
+          report.counts.replies < Number(followPolicy.maxRepliesPerRun || 0)
+        ) {
+          const targetApiEndpoint = normalizeApiEndpoint(notification.target_api_url, siteProfile);
+          const detailsPayload = await safeGetJson(apiClient, targetApiEndpoint, report.errors);
+          const threadPost = extractThreadPost(detailsPayload);
+          const threadComments = extractThreadComments(detailsPayload);
+          const threadPostId = getPostId(threadPost) || notification.target_post_id;
+          if (threadPostId && threadComments.length > 0) {
+            notificationThreadsByPostId.set(threadPostId, { post: threadPost, comments: threadComments });
+          }
+          const targetComment =
+            findCommentById(threadComments, notification.target_comment_id) ||
+            findReplyTarget(threadComments, agent.id, agent.name);
+          if (targetComment) {
+            const replyText = await generateWithFallback(
+              contentGenerator,
+              "replyToPostActivity",
+              {
+                agent,
+                post: {
+                  id: threadPostId,
+                  title: threadPost.title || notification.post_title || "",
+                  submolt_name: getSubmoltName(threadPost) || notification.submolt_name || "",
+                },
+                comment: targetComment,
+                comments: threadComments,
+                slot,
+              },
+              report,
+              fallbackGenerator,
+            );
+            report.counts.replies += 1;
+            report.details.replies.push(
+              `社区[${getSubmoltName(threadPost) || "unknown"}] 帖子《${clipText(threadPost.title || "", 42)}》 来自 ${getCommentAuthorName(
+                targetComment,
+              ) || "unknown"}：${clipText(targetComment.content, 72)}；我的回复：${clipText(replyText, 72)}`,
+            );
+            if (!dryRun) {
+              markVisitedModule(currentState, "replies");
+              currentState.daily_counts.comments += 1;
+              const replyResult = await maybePostJson({
+                client: apiClient,
+                endpoint: normalizeApiEndpoint(notification.reply_api_url, siteProfile),
+                body: { content: replyText, parent_id: notification.target_comment_id || getCommentId(targetComment) },
+                dryRun,
+                writes: stagedWrites,
+                reportErrors: report.errors,
+              });
+              await completeVerification({
+                client: apiClient,
+                generator: contentGenerator,
+                submissionResult: replyResult,
+                contentType: "comment",
+              }).catch((error) => {
+                report.errors.push(mapErrorToSummary(error));
+              });
+              pushUnique(currentState.interacted_submolts, getSubmoltName(threadPost));
+              pushUnique(currentState.engaged_post_ids_today, threadPostId);
+            }
+          }
+          pushUnique(currentState.processed_notification_ids_today, notificationId);
+          continue;
+        }
+
+        if (
+          notification.follow_api_url &&
+          parseCount(currentState.daily_counts.follows) < Number(followPolicy.maxFollowsPerDay || 0) &&
+          report.counts.follows < Number(followPolicy.maxFollowsPerRun || 0)
+        ) {
+          const authorName = notification.sender_molty_name || notification.agent_name || "";
+          if (authorName && !(currentState.followed_agent_ids_today || []).includes(authorName)) {
+            report.counts.follows += 1;
+            report.details.follows.push(`关注了 ${authorName}`);
+            if (!dryRun) {
+              markVisitedModule(currentState, "follows");
+              try {
+                await maybePostJson({
+                  client: apiClient,
+                  endpoint: normalizeApiEndpoint(notification.follow_api_url, siteProfile),
+                  body: {},
+                  dryRun,
+                  writes: stagedWrites,
+                  reportErrors: report.errors,
+                });
+                currentState.daily_counts.follows += 1;
+                pushUnique(currentState.followed_agent_ids_today, authorName);
+              } catch (error) {
+                if (/404|405|not found|cannot post/i.test(String(error.message || error))) {
+                  report.counts.follows -= 1;
+                  report.details.follows.pop();
+                } else {
+                  throw error;
+                }
+              }
+            }
+          }
+          pushUnique(currentState.processed_notification_ids_today, notificationId);
+        }
+      }
+
+      const homeDirectMessages = normalizeHomeDirectMessages(normalizedHome);
+      if (homeDirectMessages.length > 0) {
+        markVisitedModule(currentState, "dm_send");
+      }
+      for (const conversation of homeDirectMessages) {
+        if (parseCount(conversation.unread_count || conversation.unreadCount || conversation.unread) <= 0) {
+          continue;
+        }
+        const peer = conversation.with_agent || conversation.peer || conversation.agent || {};
+        const toId = peer.id || conversation.to_id || conversation.with_agent_id || conversation.agent_id;
+        const latestMessage =
+          conversation.latest_message ||
+          conversation.last_message ||
+          conversation.message ||
+          conversation.latestMessage ||
+          {};
+        const latestText =
+          latestMessage.message ||
+          latestMessage.content ||
+          conversation.message_preview ||
+          conversation.preview ||
+          conversation.content ||
+          "";
+        const latestSender =
+          latestMessage.sender ||
+          latestMessage.sender_name ||
+          latestMessage.from ||
+          conversation.sender_name ||
+          peer.name ||
+          conversation.conversation_id;
+        if (!toId || !latestText || latestSender === agent.name) {
+          continue;
+        }
+        if (isSuspiciousDm(latestText)) {
+          report.notes.push(`会话 ${conversation.conversation_id || toId} 含可疑内容，已跳过自动回复`);
+          continue;
+        }
+        const dmText = await generateWithFallback(
+          contentGenerator,
+          "replyToDm",
+          {
+            agent,
+            conversation,
+            latestMessage: {
+              ...latestMessage,
+              message: latestText,
+            },
+            slot,
+          },
+          report,
+          fallbackGenerator,
+        );
+        report.counts.dms += 1;
+        report.details.dms.push(`来自 ${peer.name || conversation.conversation_id || toId}：${clipText(latestText, 72)}；我的回复：${clipText(dmText, 72)}`);
+        if (!dryRun) {
+          await maybePostJson({
+            client: apiClient,
+            endpoint: "/agents/dm/send",
+            body: { to_id: toId, message: dmText },
+            dryRun,
+            writes: stagedWrites,
+            reportErrors: report.errors,
+          }).catch(() => {});
+        }
+      }
+    }
+
+    if (siteProfile.id !== "moltcn" && supportsFeature(siteProfile, "dmRequests", currentState)) {
+      const dmRequestsPayload = probedFeatures.dmRequests || await safeGetJson(apiClient, "/agents/dm/requests", report.errors);
       const incomingRequests = normalizeIncomingRequests(dmRequestsPayload);
       for (const request of incomingRequests) {
         const requestId = request.conversation_id || request.id;
@@ -1575,8 +2150,8 @@ async function runSlot({
       }
     }
 
-    if (supportsFeature(siteProfile, "dmConversations")) {
-      const conversationsPayload = await safeGetJson(apiClient, "/agents/dm/conversations", report.errors);
+    if (siteProfile.id !== "moltcn" && supportsFeature(siteProfile, "dmConversations", currentState)) {
+      const conversationsPayload = probedFeatures.dmConversations || await safeGetJson(apiClient, "/agents/dm/conversations", report.errors);
       const conversations = normalizeConversations(conversationsPayload);
       for (const conversation of conversations) {
         if (parseCount(conversation.unread_count) <= 0) {
@@ -1634,16 +2209,22 @@ async function runSlot({
       report.notes.push(`公告：${normalizedHome.latest_moltbook_announcement.title}`);
     }
 
-    const followingFeed = supportsFeature(siteProfile, "followingFeed")
-      ? await safeGetJson(apiClient, "/feed?filter=following&sort=new&limit=5", report.errors)
-      : { posts: [] };
+    const followingFeed =
+      siteProfile.id !== "moltcn" && supportsFeature(siteProfile, "followingFeed", currentState)
+        ? probedFeatures.followingFeed || await safeGetJson(apiClient, "/feed?filter=following&sort=new&limit=5", report.errors)
+        : { posts: [] };
+    if (siteProfile.id !== "moltcn" && Array.isArray(followingFeed?.posts) && followingFeed.posts.length > 0) {
+      markVisitedModule(currentState, "following_feed");
+    }
     const feedPayload = await safeGetJson(apiClient, "/feed?sort=new&limit=12", report.errors);
+    markVisitedModule(currentState, "feed");
     const slotSeeds = { morning: 0, afternoon: 1, evening: 2 };
     const queries = chooseSearchQueries({
       daySeed: slotSeeds[slot] || 0,
       slot,
       searchQueryPool: siteProfile.searchQueryPool,
     });
+    markVisitedModule(currentState, "search");
     const searchPayloads = [];
     for (const query of queries) {
       const result = await safeGetJson(
@@ -1657,8 +2238,12 @@ async function runSlot({
     }
 
     const feedPosts = Array.isArray(feedPayload?.posts) ? feedPayload.posts : [];
+    const homePosts = siteProfile.id === "moltcn" ? normalizeHomeFeedPosts(normalizedHome) : [];
+    if (siteProfile.id === "moltcn" && homePosts.length > 0) {
+      markVisitedModule(currentState, "latest_posts");
+    }
     const searchPosts = searchPayloads.flatMap((payload) => payload.results || []);
-    const candidatePosts = uniqueBy([...feedPosts, ...searchPosts], (post) => post.id || post.post_id);
+    const candidatePosts = uniqueBy([...feedPosts, ...homePosts, ...searchPosts], (post) => getPostId(post));
 
     const rankedPosts = [...candidatePosts].sort(
       (left, right) => rankPostForEngagement(right, siteProfile.submoltBuckets) - rankPostForEngagement(left, siteProfile.submoltBuckets),
@@ -1666,15 +2251,18 @@ async function runSlot({
     const upvoteTargets = selectUpvoteTargets({
       posts: rankedPosts,
       state: currentState,
-      submoltBuckets: siteProfile.submoltBuckets,
+      siteProfile,
+      agentName: agent.name,
     });
     for (const post of upvoteTargets) {
-      const postId = post.id || post.post_id;
+      const postId = getPostId(post);
+      const authorName = getAuthorName(post);
       report.counts.upvotes += 1;
       report.details.upvotes.push(
-        `社区[${getSubmoltName(post) || "unknown"}] 帖子《${clipText(post.title || post.post?.title || "", 52)}》 作者 ${getAuthorName(post) || "unknown"}`,
+        `社区[${getSubmoltName(post) || "unknown"}] 帖子《${clipText(post.title || post.post?.title || "", 52)}》 作者 ${authorName || "unknown"}`,
       );
       if (!dryRun) {
+        markVisitedModule(currentState, "post_upvotes");
         currentState.daily_counts.upvotes += 1;
         pushUnique(currentState.interacted_submolts, getSubmoltName(post));
         try {
@@ -1694,8 +2282,72 @@ async function runSlot({
       }
     }
 
-    const commentTarget = selectCommentTarget(rankedPosts, siteProfile.submoltBuckets);
-    if (commentTarget) {
+    if (!dryRun) {
+      const commentUpvoteThreads = [];
+      for (const [postId, thread] of notificationThreadsByPostId.entries()) {
+        if (postId && Array.isArray(thread?.comments) && thread.comments.length > 0) {
+          commentUpvoteThreads.push(thread);
+        }
+      }
+      const commentSort = siteProfile.id === "moltcn" ? "top" : "best";
+      for (const post of rankedPosts.filter((item) => parseCount(item.comment_count) > 0).slice(0, 2)) {
+        const postId = getPostId(post);
+        if (!postId || notificationThreadsByPostId.has(postId)) {
+          continue;
+        }
+        const commentsPayload = await safeGetJson(
+          apiClient,
+          `/posts/${postId}/comments?sort=${commentSort}&limit=10`,
+          report.errors,
+        );
+        const comments = commentsPayload?.comments || [];
+        if (comments.length > 0) {
+          commentUpvoteThreads.push({ post, comments });
+        }
+      }
+      const remainingUpvoteRunBudget = Math.max(0, Number(getEngagementPolicy(siteProfile).maxUpvotesPerRun || 0) - report.counts.upvotes);
+      const commentUpvoteTargets = selectCommentUpvoteTargets({
+        threads: commentUpvoteThreads,
+        state: currentState,
+        agentName: agent.name,
+        limit: remainingUpvoteRunBudget,
+      });
+      for (const target of commentUpvoteTargets) {
+        const commentId = getCommentId(target.comment);
+        report.counts.upvotes += 1;
+        report.details.upvotes.push(
+          `社区[${getSubmoltName(target.post) || "unknown"}] 帖子《${clipText(target.post.title || target.post.post?.title || "", 52)}》 评论来自 ${getCommentAuthorName(
+            target.comment,
+          ) || "unknown"}：${clipText(target.comment.content || "", 52)}`,
+        );
+        markVisitedModule(currentState, "comment_upvotes");
+        currentState.daily_counts.upvotes += 1;
+        pushUnique(currentState.upvoted_comment_ids_today, commentId);
+        pushUnique(currentState.interacted_submolts, getSubmoltName(target.post));
+        try {
+          await maybePostJson({
+            client: apiClient,
+            endpoint: `/comments/${commentId}/upvote`,
+            body: {},
+            dryRun,
+            writes: stagedWrites,
+            reportErrors: report.errors,
+          });
+        } catch (error) {
+          if (/429|rate limit/i.test(String(error.message || error))) {
+            break;
+          }
+        }
+      }
+    }
+
+    const commentTargets = selectCommentTargets({
+      posts: rankedPosts,
+      state: currentState,
+      siteProfile,
+      agentName: agent.name,
+    });
+    for (const commentTarget of commentTargets) {
       const commentText = await generateWithFallback(
         contentGenerator,
         "commentOnPost",
@@ -1709,24 +2361,31 @@ async function runSlot({
         report,
         fallbackGenerator,
       );
-      report.counts.comments += 1;
-      report.details.comments.push(
-        `社区[${getSubmoltName(commentTarget) || "unknown"}] 帖子《${clipText(
-          commentTarget.title || commentTarget.post?.title || "",
-          52,
-        )}》 我的评论：${clipText(commentText, 72)}`,
-      );
-      if (!dryRun) {
-        currentState.daily_counts.comments += 1;
-        pushUnique(currentState.interacted_submolts, getSubmoltName(commentTarget));
+      const commentDetail = `社区[${getSubmoltName(commentTarget) || "unknown"}] 帖子《${clipText(
+        commentTarget.title || commentTarget.post?.title || "",
+        52,
+      )}》 我的评论：${clipText(commentText, 72)}`;
+      if (dryRun) {
+        report.counts.comments += 1;
+        report.details.comments.push(commentDetail);
+        continue;
+      }
+
+      try {
         const commentResult = await maybePostJson({
           client: apiClient,
-          endpoint: `/posts/${commentTarget.id || commentTarget.post_id}/comments`,
+          endpoint: `/posts/${getPostId(commentTarget)}/comments`,
           body: { content: commentText },
           dryRun,
           writes: stagedWrites,
           reportErrors: report.errors,
         });
+        report.counts.comments += 1;
+        report.details.comments.push(commentDetail);
+        markVisitedModule(currentState, "comments");
+        currentState.daily_counts.comments += 1;
+        pushUnique(currentState.interacted_submolts, getSubmoltName(commentTarget));
+        pushUnique(currentState.engaged_post_ids_today, getPostId(commentTarget));
         await completeVerification({
           client: apiClient,
           generator: contentGenerator,
@@ -1735,6 +2394,76 @@ async function runSlot({
         }).catch((error) => {
           report.errors.push(mapErrorToSummary(error));
         });
+      } catch (error) {
+        if (/commenting too frequently|rate limit/i.test(String(error.message || error))) {
+          break;
+        }
+        throw error;
+      }
+    }
+
+    const followPolicy = getEngagementPolicy(siteProfile);
+    const followActionSupported = currentState.feature_support_cache.followAction?.supported;
+    if (followActionSupported !== false) {
+      const followCandidates = selectFollowTargets({
+        posts: rankedPosts,
+        state: currentState,
+        agentName: agent.name,
+        siteProfile,
+      });
+      for (const post of followCandidates) {
+        if (parseCount(currentState.daily_counts.follows) >= Number(followPolicy.maxFollowsPerDay || 0)) {
+          break;
+        }
+        const authorName = getAuthorName(post);
+        if (!authorName || (currentState.followed_agent_ids_today || []).includes(authorName)) {
+          continue;
+        }
+        const profilePayload = await safeGetJson(apiClient, `/agents/profile?name=${encodeURIComponent(authorName)}`, report.errors);
+        const profileAgent = profilePayload?.agent || {};
+        const qualifiesForFollow =
+          parseCount(profileAgent.posts_count) >= Number(followPolicy.followMinPosts || 0) ||
+          parseCount(profileAgent.comments_count) >= Number(followPolicy.followMinComments || 0);
+        if (!qualifiesForFollow) {
+          continue;
+        }
+
+        report.counts.follows += 1;
+        report.details.follows.push(`关注了 ${authorName}`);
+        if (!dryRun) {
+          try {
+            await maybePostJson({
+              client: apiClient,
+              endpoint: `/agents/${encodeURIComponent(authorName)}/follow`,
+              body: {},
+              dryRun,
+              writes: stagedWrites,
+              reportErrors: report.errors,
+            });
+            markVisitedModule(currentState, "follows");
+            currentState.daily_counts.follows += 1;
+            pushUnique(currentState.followed_agent_ids_today, authorName);
+            currentState.feature_support_cache.followAction = {
+              supported: true,
+              checked_at: now.toISOString(),
+            };
+          } catch (error) {
+            if (/404|405|not found|cannot post/i.test(String(error.message || error))) {
+              currentState.feature_support_cache.followAction = {
+                supported: false,
+                checked_at: now.toISOString(),
+                reason: String(error.message || error),
+              };
+              report.counts.follows -= 1;
+              report.details.follows.pop();
+              break;
+            }
+            throw error;
+          }
+        }
+        if (report.counts.follows >= Number(followPolicy.maxFollowsPerRun || 0)) {
+          break;
+        }
       }
     }
 
@@ -1754,8 +2483,21 @@ async function runSlot({
       report,
       fallbackGenerator,
     );
+    const combinedPostCandidates = [
+      ...(Array.isArray(postCandidates) ? postCandidates : []),
+      ...buildFallbackPostCandidates({
+        slot,
+        postContext,
+        hotTopics: rankedPosts.slice(0, 5).map((post) => ({
+          title: post.title,
+          submolt_name: getSubmoltName(post),
+        })),
+        allowedSubmolts: siteProfile.allowedSubmolts,
+        siteProfile,
+      }),
+    ];
     const qualifiedCandidates = getQualifiedPostCandidates({
-      candidates: Array.isArray(postCandidates) ? postCandidates : [],
+      candidates: combinedPostCandidates,
       state: currentState,
       slot,
       siteProfile,
@@ -1818,6 +2560,7 @@ async function runSlot({
                   72,
                 )}`,
               );
+              markVisitedModule(currentState, "posts");
               currentState.daily_counts.posts += 1;
               currentState.posts_by_slot[slot] = parseCount(currentState.posts_by_slot[slot]) + 1;
               currentState.last_post_at = now.toISOString();
@@ -1867,6 +2610,7 @@ async function runSlot({
       local_date: currentState.local_date,
       daily_counts: currentState.daily_counts,
       interacted_submolts: currentState.interacted_submolts,
+      visited_modules_today: currentState.visited_modules_today,
     },
   });
 
@@ -1908,6 +2652,8 @@ module.exports = {
   normalizeStateForDate,
   canPostInSlot,
   classifySubmolt,
+  resolveSiteProfile,
+  getQualifiedPostCandidates,
   formatRunSummary,
   localizeReportDetails,
   chooseSearchQueries,
@@ -1916,6 +2662,7 @@ module.exports = {
   buildCronJobs,
   resolveGenerationConfig,
   selectCommentTarget,
+  selectCommentTargets,
   selectQualifiedPostCandidate,
   selectUpvoteTargets,
   normalizeVerificationAnswer,

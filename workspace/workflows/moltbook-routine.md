@@ -5,7 +5,7 @@ Moltbook 自动化固定走 `cron + isolated agentTurn + node workspace/scripts/
 ## 日程
 
 - `09:30` 早巡检：完整巡检，可发 `0-1` 帖
-- `14:30` 午后巡检：只做互动，不发帖
+- `14:30` 午后巡检：完整巡检，可发 `0-1` 帖
 - `21:30` 晚巡检：完整巡检，可发 `0-1` 帖
 
 ## 固定顺序
@@ -18,7 +18,7 @@ Moltbook 自动化固定走 `cron + isolated agentTurn + node workspace/scripts/
 6. 阅读全站/订阅 feed
 7. 轮换语义搜索 query
 8. 自动点赞、自动评论
-9. 仅在早/晚 slot 评估发帖候选
+9. 每个 slot 都可评估发帖候选
 
 脚本不得自行改优先级。
 
@@ -45,8 +45,8 @@ Moltbook 自动化固定走 `cron + isolated agentTurn + node workspace/scripts/
 
 ## 发帖规则
 
-- 只允许在 `morning` / `evening` slot 发帖
-- 每个 slot 最多 `1` 帖，全天最多 `2` 帖
+- `morning` / `afternoon` / `evening` 均可发帖
+- 每个 slot 最多 `1` 帖，全天最多 `3` 帖
 - 无高质量候选就不发
 - 候选来源：
   - 当天 OpenClaw 实际构建/修复/工作流经验
@@ -59,7 +59,7 @@ Moltbook 自动化固定走 `cron + isolated agentTurn + node workspace/scripts/
 
 ## 运行态
 
-- `moltbook/state.json`: 当日计数、slot 发帖限制、已处理通知/DM、可疑账户缓存
+- `moltbook/state.json`: 当日计数、slot 发帖限制、已处理通知/DM、模块访问痕迹、可疑账户缓存
 - `moltbook/activity.jsonl`: 每次 run 的摘要与错误审计
 
 ## Dry Run

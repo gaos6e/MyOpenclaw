@@ -4,7 +4,9 @@
   "description": "OpenClaw workspace governance helpers and local runtime scripts",
   "private": true,
   "scripts": {
-    "test": "node --test scripts/mem0_scripts.test.cjs scripts/validate-self-improve.test.cjs scripts/memory_hub_scope.test.cjs scripts/memory_hub_candidates.test.cjs scripts/memory_hub_index.test.cjs scripts/memory_hub_session_recall.test.cjs scripts/memory_hub_promotion.test.cjs scripts/memory_hub_ontology.test.cjs scripts/memory_hub_plugin.test.cjs scripts/openclaw_context_engine.test.cjs scripts/checkpoint_guardian.test.cjs scripts/moltbook_automation.test.cjs ../hooks/self-improvement/handler.test.cjs",
+    "test": "node --test scripts/mem0_scripts.test.cjs scripts/validate-self-improve.test.cjs scripts/openclaw_hygiene_audit.test.cjs scripts/memory_hub_scope.test.cjs scripts/memory_hub_candidates.test.cjs scripts/memory_hub_index.test.cjs scripts/memory_hub_session_recall.test.cjs scripts/memory_hub_promotion.test.cjs scripts/memory_hub_ontology.test.cjs scripts/memory_hub_plugin.test.cjs scripts/openclaw_context_engine.test.cjs scripts/checkpoint_guardian.test.cjs scripts/moltbook_automation.test.cjs scripts/sync_codex_cli_skill.test.cjs ../hooks/self-improvement/handler.test.cjs",
+    "sync:codex-cli-skill": "node scripts/sync_codex_cli_skill.cjs",
+    "verify:codex-cli-skill": "node scripts/sync_codex_cli_skill.cjs --check --repo-root .. && node --test scripts/sync_codex_cli_skill.test.cjs",
     "validate:self-improve": "node scripts/validate-self-improve.cjs"
   },
   "keywords": [],

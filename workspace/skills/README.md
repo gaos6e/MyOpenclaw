@@ -10,6 +10,7 @@
 
 ## Local-first skills
 
+- `codex-cli` — source: local `codex` binary; version/risk tracked in `skills/codex-cli/_meta.json`
 - `ai-daily-brief`
 - `openclaw-backup`
 - `openclaw-tavily-search`

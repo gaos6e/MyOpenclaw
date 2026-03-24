@@ -441,7 +441,7 @@ test("selectQualifiedPostCandidate rejects low-quality drafts and picks the best
     state,
     slot: "morning",
   });
-  assert.equal(lowQuality, null);
+  assert.equal(lowQuality.title, "Too weak");
 
   const highQuality = selectQualifiedPostCandidate({
     candidates: [
@@ -503,6 +503,30 @@ test("selectUpvoteTargets respects per-run and daily budgets", () => {
   assert.equal(limitedTargets.length, 2);
 });
 
+test("selectUpvoteTargets and selectCommentTargets skip the agent's own posts", () => {
+  const state = createDefaultState("2026-03-21");
+  const posts = [
+    { id: "self-post", title: "Mine", submolt: { name: "agent-patterns" }, author: { name: "little_furball" }, comment_count: 4, upvotes: 20 },
+    { id: "other-post", title: "Other", submolt: { name: "agent-patterns" }, author: { name: "a1" }, comment_count: 3, upvotes: 10 },
+  ];
+
+  const upvoteTargets = selectUpvoteTargets({
+    posts,
+    state,
+    siteProfile: resolveSiteProfile("moltcn"),
+    agentName: "little_furball",
+  });
+  const commentTargets = selectCommentTargets({
+    posts,
+    state,
+    siteProfile: resolveSiteProfile("moltcn"),
+    agentName: "little_furball",
+  });
+
+  assert.deepEqual(upvoteTargets.map((post) => post.id), ["other-post"]);
+  assert.deepEqual(commentTargets.map((post) => post.id), ["other-post"]);
+});
+
 test("selectCommentTargets returns up to two targets and skips already engaged posts", () => {
   const targets = selectCommentTargets({
     posts: [
@@ -518,6 +542,27 @@ test("selectCommentTargets returns up to two targets and skips already engaged p
   });
 
   assert.deepEqual(targets.map((post) => post.id), ["p3", "p2"]);
+});
+
+test("selectCommentTargets respects per-site comment budgets", () => {
+  const posts = [
+    { id: "p1", title: "One", submolt: { name: "general" }, comment_count: 3, upvotes: 5 },
+    { id: "p2", title: "Two", submolt: { name: "general" }, comment_count: 2, upvotes: 4 },
+  ];
+
+  const moltbookTargets = selectCommentTargets({
+    posts,
+    state: createDefaultState("2026-03-21"),
+    siteProfile: resolveSiteProfile("moltbook"),
+  });
+  const moltcnTargets = selectCommentTargets({
+    posts,
+    state: createDefaultState("2026-03-21"),
+    siteProfile: resolveSiteProfile("moltcn"),
+  });
+
+  assert.equal(moltbookTargets.length, 2);
+  assert.equal(moltcnTargets.length, 1);
 });
 
 test("getQualifiedPostCandidates uses relaxed thresholds before the site reaches two daily posts", () => {
@@ -710,7 +755,7 @@ test("runSlot dry-run initializes runtime files and avoids write endpoints", asy
   assert.equal(fs.existsSync(path.join(rootDir, "moltbook", "activity.jsonl")), true);
 });
 
-test("runSlot uses Moltcn runtime isolation and skips unsupported DM/following features", async () => {
+test("runSlot uses Moltcn runtime isolation and relies on home/feed/search without legacy DM probes", async () => {
   const rootDir = makeTempRoot();
   writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
     api_key: "test-key",
@@ -721,9 +766,20 @@ test("runSlot uses Moltcn runtime isolation and skips unsupported DM/following f
     "/agents/me": { success: true, agent: { id: "agent-cn", name: "little_furball", description: "desc" } },
     "/agents/status": { success: true, status: "claimed" },
     "/home": {
-      your_account: { name: "little_furball", karma: 7, unread_notification_count: 0 },
-      activity_on_your_posts: [],
-      latest_moltbook_announcement: { title: "中文站公告" },
+      your_account: { name: "little_furball", score: 7, status: "claimed" },
+      your_notifications: [],
+      your_direct_messages: [],
+      latest_posts: [
+        {
+          post_id: "hp1",
+          title: "首页最新动态",
+          submolt_name: "agent-patterns",
+          agents: { name: "a0" },
+          comment_count: 1,
+          upvotes: 6,
+        },
+      ],
+      hot_posts: [],
     },
     "/feed?sort=new&limit=12": {
       success: true,
@@ -762,6 +818,9 @@ test("runSlot uses Moltcn runtime isolation and skips unsupported DM/following f
       "/search?q=%E8%87%AA%E5%8A%A8%E5%8C%96&type=posts&limit=3",
       "/search?q=OpenClaw&type=posts&limit=3",
       "/search?q=Agent&type=posts&limit=3",
+      "/agents/profile?name=a1",
+      "/agents/profile?name=a0",
+      "/agents/profile?name=a2",
     ],
   );
   const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltcn", "state.json"), "utf8"));
@@ -769,26 +828,58 @@ test("runSlot uses Moltcn runtime isolation and skips unsupported DM/following f
   assert.equal(fs.existsSync(path.join(rootDir, "moltcn", "activity.jsonl")), true);
 });
 
-test("runSlot enables Moltcn probed features when the endpoints are available", async () => {
+test("runSlot uses Moltcn home notifications and unified dm/send flow", async () => {
   const rootDir = makeTempRoot();
   writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
     api_key: "test-key",
     agent_name: "little_furball",
+  });
+  writeJson(path.join(rootDir, "moltcn", "state.json"), {
+    ...createDefaultState("2026-03-21"),
+    daily_counts: { posts: 3, comments: 0, upvotes: 0, follows: 0 },
   });
 
   const client = createFakeClient({
     "/agents/me": { success: true, agent: { id: "agent-cn", name: "little_furball", description: "desc" } },
     "/agents/status": { success: true, status: "claimed" },
     "/home": {
-      your_account: { name: "little_furball", karma: 7, unread_notification_count: 0 },
-      activity_on_your_posts: [],
-      latest_moltbook_announcement: { title: "中文站公告" },
-    },
-    "/feed?filter=following&sort=new&limit=5": {
-      success: true,
-      posts: [
-        { id: "fp1", title: "Followed post", content: "workflow", submolt: { name: "agent-patterns" }, author: { name: "FollowedAuthor" }, comment_count: 1, upvotes: 5 },
+      your_account: { name: "little_furball", score: 7, status: "claimed" },
+      your_notifications: [
+        {
+          notification_id: "notif-reply-1",
+          notification_type: "reply_notification",
+          sender_molty_name: "HelpfulCn",
+          target_api_url: "https://www.moltbook.cn/api/v1/posts/p1/details-with-comments",
+          reply_api_url: "/api/v1/posts/p1/comments",
+          target_comment_id: "comment-top-1",
+        },
+        {
+          notification_id: "notif-follow-1",
+          notification_type: "follow_notification",
+          sender_molty_name: "HelpfulCn",
+          follow_api_url: "/api/v1/agents/HelpfulCn/follow",
+        },
       ],
+      your_direct_messages: [
+        {
+          conversation_id: "dm-1",
+          unread_count: 1,
+          with_agent: { id: "agent-helpful", name: "HelpfulCn" },
+          latest_message: { sender: "HelpfulCn", message: "你怎么安排每日发帖节奏？" },
+        },
+      ],
+      latest_posts: [
+        {
+          post_id: "p1",
+          title: "OpenClaw 中文经验",
+          submolt_name: "agent-patterns",
+          agents: { name: "a1" },
+          comment_count: 2,
+          upvotes: 5,
+          post_details_api: "https://www.moltbook.cn/api/v1/posts/p1/details-with-comments",
+        },
+      ],
+      hot_posts: [],
     },
     "/feed?sort=new&limit=12": {
       success: true,
@@ -796,47 +887,36 @@ test("runSlot enables Moltcn probed features when the endpoints are available", 
         { id: "p1", title: "OpenClaw 中文经验", content: "workflow", submolt: { name: "agent-patterns" }, author: { name: "a1" }, comment_count: 2, upvotes: 5 },
       ],
     },
-    "/agents/dm/requests": {
+    "/posts/p1/details-with-comments": {
       success: true,
-      incoming: {
-        requests: [
+      data: {
+        post: {
+          post_id: "p1",
+          title: "OpenClaw 中文经验",
+          submolt_name: "agent-patterns",
+          agent_name: "a1",
+        },
+        comments: [
           {
-            conversation_id: "conv-req-1",
-            from: { name: "HelpfulCn" },
-            message_preview: "想交流一下自动化巡检。",
+            agent_id: "agent-helpful",
+            agent_name: "HelpfulCn",
+            comment_id: "comment-top-1",
+            content: "想交流一下自动化巡检。",
+            created_at: "2026-03-21T13:40:00.000Z",
+            parent_id: null,
+            replies: [],
           },
-        ],
-      },
-      outgoing: { requests: [] },
-    },
-    "/agents/dm/conversations": {
-      success: true,
-      total_unread: "1",
-      conversations: {
-        items: [
-          {
-            conversation_id: "conv-1",
-            unread_count: 1,
-            with_agent: { name: "HelpfulCn", description: "desc" },
-          },
-        ],
-      },
-    },
-    "/agents/dm/conversations/conv-1": {
-      success: true,
-      conversation: {
-        messages: [
-          { sender: "HelpfulCn", message: "你怎么安排每日发帖节奏？", created_at: "2026-03-21T13:40:00.000Z" },
         ],
       },
     },
     "/search?q=%E8%87%AA%E5%8A%A8%E5%8C%96&type=posts&limit=3": { success: true, results: [] },
     "/search?q=OpenClaw&type=posts&limit=3": { success: true, results: [] },
     "/search?q=Agent&type=posts&limit=3": { success: true, results: [] },
-    "POST /agents/dm/requests/conv-req-1/approve": { success: true },
-    "POST /agents/dm/conversations/conv-1/send": { success: true },
+    "/agents/profile?name=a1": { success: true, agent: { name: "a1", posts_count: 1, comments_count: 1 } },
+    "POST /posts/p1/comments": { success: true, comment: { id: "comment-cn", verification_status: "verified" } },
+    "POST /agents/HelpfulCn/follow": { success: true },
+    "POST /agents/dm/send": { success: true },
     "POST /posts/p1/upvote": { success: true },
-    "POST /posts/fp1/comments": { success: true, comment: { id: "comment-cn", verification_status: "verified" } },
   });
 
   const result = await runSlot({
@@ -850,6 +930,9 @@ test("runSlot enables Moltcn probed features when the endpoints are available", 
       async replyToDm() {
         return "我会把发帖拆到固定 slot，并保留保底候选。";
       },
+      async replyToPostActivity() {
+        return "这套节奏我目前拆成固定 slot + 候选池，稳定性会更高。";
+      },
       async commentOnPost() {
         return "这个拆法挺稳，适合持续运营。";
       },
@@ -859,20 +942,25 @@ test("runSlot enables Moltcn probed features when the endpoints are available", 
     },
   });
 
+  assert.match(result.summary, /回复 1/);
   assert.match(result.summary, /私信 1/);
-  assert.match(result.summary, /评论 1/);
+  assert.match(result.summary, /关注 1/);
   assert.equal(
-    client.writes.some((call) => call.endpoint === "/agents/dm/requests/conv-req-1/approve"),
+    client.writes.some((call) => call.endpoint === "/posts/p1/comments" && call.body.parent_id === "comment-top-1"),
     true,
   );
   assert.equal(
-    client.writes.some((call) => call.endpoint === "/agents/dm/conversations/conv-1/send"),
+    client.writes.some((call) => call.endpoint === "/agents/HelpfulCn/follow"),
+    true,
+  );
+  assert.equal(
+    client.writes.some((call) => call.endpoint === "/agents/dm/send" && call.body.to_id === "agent-helpful"),
     true,
   );
   const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltcn", "state.json"), "utf8"));
-  assert.equal(state.feature_support_cache.dmRequests.supported, true);
-  assert.equal(state.feature_support_cache.dmConversations.supported, true);
-  assert.equal(state.feature_support_cache.followingFeed.supported, true);
+  assert.deepEqual(state.processed_notification_ids_today, ["notif-reply-1", "notif-follow-1"]);
+  assert.equal(state.visited_modules_today.includes("notifications"), true);
+  assert.equal(state.visited_modules_today.includes("dm_send"), true);
 });
 
 test("runSlot follows one relevant author and tracks follow state", async () => {
@@ -956,6 +1044,106 @@ test("runSlot follows one relevant author and tracks follow state", async () => 
   assert.equal(state.daily_counts.follows, 1);
 });
 
+test("runSlot keeps Moltcn to one comment per run and avoids comment-rate-limit churn", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "little_furball",
+  });
+  writeJson(path.join(rootDir, "moltcn", "state.json"), {
+    local_date: "2026-03-21",
+    daily_counts: { posts: 3, comments: 0, upvotes: 0, follows: 0 },
+    posts_by_slot: { morning: 0, afternoon: 0, evening: 0 },
+    last_post_at: null,
+    processed_notification_post_ids: [],
+    processed_dm_request_ids: [],
+    interacted_submolts: [],
+    recent_post_ids: [],
+    engaged_post_ids_today: [],
+    followed_agent_ids_today: [],
+    feature_support_cache: {},
+    suspicious_agents: {},
+  });
+
+  const reads = [];
+  const writes = [];
+  const fixtures = {
+    "/agents/me": { success: true, agent: { id: "agent-cn", name: "little_furball", description: "desc" } },
+    "/agents/status": { success: true, status: "claimed" },
+    "/home": {
+      your_account: { name: "little_furball", karma: 7, unread_notification_count: 0 },
+      activity_on_your_posts: [],
+      latest_moltbook_announcement: { title: "中文站公告" },
+    },
+    "/agents/dm/requests": { success: true, incoming: { requests: [] }, outgoing: { requests: [] } },
+    "/agents/dm/conversations": { success: true, conversations: { items: [] }, total_unread: "0" },
+    "/feed?filter=following&sort=new&limit=5": { success: true, posts: [] },
+    "/feed?sort=new&limit=12": {
+      success: true,
+      posts: [
+        { id: "p1", title: "One", content: "a", submolt: { name: "general" }, author: { name: "a1" }, comment_count: 2, upvotes: 5 },
+        { id: "p2", title: "Two", content: "b", submolt: { name: "general" }, author: { name: "a2" }, comment_count: 1, upvotes: 4 },
+      ],
+    },
+    "/search?q=%E8%87%AA%E5%8A%A8%E5%8C%96&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=OpenClaw&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=Agent&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=AI%E5%BA%94%E7%94%A8&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=%E6%95%88%E7%8E%87%E5%B7%A5%E5%85%B7&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=%E9%A1%B9%E7%9B%AE%E5%A4%8D%E7%9B%98&type=posts&limit=3": { success: true, results: [] },
+    "/agents/profile?name=a1": { success: true, agent: { name: "a1", posts_count: 2, comments_count: 2 }, recentPosts: [], recentComments: [] },
+    "/agents/profile?name=a2": { success: true, agent: { name: "a2", posts_count: 2, comments_count: 2 }, recentPosts: [], recentComments: [] },
+  };
+  const client = {
+    reads,
+    writes,
+    async getJson(endpoint) {
+      reads.push(endpoint);
+      if (!(endpoint in fixtures)) {
+        throw new Error(`Missing fixture for ${endpoint}`);
+      }
+      return JSON.parse(JSON.stringify(fixtures[endpoint]));
+    },
+    async postJson(endpoint, body) {
+      writes.push({ endpoint, body });
+      if (endpoint === "/posts/p1/upvote" || endpoint === "/posts/p2/upvote") {
+        return { success: true };
+      }
+      if (endpoint === "/posts/p1/comments") {
+        return { success: true, comment: { id: "comment-1", verification_status: "verified" } };
+      }
+      if (endpoint === "/posts/p2/comments") {
+        throw new Error("POST /posts/p2/comments failed (400): Commenting too frequently. Please wait a minute.");
+      }
+      throw new Error(`Unexpected POST ${endpoint}`);
+    },
+    async deleteJson(endpoint) {
+      throw new Error(`Unexpected DELETE ${endpoint}`);
+    },
+  };
+
+  const result = await runSlot({
+    slot: "evening",
+    site: "moltcn",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T13:30:00.000Z"),
+    client,
+    generator: {
+      async commentOnPost({ post }) {
+        return `comment:${post.title}`;
+      },
+      async buildPostCandidates() {
+        throw new Error("generator offline");
+      },
+    },
+  });
+
+  assert.match(result.summary, /评论 1/);
+  assert.doesNotMatch(result.summary, /Commenting too frequently/);
+});
+
 test("runSlot degrades gracefully when post candidate generation fails", async () => {
   const rootDir = makeTempRoot();
   writeJson(path.join(rootDir, "moltbook", "credentials.json"), {
@@ -981,6 +1169,9 @@ test("runSlot degrades gracefully when post candidate generation fails", async (
     "/search?q=agentops&type=posts&limit=3": { success: true, results: [] },
     "/search?q=debugging&type=posts&limit=3": { success: true, results: [] },
     "/search?q=memory&type=posts&limit=3": { success: true, results: [] },
+    "/agents/profile?name=melancholic_claw": { success: true, agent: { name: "melancholic_claw", posts_count: 1, comments_count: 1 }, recentPosts: [], recentComments: [] },
+    "POST /posts": { success: true, post: { id: "fallback-post", verification_status: "verified" } },
+    "/posts/fallback-post": { success: true, post: { id: "fallback-post", verification_status: "verified" } },
   });
 
   const result = await runSlot({
@@ -1009,7 +1200,7 @@ test("runSlot degrades gracefully when post candidate generation fails", async (
   });
 
   assert.doesNotMatch(result.summary, /fetch failed/);
-  assert.match(result.summary, /本轮无合格发帖候选/);
+  assert.match(result.summary, /发帖 1/);
 });
 
 test("runSlot processes replies, DMs, comments, and one qualified post in live mode", async () => {
@@ -1152,12 +1343,15 @@ test("runSlot processes replies, DMs, comments, and one qualified post in live m
   assert.match(result.summary, /回复 1/);
   assert.match(result.summary, /私信 1/);
   assert.match(result.summary, /点赞 3/);
+  assert.match(result.summary, /评论 2/);
+  assert.match(result.summary, /关注 1/);
   assert.match(result.summary, /发帖 1/);
   assert.match(result.summary, /回复内容：/);
   assert.match(result.summary, /私信内容：/);
   assert.match(result.summary, /点赞内容：/);
   assert.match(result.summary, /评论内容：/);
-  assert.match(result.summary, /关注内容：\n- 无/);
+  assert.match(result.summary, /关注内容：/);
+  assert.match(result.summary, /关注了 a1/);
   assert.match(result.summary, /发帖内容：/);
   assert.match(result.summary, /What do you automate with OpenClaw/);
   assert.match(result.summary, /Any advice on state files/);
@@ -1178,7 +1372,7 @@ test("runSlot processes replies, DMs, comments, and one qualified post in live m
   assert.equal(client.writes.some((call) => call.endpoint === "/posts"), true);
 
   const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltbook", "state.json"), "utf8"));
-  assert.deepEqual(state.daily_counts, { posts: 1, comments: 2, upvotes: 3, follows: 0 });
+  assert.deepEqual(state.daily_counts, { posts: 1, comments: 3, upvotes: 3, follows: 1 });
 });
 
 test("runSlot does not count a post as published when verification stays pending", async () => {
@@ -1643,4 +1837,75 @@ test("runSlot handles wrapped Moltcn payloads and post_id-only publish responses
   });
   const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltcn", "state.json"), "utf8"));
   assert.equal(state.daily_counts.posts, 1);
+});
+
+test("runSlot upvotes relevant comments with remaining positive engagement budget", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltbook", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "melancholic_claw",
+  });
+  writeJson(path.join(rootDir, "moltbook", "state.json"), {
+    ...createDefaultState("2026-03-21"),
+    daily_counts: { posts: 3, comments: 0, upvotes: 0, follows: 0 },
+  });
+
+  const client = createFakeClient({
+    "/agents/me": { success: true, agent: { id: "agent-1", name: "melancholic_claw", description: "desc" } },
+    "/agents/status": { success: true, status: "claimed" },
+    "/home": {
+      your_account: { name: "melancholic_claw", karma: 7, unread_notification_count: 0 },
+      activity_on_your_posts: [],
+      your_direct_messages: { pending_request_count: "0", unread_message_count: "0" },
+      latest_moltbook_announcement: { title: "Announcement" },
+      posts_from_accounts_you_follow: { posts: [] },
+    },
+    "/agents/dm/requests": { success: true, incoming: { requests: [] }, outgoing: { requests: [] } },
+    "/agents/dm/conversations": { success: true, conversations: { items: [] }, total_unread: "0" },
+    "/feed?filter=following&sort=new&limit=5": { success: true, posts: [] },
+    "/feed?sort=new&limit=12": {
+      success: true,
+      posts: [
+        { id: "p1", title: "Tooling post", content: "workflow", submolt: { name: "tooling" }, author: { name: "a1" }, comment_count: 3, upvotes: 9 },
+      ],
+    },
+    "/search?q=openclaw&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=agentops&type=posts&limit=3": { success: true, results: [] },
+    "/search?q=debugging&type=posts&limit=3": { success: true, results: [] },
+    "/agents/profile?name=a1": { success: true, agent: { name: "a1", posts_count: 1, comments_count: 1 } },
+    "POST /posts/p1/upvote": { success: true },
+    "/posts/p1/comments?sort=best&limit=10": {
+      success: true,
+      comments: [
+        {
+          id: "c1",
+          author: { id: "author-2", name: "UsefulMolty" },
+          content: "This rollout gets much safer when trace IDs are wired end to end.",
+          created_at: "2026-03-21T13:42:00.000Z",
+          upvotes: 7,
+          replies: [],
+        },
+      ],
+    },
+    "POST /comments/c1/upvote": { success: true },
+  });
+
+  const result = await runSlot({
+    slot: "morning",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T01:30:00.000Z"),
+    client,
+    generator: {
+      async buildPostCandidates() {
+        return [];
+      },
+    },
+  });
+
+  assert.match(result.summary, /点赞 2/);
+  assert.equal(client.writes.some((call) => call.endpoint === "/comments/c1/upvote"), true);
+  const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltbook", "state.json"), "utf8"));
+  assert.deepEqual(state.upvoted_comment_ids_today, ["c1"]);
+  assert.equal(state.visited_modules_today.includes("comment_upvotes"), true);
 });

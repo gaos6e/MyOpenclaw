@@ -6,7 +6,11 @@
 
 # QQ Bot Channel Plugin for OpenClaw
 
+
+
 **Connect your AI assistant to QQ — private chat, group chat, and rich media, all in one plugin.**
+
+### 🚀 Current Version: `v1.6.4`
 
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![QQ Bot](https://img.shields.io/badge/QQ_Bot-API_v2-red)](https://bot.q.qq.com/wiki/)
@@ -14,13 +18,14 @@
 [![Node.js](https://img.shields.io/badge/Node.js->=18-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
+
 <br/>
 
 **[简体中文](README.zh.md) | English**
 
 Scan to join the QQ group chat
 
-<img width="300" height="540" alt="Clipboard_Screenshot_1773047715" src="https://github.com/user-attachments/assets/4d2d2337-229a-42ad-97ab-8a6d0607f296" />
+<img width="400" alt="QQ QR Code" src="./docs/images/developer_group.png" />
 
 
 </div>
@@ -31,13 +36,13 @@ Scan to join the QQ group chat
 
 | Feature | Description |
 |---------|-------------|
-| 🔒 **Multi-Scene** | C2C private chat, group @messages, channel messages, channel DMs |
+| 🔒 **Multi-Scene** | C2C private chat, group @messages |
 | 🖼️ **Rich Media** | Send & receive images, voice, video, and files |
 | 🎙️ **Voice (STT/TTS)** | Speech-to-text transcription & text-to-speech replies |
+| 🔥 **One-Click Hot Upgrade** | Send `/bot-upgrade` in private chat to upgrade — no server login needed |
 | ⏰ **Scheduled Push** | Proactive message delivery via scheduled tasks |
 | 🔗 **URL Support** | Direct URL sending in private chat (no restrictions) |
 | ⌨️ **Typing Indicator** | "Bot is typing..." status shown in real-time |
-| 🔄 **Hot Reload** | Install via npm with seamless hot updates |
 | 📝 **Markdown** | Full Markdown formatting support |
 | 🛠️ **Commands** | Native OpenClaw command integration |
 | 💬 **Quoted Context** | Resolve QQ `REFIDX_*` quoted messages and inject quote body into AI context |
@@ -55,6 +60,8 @@ QQ quote events carry index keys (e.g. `REFIDX_xxx`) instead of full original me
 - Inbound and outbound messages with `ref_idx` are automatically indexed.
 - Store path: `~/.openclaw/qqbot/data/ref-index.jsonl` (survives gateway restart).
 - Quote body may include text + media summary (image/voice/video/file).
+
+<img width="360" src="docs/images/ref_msg.png" alt="Quoted Message Context Demo" />
 
 ### 🎙️ Voice Messages (STT)
 
@@ -86,23 +93,23 @@ If your main model supports vision (e.g. Tencent Hunyuan `hunyuan-vision`), AI c
 
 <img width="360" src="docs/images/59d421891f813b0d3c0cbe12574b6a72_720.jpg" alt="Image Understanding Demo" />
 
-### 🎨 Image Generation
+### 🎨 Image Sending
 
 > **You**: Draw me a cat
 >
 > **QQBot**: Here you go! 🐱
 
-AI sends images via `<qqimg>path</qqimg>`. Supports local paths and URLs. Formats: jpg/png/gif/webp/bmp.
+AI can send images directly. Supports local paths and URLs. Formats: jpg/png/gif/webp/bmp.
 
 <img width="360" src="docs/images/4645f2b3a20822b7f8d6664a708529eb_720.jpg" alt="Image Generation Demo" />
 
-### 🔊 Voice Reply (TTS)
+### 🔊 Voice Sending
 
 > **You**: Tell me a joke in voice
 >
 > **QQBot**: *(sends a voice message)*
 
-AI sends voice via `<qqvoice>path</qqvoice>`. Formats: mp3/wav/silk/ogg. No ffmpeg required.
+AI can send voice messages directly. Formats: mp3/wav/silk/ogg. No ffmpeg required.
 
 <img width="360" src="docs/images/21dce8bfc553ce23d1bd1b270e9c516c.jpg" alt="TTS Voice Demo" />
 
@@ -122,7 +129,7 @@ This capability depends on OpenClaw cron scheduling and proactive messaging. If 
 >
 > **QQBot**: *(sends a .txt file)*
 
-AI sends files via `<qqfile>path</qqfile>`. Any format, up to 20MB.
+AI can send files directly. Any format, up to 20MB.
 
 <img width="360" src="docs/images/17cada70df90185d45a2d6dd36e92f2f_720.jpg" alt="File Sending Demo" />
 
@@ -132,21 +139,80 @@ AI sends files via `<qqfile>path</qqfile>`. Any format, up to 20MB.
 >
 > **QQBot**: *(sends a video)*
 
-AI sends videos via `<qqvideo>path</qqvideo>`. Supports local files and URLs. Large files (>5MB) auto-show upload progress.
+AI can send videos directly. Supports local files and URLs.
 
 <img width="360" src="docs/images/85d03b8a216f267ab7b2aee248a18a41_720.jpg" alt="Video Sending Demo" />
 
-### Rich Media Tag Reference
+> **Under the hood:** Upload dedup caching, ordered queue delivery, and multi-layer audio format fallback.
 
-| Tag | Direction | Notes |
-|-----|-----------|-------|
-| `<qqimg>path</qqimg>` | Send | jpg/png/gif/webp/bmp, local path or URL |
-| `<qqvoice>path</qqvoice>` | Send | mp3/wav/silk/ogg, no ffmpeg required |
-| `<qqfile>path</qqfile>` | Send | Any format, up to 20MB |
-| `<qqvideo>path</qqvideo>` | Send | Local path or URL |
-| Voice / File / Image | Receive | Auto-transcribe (STT), auto-download, or vision analysis |
+### 🛠️ Slash Commands
 
-> **Under the hood:** 30+ tag variant auto-correction, upload dedup caching, ordered queue delivery, and multi-layer audio format fallback.
+The plugin provides built-in slash commands that are intercepted before reaching the AI queue, giving instant responses for diagnostics and management.
+
+#### `/bot-ping` — Latency Test
+
+> **You**: `/bot-ping`
+>
+> **QQBot**: ✅ pong！⏱ Latency: 602ms (network: 602ms, plugin: 0ms)
+
+Measures end-to-end latency from QQ server push to plugin response, broken down into network transport and plugin processing time.
+
+<img width="360" src="docs/images/slash-ping.jpg" alt="Ping Demo" />
+
+#### `/bot-version` — Version Info
+
+> **You**: `/bot-version`
+>
+> **QQBot**: 🦞 Framework: OpenClaw 2026.3.13 (61d171a) / 🤖 Plugin: v1.6.3 / 🌟 GitHub repo
+
+Shows framework version, plugin version, and a direct link to the official repository.
+
+<img width="360" src="docs/images/slash-version.jpg" alt="Version Demo" />
+
+#### `/bot-help` — Command List
+
+> **You**: `/bot-help`
+>
+> **QQBot**: Lists all available slash commands with clickable shortcuts.
+
+<img width="360" src="docs/images/slash-help.jpg" alt="Help Demo" />
+
+#### `/bot-upgrade` — One-Click Hot Upgrade
+
+> **You**: `/bot-upgrade`
+>
+> **QQBot**: 📌 Current: v1.6.3 / ✅ New version v1.6.4 available / Click button below to confirm
+
+Send in private chat to upgrade the plugin without server login. Supported usage:
+
+| Command | Description |
+|---------|-------------|
+| `/bot-upgrade` | Check for updates, show confirmation button |
+| `/bot-upgrade --latest` | Confirm upgrade to the latest version |
+| `/bot-upgrade --version 1.6.4` | Upgrade to a specific version |
+| `/bot-upgrade --force` | Force reinstall current version |
+
+Credentials are automatically backed up before upgrade. Version existence is verified against npm before proceeding. Auto-recovery on failure.
+
+<!-- TODO: add /bot-upgrade screenshot -->
+
+#### `/bot-logs` — Log Export
+
+> **You**: `/bot-logs`
+>
+> **QQBot**: 📋 Logs packaged (~2000 lines), sending file... *(sends a .txt file)*
+
+Exports the last ~2000 lines of gateway logs as a file for quick troubleshooting.
+
+<img width="360" src="docs/images/slash-logs.jpg" alt="Logs Demo" />
+
+#### Usage Help
+
+All commands support a `?` suffix to show usage:
+
+> **You**: `/bot-upgrade ?`
+>
+> **QQBot**: 📖 /bot-upgrade usage: …
 
 ---
 
@@ -208,7 +274,7 @@ bash ./scripts/upgrade-via-source.sh --appid YOUR_APPID --secret YOUR_SECRET
 | `--self-version` | Install the version from local `package.json` (npm script only) |
 | `-h` / `--help` | Show full usage |
 
-> Environment variables `QQBOT_APP_ID` / `QQBOT_CLIENT_SECRET` are also supported.
+> Environment variables `QQBOT_APPID` / `QQBOT_SECRET` are also supported.
 
 **Option C: Manual Install / Upgrade**
 
@@ -372,7 +438,7 @@ STT supports two-level configuration with priority fallback:
 - `provider` — references a key in `models.providers` to inherit `baseUrl` and `apiKey`
 - `voice` — voice variant
 - Set `enabled: false` to disable (default: `true`)
-- When configured, AI can use `<qqvoice>` tags to generate and send voice messages
+- When configured, AI can generate and send voice messages
 
 ---
 
@@ -381,6 +447,26 @@ STT supports two-level configuration with priority fallback:
 - [Upgrade Guide](docs/UPGRADE_GUIDE.md) — full upgrade paths and migration notes
 - [Command Reference](docs/commands.md) — OpenClaw CLI commands
 - [Changelog](CHANGELOG.md) — release notes
+
+## 🤝 Contributors
+
+Thanks to all the developers who have contributed to this project!
+
+<a href="https://github.com/tencent-connect/openclaw-qqbot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tencent-connect/openclaw-qqbot" />
+</a>
+
+## 💖 Acknowledgements
+
+Special thanks to [@sliverp](https://github.com/sliverp) for outstanding contributions to the project!
+
+<a href="https://github.com/sliverp"><img src="https://avatars.githubusercontent.com/u/38134380?v=4" width="48" height="48" alt="sliverp" title="sliverp"/></a>
+
+Thanks to [Tencent Cloud Lighthouse](https://cloud.tencent.com/product/lighthouse) for the deep collaboration. For raising crawfish, choose Tencent Cloud Lighthouse!
+
+<a href="https://cloud.tencent.com/product/lighthouse">
+  <img alt="Tencent Cloud Lighthouse" src="./docs/images/lighthouse_head.png" height="500" style="max-width:80%; height:auto;"/>
+</a>
 
 ## ⭐ Star History
 

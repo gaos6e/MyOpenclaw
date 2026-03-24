@@ -12,6 +12,7 @@
 ## 执行清单
 - [ ] 错误池复盘：优先查看 .learnings/ERRORS.md / .learnings/LEARNINGS.md，提炼 1 条可改进点
 - [ ] 待做池清理：优先处理 self_improve_todo.md 中的事项，并维护 self_improve_status.md 状态
+- [ ] 环境卫生自检：先运行 `node scripts/openclaw_hygiene_audit.cjs --json` 审计 `.openclaw` 根目录 + `logs/` / `backup/` / `qqbot/downloads/` / workspace 临时区；仅对 `safeActions` 运行 `--apply-safe --archive-age-days 7`，`askFirst` / `reportOnly` 只记录不自动处理
 - [ ] 定时任务/设置：核对新增/失效/重复项 → 必要时修正，并记录到 .learnings/ERRORS.md
 - [ ] 文档流程：聚焦 1 个文档/skill，提炼 1 条可执行改进 → 落盘到 AGENTS.md / TOOLS.md
 - [ ] 偏好复盘：补充 1 条最重要偏好到 MEMORY.md
@@ -26,6 +27,7 @@
 ## 执行后动作
 - [ ] 有产出才汇报（做了什么/改进点/是否需用户输入）
 - [ ] 无产出则不发消息
+- [ ] 安全归档/迁移发生时：在 self_improve_status.md 留 1 条记录；需要人工确认的项写入 self_improve_todo.md；若反复误放则补 1 条 self_improve_quality.md
 - [ ] 如修改了治理文件，必要时运行 `node scripts/validate-self-improve.cjs`
 
 # 固定时间点任务（已创建）

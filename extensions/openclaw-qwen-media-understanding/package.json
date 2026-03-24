@@ -1,0 +1,12 @@
+{
+  "name": "@local/openclaw-qwen-media-understanding",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "First-party Qwen media understanding plugin for OpenClaw",
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ]
+  }
+}

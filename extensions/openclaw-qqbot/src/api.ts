@@ -3,11 +3,21 @@
  * [修复版] 已重构为支持多实例并发，消除全局变量冲突
  */
 
+import { createRequire } from "node:module";
+import os from "node:os";
 import { computeFileHash, getCachedFileInfo, setCachedFileInfo } from "./utils/upload-cache.js";
 import { sanitizeFileName } from "./utils/platform.js";
 
 const API_BASE = "https://api.sgroup.qq.com";
 const TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken";
+
+// ============ Plugin User-Agent ============
+// 格式: QQBotPlugin/{version} (Node/{nodeVersion}; {os})
+// 示例: QQBotPlugin/1.6.0 (Node/22.14.0; darwin)
+const _require = createRequire(import.meta.url);
+let _pluginVersion = "unknown";
+try { _pluginVersion = _require("../package.json").version ?? "unknown"; } catch { /* fallback */ }
+export const PLUGIN_USER_AGENT = `QQBotPlugin/${_pluginVersion} (Node/${process.versions.node}; ${os.platform()})`;
 
 // 运行时配置
 let currentMarkdownSupport = false;
@@ -74,8 +84,12 @@ export async function getAccessToken(appId: string, clientSecret: string): Promi
   const normalizedAppId = String(appId).trim();
   const cachedToken = tokenCacheMap.get(normalizedAppId);
 
-  // 检查缓存：未过期 且 appId 未变化 时复用
-  if (cachedToken && Date.now() < cachedToken.expiresAt - 5 * 60 * 1000) {
+  // 检查缓存：未过期时复用
+  // 提前刷新阈值：取 expiresIn 的 1/3 和 5 分钟的较小值，避免短有效期 token 永远被判定过期
+  const REFRESH_AHEAD_MS = cachedToken
+    ? Math.min(5 * 60 * 1000, (cachedToken.expiresAt - Date.now()) / 3)
+    : 0;
+  if (cachedToken && Date.now() < cachedToken.expiresAt - REFRESH_AHEAD_MS) {
     return cachedToken.token;
   }
 
@@ -105,7 +119,7 @@ export async function getAccessToken(appId: string, clientSecret: string): Promi
  */
 async function doFetchToken(appId: string, clientSecret: string): Promise<string> {
   const requestBody = { appId, clientSecret };
-  const requestHeaders = { "Content-Type": "application/json" };
+  const requestHeaders = { "Content-Type": "application/json", "User-Agent": PLUGIN_USER_AGENT };
   
   // 打印请求信息（隐藏敏感信息）
   console.log(`[qqbot-api:${appId}] >>> POST ${TOKEN_URL}`);
@@ -185,7 +199,8 @@ export function getTokenStatus(appId: string): { status: "valid" | "expired" | "
   if (!cached) {
     return { status: "none", expiresAt: null };
   }
-  const isValid = Date.now() < cached.expiresAt - 5 * 60 * 1000;
+  const remaining = cached.expiresAt - Date.now();
+  const isValid = remaining > Math.min(5 * 60 * 1000, remaining / 3);
   return { status: isValid ? "valid" : "expired", expiresAt: cached.expiresAt };
 }
 
@@ -217,6 +232,7 @@ export async function apiRequest<T = unknown>(
   const headers: Record<string, string> = {
     Authorization: `QQBot ${accessToken}`,
     "Content-Type": "application/json",
+    "User-Agent": PLUGIN_USER_AGENT,
   };
   
   const isFileUpload = path.includes("/files");
@@ -435,6 +451,23 @@ export async function sendChannelMessage(
   });
 }
 
+/**
+ * 发送频道私信消息
+ * @param guildId - 私信会话的 guild_id（由 DIRECT_MESSAGE_CREATE 事件提供）
+ * @param msgId - 被动回复时必填
+ */
+export async function sendDmMessage(
+  accessToken: string,
+  guildId: string,
+  content: string,
+  msgId?: string
+): Promise<{ id: string; timestamp: string }> {
+  return apiRequest(accessToken, "POST", `/dms/${guildId}/messages`, {
+    content,
+    ...(msgId ? { msg_id: msgId } : {}),
+  });
+}
+
 export async function sendGroupMessage(
   accessToken: string,
   groupOpenid: string,
@@ -628,8 +661,8 @@ export async function sendGroupImageMessage(accessToken: string, groupOpenid: st
   return sendGroupMediaMessage(accessToken, groupOpenid, uploadResult.file_info, msgId, content);
 }
 
-export async function sendC2CVoiceMessage(accessToken: string, openid: string, voiceBase64: string, msgId?: string, ttsText?: string, filePath?: string): Promise<MessageResponse> {
-  const uploadResult = await uploadC2CMedia(accessToken, openid, MediaFileType.VOICE, undefined, voiceBase64, false);
+export async function sendC2CVoiceMessage(accessToken: string, openid: string, voiceBase64?: string, voiceUrl?: string, msgId?: string, ttsText?: string, filePath?: string): Promise<MessageResponse> {
+  const uploadResult = await uploadC2CMedia(accessToken, openid, MediaFileType.VOICE, voiceUrl, voiceBase64, false);
   return sendC2CMediaMessage(accessToken, openid, uploadResult.file_info, msgId, undefined, { 
     mediaType: "voice", 
     ...(ttsText ? { ttsText } : {}),
@@ -637,8 +670,8 @@ export async function sendC2CVoiceMessage(accessToken: string, openid: string, v
   });
 }
 
-export async function sendGroupVoiceMessage(accessToken: string, groupOpenid: string, voiceBase64: string, msgId?: string): Promise<{ id: string; timestamp: string }> {
-  const uploadResult = await uploadGroupMedia(accessToken, groupOpenid, MediaFileType.VOICE, undefined, voiceBase64, false);
+export async function sendGroupVoiceMessage(accessToken: string, groupOpenid: string, voiceBase64?: string, voiceUrl?: string, msgId?: string): Promise<{ id: string; timestamp: string }> {
+  const uploadResult = await uploadGroupMedia(accessToken, groupOpenid, MediaFileType.VOICE, voiceUrl, voiceBase64, false);
   return sendGroupMediaMessage(accessToken, groupOpenid, uploadResult.file_info, msgId);
 }
 

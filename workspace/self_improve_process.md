@@ -21,23 +21,38 @@
 2) **优先处理待做池 + 状态池**
    - 先查看 `self_improve_todo.md` 与 `self_improve_status.md`
    - 待执行事项进入 todo；执行中标记 doing；完成后标记 done；受阻标记 blocked
-3) **执行清单（优先级顺序）**
+3) **先做 `.openclaw` 环境卫生自检**
+   - 先运行 `node scripts/openclaw_hygiene_audit.cjs --json`
+   - 默认扫描：`.openclaw` 根目录 + `logs/` + `backup/` + `qqbot/downloads/` + workspace 临时区
+   - 仅当结果属于 `safeActions` 时，再运行 `node scripts/openclaw_hygiene_audit.cjs --apply-safe --archive-age-days 7`
+   - 安全动作范围：
+     - 根目录备份类产物 → `backup/root-backups-<timestamp>/`
+     - 明确临时文件 → `D:\桌面\openclaw`
+     - 7 天以上低价值更新日志 → `backup/hygiene-archive-<timestamp>/logs/`
+   - 必须人工确认，不自动处理：
+     - `qqbot/downloads/**/*`
+     - 语义不明确的 `_tmp_*` 目录
+     - 未知顶层条目或疑似项目/人工整理内容
+4) **执行清单（优先级顺序）**
    - 优先复盘 .learnings/ERRORS.md 与 .learnings/LEARNINGS.md
    - 梳理定时任务/设置是否需要调整
    - 阅读本地文档（OpenClaw docs/skills）并更新操作流程
    - 复盘近期对话，记录重要偏好/规则到 MEMORY.md
    - 发现可改进点 → 执行优化 → 简要汇报
    - 关注 ClawHub/GitHub/Discord 新工具/插件（先询问再安装）
-4) **记录与留痕**
+5) **记录与留痕**
    - 重要规则/偏好 → MEMORY.md
    - canonical candidate flow：`memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
    - 候选抽取结果 → 先写入 `memory/inbox/*.jsonl`，再人工审核沉淀到 `MEMORY.md`
+   - `.openclaw` 环境卫生安全动作执行结果 → `self_improve_status.md`
+   - 需要人工确认的目录卫生问题 → `self_improve_todo.md`
+   - 若目录卫生问题反复出现，说明流程仍有缺口 → `self_improve_quality.md`
    - 操作失误/失败 → .learnings/ERRORS.md
    - 方法论改进 → .learnings/LEARNINGS.md / AGENTS.md
    - 质量自检问题 → self_improve_quality.md
    - 若当下不做 → 记录到 self_improve_todo.md
    - 状态流转 → self_improve_status.md
-5) **汇报原则**
+6) **汇报原则**
    - 有阶段性进展即告知
    - 日结中控制条数（提升≤10、未执行≤10）
    - 22:00 日结只汇报已经落入 `todo/status/quality/inbox/history` 的结果
@@ -54,6 +69,7 @@
 
 ## 6. 校验
 - 轻量校验脚本：`node scripts/validate-self-improve.cjs`
+- 目录卫生审计脚本：`node scripts/openclaw_hygiene_audit.cjs --json`
 - 修改 todo/status/quality 结构后，优先跑一次校验
 - 记忆系统变更后，优先跑一次 `openclaw memory-hub status --json` 与 `openclaw memory-hub candidates --json`
 
