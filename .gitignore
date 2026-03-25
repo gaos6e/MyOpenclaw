@@ -50,6 +50,11 @@ workspace/tmp_*.png
 **/*.bak
 **/*.log
 
+# Root-level OpenClaw config backup artifacts
+openclaw.json.bak*
+auth-profiles.json.bak*
+models.json.bak*
+
 # Keep tracked governance/docs/templates
 !workspace/memory/README.md
 !workspace/memory/TEMPLATE.md
