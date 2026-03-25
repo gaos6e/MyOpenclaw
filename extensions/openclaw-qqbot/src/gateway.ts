@@ -767,8 +767,8 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
           const toolTexts: string[] = []; // 收集所有 tool deliver 文本
           const toolMediaUrls: string[] = []; // 收集所有 tool deliver 媒体 URL
           let toolFallbackSent = false; // 兜底消息是否已发送（只发一次）
-          const responseTimeout = 120000; // 120秒超时（2分钟，与 TTS/文件生成超时对齐）
-          const toolOnlyTimeout = 60000; // tool-only 兜底超时：60秒内没有 block 就兜底
+          const responseTimeout = 300000; // 300秒超时（5分钟，兼容 GPT-5.2 + medium 等较慢回复）
+          const toolOnlyTimeout = 120000; // tool-only 兜底超时：120秒内没有 block 就兜底
           const maxToolRenewals = 3; // tool 续期上限：最多续期 3 次（总等待 = 60s × 3 = 180s）
           let toolRenewalCount = 0; // 已续期次数
           let timeoutId: ReturnType<typeof setTimeout> | null = null;

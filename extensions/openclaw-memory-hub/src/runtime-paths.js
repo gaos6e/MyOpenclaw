@@ -30,6 +30,7 @@ export function resolveMemoryHubPaths({ config, pluginConfig, toolContext }) {
     workspaceDir,
     stateDir,
     dbPath: normalizePath(pluginConfig?.dbPath) ?? path.join(rootMemoryDir, "main.v2.sqlite"),
+    vectorIndexPath: normalizePath(pluginConfig?.vectorIndexPath) ?? path.join(rootMemoryDir, "aux-vector-index.json"),
     manifestPath:
       normalizePath(pluginConfig?.manifestPath) ?? path.join(workspaceMemoryDir, "index-manifest.json"),
     historyPath:
@@ -37,9 +38,12 @@ export function resolveMemoryHubPaths({ config, pluginConfig, toolContext }) {
     ontologyPath:
       normalizePath(pluginConfig?.ontologyPath) ?? path.join(workspaceMemoryDir, "ontology", "graph.jsonl"),
     inboxDir: normalizePath(pluginConfig?.inboxDir) ?? path.join(workspaceMemoryDir, "inbox"),
+    logPath: normalizePath(pluginConfig?.logPath) ?? path.join(stateDir, "logs", "memory-hub.jsonl"),
     snapshotDir: normalizePath(pluginConfig?.snapshotDir) ?? path.join(stateDir, "backup", "memory-hub"),
     transcriptBackfillLimit: Math.max(1, Number(pluginConfig?.transcriptBackfillLimit ?? 50)),
     sessionRecallWindow: Math.max(1, Number(pluginConfig?.sessionRecallWindow ?? 60)),
+    vectorMaxSessionFiles: Math.max(1, Number(pluginConfig?.vectorMaxSessionFiles ?? 25)),
+    vectorMaxSessionMessagesPerFile: Math.max(1, Number(pluginConfig?.vectorMaxSessionMessagesPerFile ?? 20)),
   };
 }
 
@@ -47,6 +51,8 @@ export function ensureMemoryHubFiles(paths) {
   fs.mkdirSync(paths.inboxDir, { recursive: true });
   fs.mkdirSync(path.dirname(paths.ontologyPath), { recursive: true });
   fs.mkdirSync(path.dirname(paths.historyPath), { recursive: true });
+  fs.mkdirSync(path.dirname(paths.logPath), { recursive: true });
+  fs.mkdirSync(path.dirname(paths.vectorIndexPath), { recursive: true });
   if (!fs.existsSync(paths.manifestPath)) {
     fs.writeFileSync(
       paths.manifestPath,

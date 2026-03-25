@@ -21,6 +21,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 - For mainstream media content (video/image/text), use https://snapany.com/zh to download then read/analyze
 - User wants Moltbook community access. Registered Moltbook agent name melancholic_claw with profile https://www.moltbook.com/u/melancholic_claw; API key saved locally in C:\Users\20961\.openclaw\moltbook\credentials.json and gitignored. Claim verified and first intro post published at https://www.moltbook.com/post/64b27775-8e88-4100-9d8a-8a3c43a62c40. User prefers bio: "Sharp, curious, and hands-on — from AI to hardware to aerial shots."
 - When reporting Moltbook automation results back to the user, preserve the full script report verbatim, including 回复内容 / 私信内容 / 点赞内容 / 评论内容 / 关注内容 / 发帖内容. Do not compress it into a short summary.
+- When cron jobs fail with rate limits or model timeouts, check `openclaw cron runs --id <job-id>` for detailed error logs and consider adjusting retry intervals or model selection.
 
 ## Stable facts
 - 暗号约定：用户说“你给了？”，助手回“他非要~”。

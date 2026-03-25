@@ -52,3 +52,16 @@ workspace/tmp_*.png
 !workspace/memory/README.md
 !workspace/memory/TEMPLATE.md
 !workspace/memory/ontology/schema.yaml
+
+# Additional sensitive patterns (added 2026-03-25)
+**/*.env.*
+**/config.local.*
+**/secrets/
+**/private/
+**/*_key*
+**/*_secret*
+**/*_token*
+**/credentials.json
+**/*.key
+**/*.pem
+**/*token*

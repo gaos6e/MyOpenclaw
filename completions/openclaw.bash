@@ -205,7 +205,7 @@ _openclaw_completion() {
         return 0
         ;;
       memory-hub)
-        opts="status index search backfill candidates extract promote "
+        opts="status index vector-index vector-search search backfill candidates extract promote "
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
         return 0
         ;;

@@ -10,6 +10,9 @@
       "dbPath": {
         "type": "string"
       },
+      "vectorIndexPath": {
+        "type": "string"
+      },
       "manifestPath": {
         "type": "string"
       },
@@ -22,6 +25,9 @@
       "inboxDir": {
         "type": "string"
       },
+      "logPath": {
+        "type": "string"
+      },
       "snapshotDir": {
         "type": "string"
       },
@@ -30,6 +36,14 @@
         "minimum": 1
       },
       "sessionRecallWindow": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "vectorMaxSessionFiles": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "vectorMaxSessionMessagesPerFile": {
         "type": "integer",
         "minimum": 1
       }

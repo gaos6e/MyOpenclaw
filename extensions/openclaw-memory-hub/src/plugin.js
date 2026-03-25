@@ -1,15 +1,17 @@
 import path from "node:path";
 import { jsonResult } from "./json-result.js";
 import { MemoryHubIndexer } from "./indexer.js";
+import { createRemoteEmbedMany, ensureAuxVectorIndex, searchAuxVectorIndex } from "./aux-vector.js";
 import { inferSessionScope } from "./session-scope.js";
 import {
   collectCurrentSessionUserTexts,
   readSessionTranscriptSnippet,
   searchSessionTranscript,
 } from "./session-recall.js";
-import { extractHeuristicCandidates } from "./candidates.js";
+import { extractCandidateBatch, extractHeuristicCandidates } from "./candidates.js";
 import { lookupOntology, rebuildOntologyGraph } from "./ontology.js";
 import { backfillTranscriptCandidates, snapshotMemorySources } from "./backfill.js";
+import { appendOperationLog } from "./operation-log.js";
 import { appendCandidates, listInboxCandidates, promoteCandidate } from "./stores.js";
 import { ensureMemoryHubFiles, resolveMemoryHubPaths } from "./runtime-paths.js";
 
@@ -25,6 +27,13 @@ function getIndexer(paths) {
     INDEXERS.set(key, new MemoryHubIndexer({ workspaceDir: paths.workspaceDir, dbPath: paths.dbPath }));
   }
   return INDEXERS.get(key);
+}
+
+function getVectorEmbedMany(api) {
+  if (typeof api.pluginConfig?.embedMany === "function") {
+    return api.pluginConfig.embedMany;
+  }
+  return createRemoteEmbedMany(api.config?.agents?.defaults?.memorySearch);
 }
 
 async function preparePaths(api, toolContext) {
@@ -69,13 +78,17 @@ const plugin = {
       additionalProperties: false,
       properties: {
         dbPath: { type: "string" },
+        vectorIndexPath: { type: "string" },
         manifestPath: { type: "string" },
         historyPath: { type: "string" },
         ontologyPath: { type: "string" },
         inboxDir: { type: "string" },
+        logPath: { type: "string" },
         snapshotDir: { type: "string" },
         transcriptBackfillLimit: { type: "integer", minimum: 1 },
         sessionRecallWindow: { type: "integer", minimum: 1 },
+        vectorMaxSessionFiles: { type: "integer", minimum: 1 },
+        vectorMaxSessionMessagesPerFile: { type: "integer", minimum: 1 },
       },
     },
   },
@@ -136,6 +149,60 @@ const plugin = {
                 lines: params.lines,
               });
               return jsonResult(result);
+            },
+          },
+          {
+            name: "memory_vector_search",
+            label: "Memory Vector Search",
+            description:
+              "Semantic recall over auxiliary memory sources: daily memory, learnings, pending candidates, and private/direct session notes. Results are hints only and do not modify durable memory.",
+            parameters: toolSchema(
+              {
+                query: { type: "string" },
+                maxResults: { type: "integer", minimum: 1 },
+              },
+              ["query"],
+            ),
+            async execute(_toolCallId, params) {
+              const paths = await preparePaths(api, ctx);
+              const scope = inferSessionScope(ctx.sessionKey);
+              if (scope.isShared) {
+                return makeError("memory_vector_search is disabled in shared contexts");
+              }
+              const embedMany = getVectorEmbedMany(api);
+              if (typeof embedMany !== "function") {
+                return makeError("memory vector search is not configured; memorySearch embedding settings are missing");
+              }
+              const indexStatus = await ensureAuxVectorIndex({
+                workspaceDir: paths.workspaceDir,
+                stateDir: paths.stateDir,
+                agentId: ctx.agentId ?? "main",
+                indexPath: paths.vectorIndexPath,
+                embedMany,
+                maxSessionFiles: paths.vectorMaxSessionFiles,
+                maxSessionMessagesPerFile: paths.vectorMaxSessionMessagesPerFile,
+              });
+              const results = await searchAuxVectorIndex({
+                indexPath: paths.vectorIndexPath,
+                query: params.query,
+                maxResults: params.maxResults,
+                embedMany,
+              });
+              appendOperationLog(paths.logPath, {
+                event: "memory_vector_search",
+                sessionKey: ctx.sessionKey ?? null,
+                query: params.query,
+                maxResults: params.maxResults ?? 5,
+                resultCount: results.length,
+                indexMode: indexStatus.mode,
+                indexItems: indexStatus.items,
+              });
+              return jsonResult({
+                backend: "memory-hub-aux-vector",
+                mode: "semantic-hint",
+                indexStatus,
+                results,
+              });
             },
           },
           {
@@ -238,18 +305,30 @@ const plugin = {
                       sessionKey: ctx.sessionKey,
                     })
                   : [];
-              const candidates = extractHeuristicCandidates({
+              const extraction = extractCandidateBatch({
                 sourceKind: ctx.sessionKey ? "session" : "manual",
                 sourceRef: ctx.sessionKey ?? "manual",
                 texts,
-              }).slice(0, Math.max(1, Number(params.maxCandidates ?? 5)));
+              });
+              const candidates = extraction.candidates.slice(0, Math.max(1, Number(params.maxCandidates ?? 5)));
               const fileStem = new Date().toISOString().slice(0, 10);
               const writeResult = appendCandidates({
                 inboxDir: paths.inboxDir,
                 fileStem,
                 candidates,
               });
-              return jsonResult({ ...writeResult, candidates });
+              appendOperationLog(paths.logPath, {
+                event: "memory_extract_candidates",
+                sourceKind: ctx.sessionKey ? "session" : "manual",
+                sourceRef: ctx.sessionKey ?? "manual",
+                sessionKey: ctx.sessionKey ?? null,
+                textsCount: texts.length,
+                candidateCount: candidates.length,
+                schemaKeys: [...new Set(candidates.map((candidate) => candidate.schema_key).filter(Boolean))].sort(),
+                stats: extraction.stats,
+                path: writeResult.path,
+              });
+              return jsonResult({ ...writeResult, candidates, stats: extraction.stats });
             },
           },
           {
@@ -289,6 +368,12 @@ const plugin = {
                 candidateId: params.candidateId,
                 target: params.target ?? "durable",
               });
+              appendOperationLog(paths.logPath, {
+                event: "memory_promote_candidate",
+                candidateId: params.candidateId,
+                target: params.target ?? "durable",
+                sessionKey: ctx.sessionKey ?? null,
+              });
               await ensureOntologyAndIndex(paths);
               return jsonResult(result);
             },
@@ -299,6 +384,7 @@ const plugin = {
         names: [
           "memory_search",
           "memory_get",
+          "memory_vector_search",
           "session_recall_search",
           "session_recall_get",
           "ontology_lookup",
@@ -349,6 +435,84 @@ const plugin = {
           });
 
         command
+          .command("vector-index")
+          .option("--json", "output json")
+          .action(async (opts) => {
+            const paths = await preparePaths(api, {});
+            const embedMany = getVectorEmbedMany(api);
+            if (typeof embedMany !== "function") {
+              throw new Error("memory vector search is not configured; memorySearch embedding settings are missing");
+            }
+            const status = await ensureAuxVectorIndex({
+              workspaceDir: paths.workspaceDir,
+              stateDir: paths.stateDir,
+              agentId: "main",
+              indexPath: paths.vectorIndexPath,
+              embedMany,
+              maxSessionFiles: paths.vectorMaxSessionFiles,
+              maxSessionMessagesPerFile: paths.vectorMaxSessionMessagesPerFile,
+            });
+            appendOperationLog(paths.logPath, {
+              event: "memory_vector_index",
+              mode: status.mode,
+              items: status.items,
+              fingerprint: status.fingerprint,
+            });
+            console.log(opts.json ? JSON.stringify(status, null, 2) : `vector index: ${status.mode}\nitems: ${status.items}`);
+          });
+
+        command
+          .command("vector-search")
+          .argument("[query]", "query")
+          .option("--query <text>", "query text")
+          .option("--max-results <n>", "max results", "5")
+          .option("--json", "output json")
+          .action(async (queryArg, opts) => {
+            const query = opts.query ?? queryArg;
+            if (!query) {
+              throw new Error("query required");
+            }
+            const paths = await preparePaths(api, {});
+            const embedMany = getVectorEmbedMany(api);
+            if (typeof embedMany !== "function") {
+              throw new Error("memory vector search is not configured; memorySearch embedding settings are missing");
+            }
+            const indexStatus = await ensureAuxVectorIndex({
+              workspaceDir: paths.workspaceDir,
+              stateDir: paths.stateDir,
+              agentId: "main",
+              indexPath: paths.vectorIndexPath,
+              embedMany,
+              maxSessionFiles: paths.vectorMaxSessionFiles,
+              maxSessionMessagesPerFile: paths.vectorMaxSessionMessagesPerFile,
+            });
+            const results = await searchAuxVectorIndex({
+              indexPath: paths.vectorIndexPath,
+              query,
+              maxResults: Number(opts.maxResults),
+              embedMany,
+            });
+            appendOperationLog(paths.logPath, {
+              event: "memory_vector_search",
+              sessionKey: null,
+              query,
+              maxResults: Number(opts.maxResults),
+              resultCount: results.length,
+              indexMode: indexStatus.mode,
+              indexItems: indexStatus.items,
+            });
+            if (opts.json) {
+              console.log(JSON.stringify({ backend: "memory-hub-aux-vector", mode: "semantic-hint", indexStatus, results }, null, 2));
+              return;
+            }
+            for (const item of results) {
+              console.log(`${item.namespace} ${item.score.toFixed(3)} ${item.path}`);
+              console.log(item.text);
+              console.log("");
+            }
+          });
+
+        command
           .command("search")
           .argument("[query]", "query")
           .option("--query <text>", "query text")
@@ -389,6 +553,14 @@ const plugin = {
               agentId: "main",
               inboxDir: paths.inboxDir,
               limit: paths.transcriptBackfillLimit,
+            });
+            appendOperationLog(paths.logPath, {
+              event: "memory_backfill_candidates",
+              agentId: "main",
+              limit: paths.transcriptBackfillLimit,
+              appended: result.appended,
+              path: result.path,
+              snapshotDir: snapshot.snapshotDir,
             });
             const payload = { snapshot, result };
             console.log(opts.json ? JSON.stringify(payload, null, 2) : `snapshot: ${snapshot.snapshotDir}\nappended: ${result.appended}`);

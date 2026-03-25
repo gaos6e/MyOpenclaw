@@ -3430,6 +3430,18 @@ _openclaw_memory_hub_index() {
     "--force[force full reindex]"
 }
 
+_openclaw_memory_hub_vector_index() {
+  _arguments -C \
+    "--json[output json]"
+}
+
+_openclaw_memory_hub_vector_search() {
+  _arguments -C \
+    "--query[query text]" \
+    "--max-results[max results]" \
+    "--json[output json]"
+}
+
 _openclaw_memory_hub_search() {
   _arguments -C \
     "--query[query text]" \
@@ -3464,7 +3476,7 @@ _openclaw_memory_hub() {
   
   _arguments -C \
      \
-    "1: :_values 'command' 'status[]' 'index[]' 'search[]' 'backfill[]' 'candidates[]' 'extract[]' 'promote[]'" \
+    "1: :_values 'command' 'status[]' 'index[]' 'vector-index[]' 'vector-search[]' 'search[]' 'backfill[]' 'candidates[]' 'extract[]' 'promote[]'" \
     "*::arg:->args"
 
   case $state in
@@ -3472,6 +3484,8 @@ _openclaw_memory_hub() {
       case $line[1] in
         (status) _openclaw_memory_hub_status ;;
         (index) _openclaw_memory_hub_index ;;
+        (vector-index) _openclaw_memory_hub_vector_index ;;
+        (vector-search) _openclaw_memory_hub_vector_search ;;
         (search) _openclaw_memory_hub_search ;;
         (backfill) _openclaw_memory_hub_backfill ;;
         (candidates) _openclaw_memory_hub_candidates ;;

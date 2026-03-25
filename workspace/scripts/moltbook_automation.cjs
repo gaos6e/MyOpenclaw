@@ -173,6 +173,8 @@ const MAX_FETCH_ATTEMPTS = 2;
 const POST_STATUS_CHECK_ATTEMPTS = 4;
 const POST_STATUS_CHECK_DELAY_MS = 500;
 const FEATURE_SUPPORT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const MOLTBOOK_API_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
 const NUMBER_WORDS = {
   zero: 0,
   one: 1,
@@ -1635,6 +1637,13 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
 }
 
 function createApiClient({ apiKey, baseUrl = API_BASE_URL, fetchImpl = fetch, curlImpl = spawnSync, env = process.env }) {
+  const defaultHeaders = {
+    Authorization: `Bearer ${apiKey}`,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "User-Agent": MOLTBOOK_API_USER_AGENT,
+  };
+
   async function request(method, endpoint, body) {
     const url = `${baseUrl}${endpoint}`;
     const requestBody = body === undefined ? undefined : JSON.stringify(body);
@@ -1645,19 +1654,13 @@ function createApiClient({ apiKey, baseUrl = API_BASE_URL, fetchImpl = fetch, cu
       perform: () =>
         fetchImpl(url, {
           method,
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
+          headers: defaultHeaders,
           body: requestBody,
         }),
       curlRequest: {
         url,
         method,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
+        headers: defaultHeaders,
         body: requestBody,
       },
     });

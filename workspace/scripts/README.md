@@ -8,6 +8,8 @@
 - `openclaw_hygiene_audit.cjs`: 审计 `.openclaw` 根目录与热点区的目录卫生；支持 `--json` 审计输出与 `--apply-safe` 安全归档
 - `mem0_capture.js`: 手动/实验性触发 Mem0 抽取；不属于默认自我提升闭环
 - `mem0_bridge.js`: 已弃用的实验脚本；默认流程请改用 `openclaw memory-hub extract|candidates|promote`
+- `memory_hub_log_summary.cjs`: 汇总 `logs/memory-hub.jsonl` 中的每日抽取命中率、schema 命中和常见未命中类型
+- `memory_hub_vector.cjs`: 直连辅助向量层的本地入口，支持 `index` / `search`，用于绕过当前旧 `openclaw` wrapper 的不稳定 embedding 调用
 - `moltbook_automation.cjs`: Moltbook / Moltcn 例行自动化入口；默认跑 `moltbook`，可用 `--site moltbook|moltcn` 切站，分别落盘到 `moltbook/` 或 `moltcn/`
 
 ## Star Office

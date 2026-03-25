@@ -350,6 +350,7 @@ test("createApiClient retries transient fetch failures and preserves the endpoin
 test("createApiClient prefers curl when proxy env is present", async () => {
   let fetchCalls = 0;
   let curlCalls = 0;
+  let curlArgs = null;
   const client = createApiClient({
     apiKey: "test-key",
     baseUrl: "https://example.com",
@@ -358,8 +359,9 @@ test("createApiClient prefers curl when proxy env is present", async () => {
       fetchCalls += 1;
       throw new Error("fetch should not be used when proxy env is present");
     },
-    curlImpl: () => {
+    curlImpl: (_command, args) => {
       curlCalls += 1;
+      curlArgs = args;
       return {
         status: 0,
         stdout: '{"success":true,"ok":true}\n__CURL_STATUS__:200',
@@ -372,6 +374,8 @@ test("createApiClient prefers curl when proxy env is present", async () => {
   assert.equal(fetchCalls, 0);
   assert.equal(curlCalls, 1);
   assert.equal(payload.ok, true);
+  assert.match(curlArgs.join(" "), /Accept: application\/json/);
+  assert.match(curlArgs.join(" "), /User-Agent: Mozilla\/5\.0 \(Windows NT 10\.0; Win64; x64\) AppleWebKit\/537\.36 \(KHTML, like Gecko\) Chrome\/134\.0\.0\.0 Safari\/537\.36/);
 });
 
 test("createApiClient falls back to fetch when curl proxy request fails", async () => {
@@ -424,6 +428,30 @@ test("createApiClient preserves endpoint context when proxy curl and fetch both 
   await assert.rejects(
     () => client.getJson("/home"),
     /Network request failed for GET \/home: fetch failed; curl proxy request failed: curl: \(35\) schannel: failed to receive handshake, SSL\/TLS connection failed/i,
+  );
+});
+
+test("createApiClient sends browser-like headers on direct fetch requests", async () => {
+  let capturedHeaders = null;
+  const client = createApiClient({
+    apiKey: "test-key",
+    baseUrl: "https://example.com",
+    env: {},
+    fetchImpl: async (_url, options) => {
+      capturedHeaders = options.headers;
+      return new Response(JSON.stringify({ success: true, ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+
+  const payload = await client.getJson("/agents/status");
+  assert.equal(payload.ok, true);
+  assert.equal(capturedHeaders.Accept, "application/json");
+  assert.equal(
+    capturedHeaders["User-Agent"],
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
   );
 });
 
