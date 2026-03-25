@@ -12,7 +12,8 @@ _This file stores long-term, distilled memory. Keep it concise._
 ## Preferences & setup
 - Use QQ for communication
 - 进行自我提升前先告知用户
-- 希望以后称呼他为“帅哥”
+- 希望以后称呼他为“哥哥～”（带波浪线，已确认，长期生效）
+- 模型思考模式设置为开启，默认使用 medium 级别
 - Important/common files live in: C:\Users\20961\.openclaw
 - Backups/temporary files live in: D:\桌面\openclaw
 - Long-term workspace: C:\Users\20961\.openclaw\workspace
@@ -32,6 +33,7 @@ _This file stores long-term, distilled memory. Keep it concise._
   - `.openclaw` 环境卫生自检：默认扫描根目录 + `logs/` / `backup/` / `qqbot/downloads/` / workspace 临时区；先审计再仅执行 `safeActions`
   - 环境卫生安全动作：根目录备份类产物进 `backup/root-backups-<timestamp>/`；明确临时文件进 `D:\桌面\openclaw`；7 天以上低价值更新日志进 `backup/hygiene-archive-<timestamp>/logs/`
   - 环境卫生必须人工确认：`qqbot/downloads`、语义不明确的 `_tmp_*` 目录、未知顶层条目
+  - heartbeat 汇报偏好：只要实际执行了检查/整理，就默认返回简短总结；只有完全没做事时才允许 `HEARTBEAT_OK`
   - 记录面：`self_improve_todo.md`, `self_improve_status.md`, `self_improve_quality.md`
   - 日结：每天 22:00 输出总结
   - 记忆沉淀：每 2 天从 daily memory 提炼到 `MEMORY.md`

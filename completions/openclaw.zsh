@@ -11,7 +11,7 @@ _openclaw_root_completion() {
     "--profile[Use a named profile (isolates OPENCLAW_STATE_DIR/OPENCLAW_CONFIG_PATH under ~/.openclaw-<name>)]" \
     "--log-level[Global log level override for file + console (silent|fatal|error|warn|info|debug|trace)]" \
     "--no-color[Disable ANSI colors]" \
-    "1: :_values 'command' 'mcp[Manage embedded Pi MCP servers]' 'completion[Generate shell completion script]' 'setup[Initialize ~/.openclaw/openclaw.json and the agent workspace]' 'onboard[Interactive onboarding for the gateway, workspace, and skills]' 'configure[Interactive configuration for credentials, channels, gateway, and agent defaults]' 'config[Non-interactive config helpers (get/set/unset/file/validate). Run without subcommand for guided setup.]' 'backup[Create and verify local backup archives for OpenClaw state]' 'doctor[Health checks + quick fixes for the gateway and channels]' 'dashboard[Open the Control UI with your current token]' 'reset[Reset local config/state (keeps the CLI installed)]' 'uninstall[Uninstall the gateway service + local data (CLI remains)]' 'message[Send, read, and manage messages and channel actions]' 'memory[Search, inspect, and reindex memory files]' 'agent[Run an agent turn via the Gateway (use --local for embedded)]' 'agents[Manage isolated agents (workspaces + auth + routing)]' 'status[Show channel health and recent session recipients]' 'health[Fetch health from the running gateway]' 'sessions[List stored conversation sessions]' 'browser[Manage OpenClaw'\''s dedicated browser (Chrome/Chromium)]' 'acp[Run an ACP bridge backed by the Gateway]' 'gateway[Run, inspect, and query the WebSocket Gateway]' 'daemon[Manage the Gateway service (launchd/systemd/schtasks)]' 'logs[Tail gateway file logs via RPC]' 'system[System tools (events, heartbeat, presence)]' 'models[Model discovery, scanning, and configuration]' 'approvals[Manage exec approvals (gateway or node host)]' 'nodes[Manage gateway-owned nodes (pairing, status, invoke, and media)]' 'devices[Device pairing and auth tokens]' 'node[Run and manage the headless node host service]' 'sandbox[Manage sandbox containers (Docker-based agent isolation)]' 'tui[Open a terminal UI connected to the Gateway]' 'cron[Manage cron jobs (via Gateway)]' 'dns[DNS helpers for wide-area discovery (Tailscale + CoreDNS)]' 'docs[Search the live OpenClaw docs]' 'hooks[Manage internal agent hooks]' 'webhooks[Webhook helpers and integrations]' 'qr[Generate an iOS pairing QR code and setup code]' 'clawbot[Legacy clawbot command aliases]' 'memory-hub[OpenClaw memory hub commands]' 'pairing[Secure DM pairing (approve inbound requests)]' 'plugins[Manage OpenClaw plugins and extensions]' 'channels[Manage connected chat channels and accounts]' 'directory[Lookup contact and group IDs (self, peers, groups) for supported chat channels]' 'security[Audit local config and state for common security foot-guns]' 'secrets[Secrets runtime controls]' 'skills[List and inspect available skills]' 'update[Update OpenClaw and inspect update channel status]'" \
+    "1: :_values 'command' 'mcp[Manage embedded Pi MCP servers]' 'completion[Generate shell completion script]' 'setup[Initialize ~/.openclaw/openclaw.json and the agent workspace]' 'onboard[Interactive onboarding for the gateway, workspace, and skills]' 'configure[Interactive configuration for credentials, channels, gateway, and agent defaults]' 'config[Non-interactive config helpers (get/set/unset/file/validate). Run without subcommand for guided setup.]' 'backup[Create and verify local backup archives for OpenClaw state]' 'doctor[Health checks + quick fixes for the gateway and channels]' 'dashboard[Open the Control UI with your current token]' 'reset[Reset local config/state (keeps the CLI installed)]' 'uninstall[Uninstall the gateway service + local data (CLI remains)]' 'message[Send, read, and manage messages and channel actions]' 'memory[Search, inspect, and reindex memory files]' 'agent[Run an agent turn via the Gateway (use --local for embedded)]' 'agents[Manage isolated agents (workspaces + auth + routing)]' 'status[Show channel health and recent session recipients]' 'health[Fetch health from the running gateway]' 'sessions[List stored conversation sessions]' 'browser[Manage OpenClaw'\''s dedicated browser (Chrome/Chromium)]' 'acp[Run an ACP bridge backed by the Gateway]' 'gateway[Run, inspect, and query the WebSocket Gateway]' 'daemon[Manage the Gateway service (launchd/systemd/schtasks)]' 'logs[Tail gateway file logs via RPC]' 'system[System tools (events, heartbeat, presence)]' 'models[Model discovery, scanning, and configuration]' 'approvals[Manage exec approvals (gateway or node host)]' 'nodes[Manage gateway-owned nodes (pairing, status, invoke, and media)]' 'devices[Device pairing and auth tokens]' 'node[Run and manage the headless node host service]' 'sandbox[Manage sandbox containers (Docker-based agent isolation)]' 'tui[Open a terminal UI connected to the Gateway]' 'cron[Manage cron jobs (via Gateway)]' 'dns[DNS helpers for wide-area discovery (Tailscale + CoreDNS)]' 'docs[Search the live OpenClaw docs]' 'hooks[Manage internal agent hooks]' 'webhooks[Webhook helpers and integrations]' 'qr[Generate an iOS pairing QR code and setup code]' 'clawbot[Legacy clawbot command aliases]' 'feishu-diagnose[运行飞书插件诊断，检查配置、连通性和权限状态]' 'memory-hub[OpenClaw memory hub commands]' 'pairing[Secure DM pairing (approve inbound requests)]' 'plugins[Manage OpenClaw plugins and extensions]' 'channels[Manage connected chat channels and accounts]' 'directory[Lookup contact and group IDs (self, peers, groups) for supported chat channels]' 'security[Audit local config and state for common security foot-guns]' 'secrets[Secrets runtime controls]' 'skills[List and inspect available skills]' 'update[Update OpenClaw and inspect update channel status]'" \
     "*::arg:->args"
 
   case $state in
@@ -55,6 +55,7 @@ _openclaw_root_completion() {
         (webhooks) _openclaw_webhooks ;;
         (qr) _openclaw_qr ;;
         (clawbot) _openclaw_clawbot ;;
+        (feishu-diagnose) _openclaw_feishu_diagnose ;;
         (memory-hub) _openclaw_memory_hub ;;
         (pairing) _openclaw_pairing ;;
         (plugins) _openclaw_plugins ;;
@@ -102,7 +103,7 @@ _openclaw_onboard() {
     "--accept-risk[Acknowledge that agents are powerful and full system access is risky (required for --non-interactive)]" \
     "--flow[Onboard flow: quickstart|advanced|manual]" \
     "--mode[Onboard mode: local|remote]" \
-    "--auth-choice[Auth: chutes|litellm-api-key|custom-api-key|skip|setup-token|oauth|claude-cli|codex-cli|token|apiKey|byteplus-api-key|chutes-api-key|cloudflare-ai-gateway-api-key|copilot-proxy|github-copilot|gemini-api-key|google-gemini-cli|huggingface-api-key|kilocode-api-key|kimi-code-api-key|minimax-global-oauth|minimax-global-api|minimax-cn-oauth|minimax-cn-api|mistral-api-key|modelstudio-api-key-cn|modelstudio-api-key|moonshot-api-key|moonshot-api-key-cn|ollama|openai-codex|openai-api-key|opencode-zen|opencode-go|openrouter-api-key|qianfan-api-key|sglang|synthetic-api-key|together-api-key|venice-api-key|ai-gateway-api-key|vllm|volcengine-api-key|xai-api-key|xiaomi-api-key|zai-api-key|zai-coding-global|zai-coding-cn|zai-global|zai-cn|qwen-portal]" \
+    "--auth-choice[Auth: chutes|litellm-api-key|custom-api-key|skip|setup-token|oauth|claude-cli|codex-cli|token|apiKey|byteplus-api-key|chutes-api-key|cloudflare-ai-gateway-api-key|copilot-proxy|deepseek-api-key|github-copilot|gemini-api-key|google-gemini-cli|huggingface-api-key|kilocode-api-key|kimi-code-api-key|minimax-global-oauth|minimax-global-api|minimax-cn-oauth|minimax-cn-api|mistral-api-key|modelstudio-standard-api-key-cn|modelstudio-standard-api-key|modelstudio-api-key-cn|modelstudio-api-key|moonshot-api-key|moonshot-api-key-cn|ollama|openai-codex|openai-api-key|opencode-zen|opencode-go|openrouter-api-key|qianfan-api-key|sglang|synthetic-api-key|together-api-key|venice-api-key|ai-gateway-api-key|vllm|volcengine-api-key|xai-api-key|xiaomi-api-key|zai-api-key|zai-coding-global|zai-coding-cn|zai-global|zai-cn|qwen-portal]" \
     "--token-provider[Token provider id (non-interactive; used with --auth-choice token)]" \
     "--token[Token value (non-interactive; used with --auth-choice token)]" \
     "--token-profile-id[Auth profile id (non-interactive; default: <provider>:manual)]" \
@@ -115,6 +116,7 @@ _openclaw_onboard() {
     "--byteplus-api-key[BytePlus API key]" \
     "--chutes-api-key[Chutes API key]" \
     "--cloudflare-ai-gateway-api-key[Cloudflare AI Gateway API key]" \
+    "--deepseek-api-key[DeepSeek API key]" \
     "--fal-api-key[fal API key]" \
     "--gemini-api-key[Gemini API key]" \
     "--huggingface-api-key[Hugging Face API key (HF token)]" \
@@ -122,6 +124,8 @@ _openclaw_onboard() {
     "--kimi-code-api-key[Kimi Code API key]" \
     "--minimax-api-key[MiniMax API key]" \
     "--mistral-api-key[Mistral API key]" \
+    "--modelstudio-standard-api-key-cn[Alibaba Cloud Model Studio Standard API key (China)]" \
+    "--modelstudio-standard-api-key[Alibaba Cloud Model Studio Standard API key (Global/Intl)]" \
     "--modelstudio-api-key-cn[Alibaba Cloud Model Studio Coding Plan API key (China)]" \
     "--modelstudio-api-key[Alibaba Cloud Model Studio Coding Plan API key (Global/Intl)]" \
     "--moonshot-api-key[Moonshot API key]" \
@@ -3051,7 +3055,7 @@ _openclaw_cron_add() {
     "--session[Session target (main|isolated)]" \
     "--session-key[Session key for job routing (e.g. agent:my-agent:my-session)]" \
     "--wake[Wake mode (now|next-heartbeat)]" \
-    "--at[Run once at time (ISO) or +duration (e.g. 20m)]" \
+    "--at[Run once at time (ISO with offset, or +duration). Use --tz for offset-less datetimes]" \
     "--every[Run every duration (e.g. 10m, 1h)]" \
     "--cron[Cron expression (5-field or 6-field with seconds)]" \
     "--tz[Timezone for cron expressions (IANA)]" \
@@ -3410,6 +3414,12 @@ _openclaw_clawbot() {
   esac
 }
 
+_openclaw_feishu_diagnose() {
+  _arguments -C \
+    "--trace[按 message_id 追踪完整处理链路]" \
+    "--analyze[分析追踪日志（需配合 --trace 使用）]"
+}
+
 _openclaw_memory_hub_status() {
   _arguments -C \
     "--json[output json]"
@@ -3474,14 +3484,14 @@ _openclaw_memory_hub() {
 
 _openclaw_pairing_list() {
   _arguments -C \
-    "--channel[Channel ()]" \
+    "--channel[Channel (feishu)]" \
     "--account[Account id (for multi-account channels)]" \
     "--json[Print JSON]"
 }
 
 _openclaw_pairing_approve() {
   _arguments -C \
-    "--channel[Channel ()]" \
+    "--channel[Channel (feishu)]" \
     "--account[Account id (for multi-account channels)]" \
     "--notify[Notify the requester on the same channel]"
 }

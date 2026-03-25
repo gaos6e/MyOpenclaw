@@ -1,0 +1,44 @@
+{
+  "name": "clawx",
+  "version": "0.3.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@discordjs/opus",
+      "@whiskeysockets/baileys",
+      "electron",
+      "esbuild",
+      "koffi",
+      "node-llama-cpp",
+      "protobufjs",
+      "sharp"
+    ],
+    "overrides": {
+      "isbinaryfile": "^5.0.0",
+      "https-proxy-agent": "7.0.6"
+    },
+    "supportedArchitectures": {
+      "os": [
+        "current"
+      ],
+      "cpu": [
+        "x64",
+        "arm64"
+      ]
+    }
+  },
+  "description": "ClawX - Graphical AI Assistant based on OpenClaw",
+  "main": "dist-electron/main/index.js",
+  "author": "ClawX Team",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "clawhub": "^0.5.0",
+    "electron-store": "^11.0.2",
+    "electron-updater": "^6.8.3",
+    "ms": "^2.1.3",
+    "node-machine-id": "^1.1.12",
+    "posthog-node": "^5.28.0",
+    "ws": "^8.19.0"
+  },
+  "packageManager": "pnpm@10.31.0+sha512.e3927388bfaa8078ceb79b748ffc1e8274e84d75163e67bc22e06c0d3aed43dd153151cbf11d7f8301ff4acb98c68bdc5cadf6989532801ffafe3b3e4a63c268"
+}
