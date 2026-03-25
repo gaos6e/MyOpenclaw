@@ -1,5 +1,7 @@
 # Local runtime config and secrets
 .env
+# local launcher with embedded secrets (never commit)
+gateway.local.cmd
 openclaw.json
 exec-approvals.json
 update-check.json
