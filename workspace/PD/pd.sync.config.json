@@ -1,0 +1,29 @@
+{
+  "language": "zh",
+  "sync_cadence": "weekly",
+  "sync_trigger_phrase": "同步PD",
+  "allow_local_extractions": true,
+  "weekly_schedule": {
+    "weekday": "Monday",
+    "time": "12:00",
+    "tz": "Asia/Shanghai",
+    "cron_expr": "0 12 * * 1",
+    "openclaw_cron_job_id": "9b72bb4a-e1fe-4a1e-8f0a-664229c1149d"
+  },
+  "core_source_titles": [
+    "PD项目主文档.pdf",
+    "项目背景",
+    "去年项目文档",
+    "基因扰动结果",
+    "结果-genetic",
+    "结果-chemical",
+    "结果-compare",
+    "工作日志1——搭建表达谱预测扰动大致框架.pdf",
+    "工作日志2——对模型进行调整、测试、优化（一）.pdf",
+    "工作日志3——对模型进行调整、测试、优化（二）.pdf",
+    "工作日志4——对模型进行调整、测试、优化（三）.pdf",
+    "工作日志5——对模型进行调整、测试、优化（四）.pdf",
+    "工作日志6——对模型进行调整、测试、优化（五）.pdf",
+    "工作日志7——对于模型未见靶标重点优化"
+  ]
+}

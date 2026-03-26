@@ -1,0 +1,163 @@
+{
+  "name": "基于表型驱动的扰动靶标预测研究",
+  "children": [
+    {
+      "name": "研究背景与现状",
+      "children": [
+        {
+          "name": "药物发现模式",
+          "children": [
+            {
+              "name": "靶标驱动"
+            },
+            {
+              "name": "表型驱动"
+            }
+          ]
+        },
+        {
+          "name": "预测方法分类",
+          "children": [
+            {
+              "name": "间接预测 (如scGPT, GEARS)"
+            },
+            {
+              "name": "直接预测 (如PDGrapher, CDN)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "核心研究内容",
+      "children": [
+        {
+          "name": "构建深度学习预测框架"
+        },
+        {
+          "name": "学习转录组表达谱“指纹”"
+        },
+        {
+          "name": "融合全局特征与生物网络结构"
+        },
+        {
+          "name": "多标签分类任务实现"
+        }
+      ]
+    },
+    {
+      "name": "模型架构与开发",
+      "children": [
+        {
+          "name": "嵌入模块",
+          "children": [
+            {
+              "name": "CellFM大模型嵌入"
+            },
+            {
+              "name": "Cellfm_encode通用嵌入"
+            }
+          ]
+        },
+        {
+          "name": "特征提取网络",
+          "children": [
+            {
+              "name": "GCN (图卷积网络)"
+            },
+            {
+              "name": "GAT (图注意网络)"
+            },
+            {
+              "name": "Transformer/FlashAttention"
+            },
+            {
+              "name": "MLP (多层感知机)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "工作日志与优化 (11.02-11.17)",
+      "children": [
+        {
+          "name": "遗传扰动测试",
+          "children": [
+            {
+              "name": "脚本效果对比 (GNN, GAT, Concat)"
+            },
+            {
+              "name": "数据划分与最优Epoch筛选"
+            },
+            {
+              "name": "Fold Change差异表达分析"
+            },
+            {
+              "name": "解决验证集指标优于训练集问题 (Dropout)"
+            }
+          ]
+        },
+        {
+          "name": "化学扰动测试",
+          "children": [
+            {
+              "name": "化合扰动训练脚本实现"
+            },
+            {
+              "name": "多靶标指标适配"
+            },
+            {
+              "name": "样本信息统计 (138种细胞系)"
+            }
+          ]
+        },
+        {
+          "name": "基准对比",
+          "children": [
+            {
+              "name": "PDGrapher环境配置与复现"
+            },
+            {
+              "name": "不同参数(Layers, Batch)效果分析"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "指标体系",
+      "children": [
+        {
+          "name": "分类指标 (AUROC, AUPRC, Accuracy)"
+        },
+        {
+          "name": "排名指标 (Average/Median Rank, Ranking Score)"
+        },
+        {
+          "name": "命中指标 (Recall@k, NDCG, 部分准确率)"
+        }
+      ]
+    },
+    {
+      "name": "验证与应用场景",
+      "children": [
+        {
+          "name": "内部验证 (遗传/化学扰动基准测试)"
+        },
+        {
+          "name": "外部验证 (DW机制揭示)"
+        },
+        {
+          "name": "疾病探究 (临床队列个体化治疗建议)"
+        },
+        {
+          "name": "细胞工程 (状态诱导扰动预测)"
+        },
+        {
+          "name": "响应分析 (获得性/原发性抵抗机制)"
+        }
+      ]
+    }
+  ]
+}

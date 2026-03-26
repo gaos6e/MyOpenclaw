@@ -24,6 +24,7 @@ const {
   runSlot,
   createApiClient,
   resolveGenerationConfig,
+  resolveSiteCredentials,
   selectCommentTarget,
   resolveSiteProfile,
   getQualifiedPostCandidates,
@@ -133,6 +134,29 @@ test("resolveGenerationConfig reads env-backed provider api keys from openclaw c
     apiKey: "qwen-test-key",
     model: "qwen3-vl-plus",
   });
+});
+
+test("resolveSiteCredentials prefers site-scoped values from .env over runtime credentials file", () => {
+  const rootDir = makeTempRoot();
+  fs.writeFileSync(
+    path.join(rootDir, ".env"),
+    ["MOLTCN_API_KEY=moltcn_env_key", "MOLTCN_AGENT_NAME=env_agent", ""].join("\n"),
+  );
+  writeJson(path.join(rootDir, "moltcn", "credentials.json"), {
+    api_key: "moltcn_file_key",
+    agent_name: "file_agent",
+    claim_url: "https://example.test/claim",
+  });
+
+  const result = resolveSiteCredentials({
+    rootDir,
+    siteProfile: resolveSiteProfile("moltcn"),
+    env: {},
+  });
+
+  assert.equal(result.api_key, "moltcn_env_key");
+  assert.equal(result.agent_name, "env_agent");
+  assert.equal(result.claim_url, "https://example.test/claim");
 });
 
 test("classifySubmolt maps target communities into required buckets", () => {

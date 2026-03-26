@@ -14,6 +14,17 @@ rem set "HTTP_PROXY=http://127.0.0.1:7890"
 rem set "HTTPS_PROXY=http://127.0.0.1:7890"
 rem set "NO_PROXY=127.0.0.1,localhost"
 
-set "OPENCLAW_GATEWAY_PORT=18789"
+rem Isolate OpenClaw from the local Codex CLI auth store.
+rem OpenClaw's external CLI sync reads CODEX_HOME/auth.json when present.
+rem Point it at a private directory so OpenClaw and Codex accounts do not overwrite each other.
+set "CODEX_HOME=%~dp0.codex-openclaw"
 
-"C:\Program Files\nodejs\node.exe" C:\Users\20961\AppData\Roaming\npm\node_modules\openclaw\dist\index.js gateway --port %OPENCLAW_GATEWAY_PORT%
+set "OPENCLAW_GATEWAY_PORT=18789"
+set "OPENCLAW_LOG_DIR=%~dp0logs"
+set "OPENCLAW_GATEWAY_LOG=%OPENCLAW_LOG_DIR%\gateway-runtime.log"
+
+if not exist "%OPENCLAW_LOG_DIR%" mkdir "%OPENCLAW_LOG_DIR%"
+
+echo [gateway.cmd] Starting OpenClaw Gateway at %DATE% %TIME% >> "%OPENCLAW_GATEWAY_LOG%"
+
+"C:\Program Files\nodejs\node.exe" C:\Users\20961\AppData\Roaming\npm\node_modules\openclaw\dist\index.js gateway --port %OPENCLAW_GATEWAY_PORT% >> "%OPENCLAW_GATEWAY_LOG%" 2>&1

@@ -4,7 +4,10 @@ param(
     [int]$StartupGraceSeconds = 15,
     [int]$FailuresBeforeRestart = 2,
     [int]$RestartCooldownSeconds = 120,
-    [string]$LogPath = "$HOME\.openclaw\logs\watchdog.log"
+    [string]$LogPath = "$HOME\.openclaw\logs\watchdog.log",
+    [string]$GatewayTaskName = "OpenClaw Gateway",
+    [string]$GatewayCommandPath = "$HOME\.openclaw\gateway.cmd",
+    [string]$OpenClawCliPath = "$env:APPDATA\npm\openclaw.ps1"
 )
 
 Set-StrictMode -Version Latest
@@ -27,10 +30,84 @@ function Invoke-OpenClaw {
         [string[]]$Args
     )
 
+    if (Test-Path $OpenClawCliPath) {
+        & $OpenClawCliPath @Args 2>&1
+        return
+    }
+
     & openclaw @Args 2>&1
 }
 
+function Get-PortOwners {
+    $listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+    $owners = @()
+
+    foreach ($listener in $listeners) {
+        $process = Get-CimInstance Win32_Process -Filter "ProcessId = $($listener.OwningProcess)" -ErrorAction SilentlyContinue
+        if ($null -eq $process) {
+            continue
+        }
+
+        $owners += [pscustomobject]@{
+            ProcessId = $process.ProcessId
+            Name = $process.Name
+            CommandLine = [string]$process.CommandLine
+        }
+    }
+
+    return $owners
+}
+
+function Format-PortOwners {
+    $owners = @(Get-PortOwners)
+    if (-not $owners) {
+        return "none"
+    }
+
+    return ($owners | ForEach-Object {
+        $commandLine = $_.CommandLine
+        if ($commandLine.Length -gt 140) {
+            $commandLine = $commandLine.Substring(0, 140) + "..."
+        }
+
+        "pid=$($_.ProcessId) name=$($_.Name) cmd=$commandLine"
+    }) -join "; "
+}
+
+function Test-ExpectedGatewayOwner {
+    $owners = @(Get-PortOwners)
+    if (-not $owners) {
+        return @{
+            Healthy = $false
+            Output = "Port $Port is not listening."
+        }
+    }
+
+    $expectedOwners = @(
+        $owners | Where-Object {
+            $_.CommandLine -match "openclaw" -and $_.CommandLine -match "gateway"
+        }
+    )
+
+    if (-not $expectedOwners) {
+        return @{
+            Healthy = $false
+            Output = "Port $Port is owned by a foreign process: $(Format-PortOwners)"
+        }
+    }
+
+    return @{
+        Healthy = $true
+        Output = "Expected gateway owner found: $(Format-PortOwners)"
+    }
+}
+
 function Test-Health {
+    $ownerCheck = Test-ExpectedGatewayOwner
+    if (-not $ownerCheck.Healthy) {
+        return $ownerCheck
+    }
+
     try {
         $output = Invoke-OpenClaw -Args @("gateway", "health")
         $text = ($output | Out-String).Trim()
@@ -49,28 +126,27 @@ function Test-Health {
 
 function Stop-GatewayTask {
     try {
-        Invoke-OpenClaw -Args @("gateway", "stop") | Out-Null
-        Write-Log "Stopped gateway task via CLI."
+        schtasks /End /TN $GatewayTaskName | Out-Null
+        Write-Log "Requested stop for scheduled task '$GatewayTaskName'."
     }
     catch {
-        Write-Log "CLI stop reported: $($_.Exception.Message)"
-    }
-
-    try {
-        schtasks /End /TN "OpenClaw Gateway" | Out-Null
-        Write-Log "Terminated scheduled task."
-    }
-    catch {
-        Write-Log "Scheduled task end reported: $($_.Exception.Message)"
+        Write-Log "Scheduled task stop reported: $($_.Exception.Message)"
     }
 }
 
 function Stop-GatewayProcesses {
     $processes = Get-CimInstance Win32_Process |
         Where-Object {
-            $_.Name -eq "node.exe" -and
-            $_.CommandLine -match "openclaw" -and
-            $_.CommandLine -match "gateway"
+            $commandLine = [string]$_.CommandLine
+            (
+                $commandLine -match [regex]::Escape($GatewayCommandPath)
+            ) -or (
+                $_.Name -eq "node.exe" -and
+                $commandLine -match "openclaw" -and
+                $commandLine -match "gateway"
+            ) -or (
+                $commandLine -match "D:\\clawx" -or $commandLine -match "ClawX\.exe"
+            )
         }
 
     foreach ($process in $processes) {
@@ -105,8 +181,18 @@ function Wait-ForPortState {
 }
 
 function Start-GatewayTask {
-    Invoke-OpenClaw -Args @("gateway", "start") | Out-Null
-    Write-Log "Started gateway task via CLI."
+    if (Get-ScheduledTask -TaskName $GatewayTaskName -ErrorAction SilentlyContinue) {
+        schtasks /Run /TN $GatewayTaskName | Out-Null
+        Write-Log "Started scheduled task '$GatewayTaskName'."
+        return
+    }
+
+    if (-not (Test-Path $GatewayCommandPath)) {
+        throw "Gateway command not found: $GatewayCommandPath"
+    }
+
+    Start-Process -FilePath $GatewayCommandPath -WindowStyle Hidden | Out-Null
+    Write-Log "Started gateway command directly: $GatewayCommandPath"
 }
 
 function Restart-Gateway {
@@ -140,6 +226,7 @@ if (-not (Test-Path -Path (Split-Path -Parent $LogPath))) {
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $LogPath) | Out-Null
 }
 
+Write-Log "Resolved OpenClaw CLI path: $OpenClawCliPath"
 Write-Log "Watchdog started. Poll=${PollIntervalSeconds}s FailuresBeforeRestart=${FailuresBeforeRestart} Cooldown=${RestartCooldownSeconds}s"
 
 while ($true) {

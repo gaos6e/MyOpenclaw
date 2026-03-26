@@ -2,6 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 const DEFAULT_MODEL = "qwen3-asr-flash";
@@ -24,6 +25,8 @@ function parseArgs(argv) {
   }
   return out;
 }
+
+export { parseArgs };
 
 function guessMimeType(filePath) {
   switch (path.extname(filePath).toLowerCase()) {
@@ -71,22 +74,32 @@ function extractTranscript(payload) {
   return "";
 }
 
+export function resolveRuntimeConfig(args, env = process.env) {
+  const apiKeyEnv = typeof args["api-key-env"] === "string" ? args["api-key-env"].trim() : "";
+  const apiKey =
+    (apiKeyEnv ? env[apiKeyEnv] : undefined) ||
+    env.QWEN_API_KEY ||
+    env.DASHSCOPE_API_KEY;
+  if (!apiKey) {
+    throw new Error("QWEN_API_KEY is not set.");
+  }
+
+  return {
+    apiKey,
+    baseUrl: String(args["base-url"] || env.QWEN_ASR_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, ""),
+    model: String(args.model || env.QWEN_ASR_MODEL || DEFAULT_MODEL),
+    language: typeof args.language === "string" ? args.language.trim() : "",
+    prompt: typeof args.prompt === "string" ? args.prompt.trim() : "",
+  };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const filePath = args.file;
   if (!filePath) {
     throw new Error("Missing required --file argument.");
   }
-
-  const apiKey = process.env.QWEN_API_KEY || process.env.DASHSCOPE_API_KEY;
-  if (!apiKey) {
-    throw new Error("QWEN_API_KEY is not set.");
-  }
-
-  const baseUrl = String(args["base-url"] || process.env.QWEN_ASR_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, "");
-  const model = String(args.model || process.env.QWEN_ASR_MODEL || DEFAULT_MODEL);
-  const language = typeof args.language === "string" ? args.language.trim() : "";
-  const prompt = typeof args.prompt === "string" ? args.prompt.trim() : "";
+  const { apiKey, baseUrl, model, language, prompt } = resolveRuntimeConfig(args);
   const bytes = await fs.readFile(filePath);
   if (bytes.byteLength > MAX_AUDIO_BYTES) {
     throw new Error(`Audio file exceeds ${MAX_AUDIO_BYTES} bytes; qwen3-asr-flash only supports files up to 10 MB.`);
@@ -163,12 +176,16 @@ async function main() {
   process.stdout.write(transcript);
 }
 
-main().catch((error) => {
-  if (error instanceof Error) {
-    const details = error.cause ? ` (${String(error.cause)})` : "";
-    process.stderr.write(`${error.message}${details}\n`);
-  } else {
-    process.stderr.write(`${String(error)}\n`);
-  }
-  process.exitCode = 1;
-});
+const entryHref = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
+
+if (import.meta.url === entryHref) {
+  main().catch((error) => {
+    if (error instanceof Error) {
+      const details = error.cause ? ` (${String(error.cause)})` : "";
+      process.stderr.write(`${error.message}${details}\n`);
+    } else {
+      process.stderr.write(`${String(error)}\n`);
+    }
+    process.exitCode = 1;
+  });
+}
