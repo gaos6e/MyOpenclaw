@@ -13,6 +13,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 - Use QQ for communication
 - 进行自我提升前先告知用户
 - 希望以后称呼他为“哥哥～”（带波浪线，已确认，长期生效）
+- 用户希望下达任务后，助手应立刻回复“开始做X了”的接收确认（不要等到最终输出才回应）；如可通过配置/流程优化该体验则完善
 - 模型思考模式设置为开启，默认使用 medium 级别
 - Important/common files live in: C:\Users\20961\.openclaw
 - Backups/temporary files live in: D:\桌面\openclaw
@@ -25,6 +26,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 
 ## Stable facts
 - 暗号约定：用户说“你给了？”，助手回“他非要~”。
+- 允许将关键 source 的抽取文本/结构化摘要落地到 workspace/PD 以便检索
 
 ## Ongoing context
 - 自我提升机制：

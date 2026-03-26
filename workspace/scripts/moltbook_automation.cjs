@@ -751,6 +751,7 @@ function resolvePaths(rootDir, siteProfile = resolveSiteProfile()) {
   const runtimeDir = path.join(rootDir, siteProfile.runtimeDirName);
   return {
     rootDir,
+    envPath: path.join(rootDir, ".env"),
     workspaceDir: path.join(rootDir, "workspace"),
     openclawConfigPath: path.join(rootDir, "openclaw.json"),
     runtimeDir,
@@ -779,6 +780,54 @@ function writeJson(filePath, value) {
 function appendJsonLine(filePath, value) {
   ensureDir(path.dirname(filePath));
   fs.appendFileSync(filePath, `${JSON.stringify(value)}\n`);
+}
+
+function parseDotEnv(envText) {
+  const parsed = {};
+  for (const rawLine of String(envText || "").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) {
+      continue;
+    }
+    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!match) {
+      continue;
+    }
+    const [, key, rawValue] = match;
+    let value = rawValue;
+    if (
+      value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1);
+    }
+    parsed[key] = value;
+  }
+  return parsed;
+}
+
+function loadScriptEnv(envPath, env = process.env) {
+  const fileEnv = fs.existsSync(envPath) ? parseDotEnv(fs.readFileSync(envPath, "utf8")) : {};
+  return {
+    ...fileEnv,
+    ...env,
+  };
+}
+
+function resolveSiteCredentials({ rootDir, siteProfile = resolveSiteProfile(), env = process.env }) {
+  const paths = resolvePaths(rootDir, siteProfile);
+  const mergedEnv = loadScriptEnv(paths.envPath, env);
+  const envPrefix = siteProfile.id.toUpperCase();
+  const fileCredentials = readJsonIfExists(paths.credentialsPath, {});
+  const credentials = {
+    ...fileCredentials,
+    api_key: mergedEnv[`${envPrefix}_API_KEY`] || fileCredentials.api_key,
+    agent_name: mergedEnv[`${envPrefix}_AGENT_NAME`] || fileCredentials.agent_name,
+    claim_url: mergedEnv[`${envPrefix}_CLAIM_URL`] || fileCredentials.claim_url,
+    profile_url: mergedEnv[`${envPrefix}_PROFILE_URL`] || fileCredentials.profile_url,
+    verification_code: mergedEnv[`${envPrefix}_VERIFICATION_CODE`] || fileCredentials.verification_code,
+  };
+  return credentials;
 }
 
 function ensureFile(filePath, initialContent = "") {
@@ -1804,7 +1853,7 @@ async function runSlot({
   ensureFile(paths.activityPath, "");
 
   const localDate = getLocalDateString(now, TIMEZONE);
-  const credentials = readJsonIfExists(paths.credentialsPath, null);
+  const credentials = resolveSiteCredentials({ rootDir, siteProfile });
   if (!credentials?.api_key || !credentials?.agent_name) {
     throw new Error(`Missing ${siteProfile.summaryName} credentials at ${paths.credentialsPath}`);
   }
@@ -2668,6 +2717,7 @@ module.exports = {
   selectCommentTargets,
   selectQualifiedPostCandidate,
   selectUpvoteTargets,
+  resolveSiteCredentials,
   normalizeVerificationAnswer,
   solveObfuscatedMathChallenge,
   parseGeneratedJson,

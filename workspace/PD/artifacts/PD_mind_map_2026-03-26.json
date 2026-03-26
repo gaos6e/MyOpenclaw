@@ -1,0 +1,127 @@
+{
+  "name": "单细胞扰动预测与分子虚拟筛选技术研究",
+  "children": [
+    {
+      "name": "单细胞扰动响应预测基准 (scPerturBench)",
+      "children": [
+        {
+          "name": "评估场景",
+          "children": [
+            {
+              "name": "细胞上下文泛化 (o.o.d. & i.i.d.)"
+            },
+            {
+              "name": "扰动泛化 (遗传与化学扰动)"
+            }
+          ]
+        },
+        {
+          "name": "评估指标",
+          "children": [
+            {
+              "name": "群体平均指标 (MSE, PCC-delta, E-distance)"
+            },
+            {
+              "name": "群体分布指标 (Wasserstein, KL散度, Common-DEGs)"
+            }
+          ]
+        },
+        {
+          "name": "核心结论",
+          "children": [
+            {
+              "name": "无万能模型 (依赖数据规模与异质性)"
+            },
+            {
+              "name": "基础模型在充足微调数据下表现更优"
+            },
+            {
+              "name": "泛化性受细胞上下文间异质性制约"
+            }
+          ]
+        },
+        {
+          "name": "推荐方法",
+          "children": [
+            {
+              "name": "单条件场景: trVAE, CellOT, inVAE"
+            },
+            {
+              "name": "多条件场景 (剂量信息): scVIDR"
+            },
+            {
+              "name": "遗传单扰动: GenePert, CPA, scGPT"
+            },
+            {
+              "name": "遗传组合扰动: linearModel, scouter"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "超快速全基因组虚拟筛选 (DrugCLIP)",
+      "children": [
+        {
+          "name": "技术框架",
+          "children": [
+            {
+              "name": "对比学习 (Contrastive Learning)"
+            },
+            {
+              "name": "双塔编码 (口袋编码器 & 分子编码器)"
+            },
+            {
+              "name": "稠密检索技术 (向量相似度匹配)"
+            }
+          ]
+        },
+        {
+          "name": "关键组件",
+          "children": [
+            {
+              "name": "ProFSA: 大规模合成数据预训练"
+            },
+            {
+              "name": "GenPack: 生成式口袋精修模块"
+            },
+            {
+              "name": "Uni-Mol: 分子表征初始化"
+            }
+          ]
+        },
+        {
+          "name": "应用成果",
+          "children": [
+            {
+              "name": "GenomeScreenDB: 200万候补分子数据库"
+            },
+            {
+              "name": "湿实验验证: 5HT2AR, NET, TRIP12 抑制剂"
+            },
+            {
+              "name": "效率突破: 24小时内完成10万亿对筛选"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "未来研究方向",
+      "children": [
+        {
+          "name": "构建单细胞扰动图谱"
+        },
+        {
+          "name": "整合生物学先验知识 (GRN, 通路)"
+        },
+        {
+          "name": "改进群体分布预测能力"
+        },
+        {
+          "name": "开发化学组合扰动专用算法"
+        }
+      ]
+    }
+  ]
+}
