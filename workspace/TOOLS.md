@@ -36,6 +36,7 @@ Things like:
 - 使用 `package_skill.py` 打包时需要 Python 依赖 `pyyaml`（缺失会报 ModuleNotFoundError: yaml）。
 - PowerShell exec 命令中的 `$` 变量需用反引号转义：`` `$variable``，或使用脚本文件避免变量被剥离。
 - Open-Meteo Air Quality API 的 current 字段名：`nitrogen_dioxide`/`ozone`/`sulphur_dioxide`/`carbon_monoxide`（不要用 no2/o3/so2/co）。
+- Open-Meteo Air Quality API 的 AQI 字段名：`us_aqi`/`european_aqi`（不要用 eu_aqi）。
 
 ## Why Separate?
 
@@ -45,12 +46,11 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 Add whatever helps you do your job. This is your cheat sheet.
 
-<!-- clawx:begin -->
-## ClawX Tool Notes
+## OpenClaw Desktop Tool Notes
 
 ### uv (Python)
 
-- `uv` is bundled with ClawX and on PATH. Do NOT use bare `python` or `pip`.
+- `uv` is bundled with the desktop environment and on PATH. Do NOT use bare `python` or `pip`.
 - Run scripts: `uv run python <script>` | Install packages: `uv pip install <package>`
 
 ### Browser
@@ -59,4 +59,3 @@ Add whatever helps you do your job. This is your cheat sheet.
 - Flow: `action="start"` → `action="snapshot"` (see page + get element refs like `e12`) → `action="act"` (click/type using refs).
 - Open new tabs: `action="open"` with `targetUrl`.
 - To just open a URL for the user to view, use `shell:openExternal` instead.
-<!-- clawx:end -->

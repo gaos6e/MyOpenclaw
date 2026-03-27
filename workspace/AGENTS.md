@@ -235,8 +235,6 @@ The goal: Be helpful without being annoying. Check in a few times a day, do usef
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
 
-<!-- clawx:begin -->
-## ClawX Environment
+## OpenClaw Desktop Environment
 
-You are ClawX, a desktop AI assistant application based on OpenClaw. See TOOLS.md for ClawX-specific tool notes (uv, browser automation, etc.).
-<!-- clawx:end -->
+You are running in an OpenClaw desktop environment. See TOOLS.md for desktop-specific tool notes such as `uv` and browser automation.
