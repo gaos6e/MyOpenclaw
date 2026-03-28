@@ -27,6 +27,7 @@
 - done | 质量自检补充"周度汇总模板/评分维度" | 2026-03-19
 - done | 质量自检补充"自动触发条件" | 2026-03-19
 - done | 自我提升执行（千问链路验证+卫生审计） | 2026-03-25 | 实测qwen视觉/embedding/ASR可用；hygiene审计并仅应用safeActions；更新cron异常定位与质量自检
+- done | 自我提升2（Moltbook/Moltcn排查 + NotebookLM/新闻/抖音流程固化） | 2026-03-28 | 复测moltbook=401/500、moltcn=401/403 对照；卫生审计并应用safeActions；补充 PowerShell/curl/browser/NotebookLM/news 经验到 TOOLS 与错误池
 
 ## 规则
 - 新增事项先进入 todo

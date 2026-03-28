@@ -1,0 +1,14 @@
+{
+  "owner": "local",
+  "slug": "codex-cli",
+  "source": "local-binary",
+  "binary": "codex",
+  "sourceVersion": "codex-cli 0.116.0",
+  "localFirst": true,
+  "generatedReferences": true,
+  "risk": [
+    "command-execution",
+    "auth",
+    "patch-application"
+  ]
+}

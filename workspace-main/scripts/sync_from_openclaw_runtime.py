@@ -1,0 +1,1 @@
+C:/Users/20961/.openclaw/workspace/skills/edict/scripts/sync_from_openclaw_runtime.py
