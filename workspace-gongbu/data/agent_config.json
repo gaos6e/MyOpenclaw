@@ -1,0 +1,2764 @@
+{
+  "generatedAt": "2026-03-28 21:14:33",
+  "defaultModel": "teamplus/gpt-5.2",
+  "knownModels": [
+    {
+      "id": "anthropic/claude-sonnet-4-6",
+      "label": "Claude Sonnet 4.6",
+      "provider": "Anthropic"
+    },
+    {
+      "id": "anthropic/claude-opus-4-5",
+      "label": "Claude Opus 4.5",
+      "provider": "Anthropic"
+    },
+    {
+      "id": "anthropic/claude-haiku-3-5",
+      "label": "Claude Haiku 3.5",
+      "provider": "Anthropic"
+    },
+    {
+      "id": "openai/gpt-4o",
+      "label": "GPT-4o",
+      "provider": "OpenAI"
+    },
+    {
+      "id": "openai/gpt-4o-mini",
+      "label": "GPT-4o Mini",
+      "provider": "OpenAI"
+    },
+    {
+      "id": "openai-codex/gpt-5.3-codex",
+      "label": "GPT-5.3 Codex",
+      "provider": "OpenAI Codex"
+    },
+    {
+      "id": "google/gemini-2.0-flash",
+      "label": "Gemini 2.0 Flash",
+      "provider": "Google"
+    },
+    {
+      "id": "google/gemini-2.5-pro",
+      "label": "Gemini 2.5 Pro",
+      "provider": "Google"
+    },
+    {
+      "id": "copilot/claude-sonnet-4",
+      "label": "Claude Sonnet 4",
+      "provider": "Copilot"
+    },
+    {
+      "id": "copilot/claude-opus-4.5",
+      "label": "Claude Opus 4.5",
+      "provider": "Copilot"
+    },
+    {
+      "id": "github-copilot/claude-opus-4.6",
+      "label": "Claude Opus 4.6",
+      "provider": "GitHub Copilot"
+    },
+    {
+      "id": "copilot/gpt-4o",
+      "label": "GPT-4o",
+      "provider": "Copilot"
+    },
+    {
+      "id": "copilot/gemini-2.5-pro",
+      "label": "Gemini 2.5 Pro",
+      "provider": "Copilot"
+    },
+    {
+      "id": "copilot/o3-mini",
+      "label": "o3-mini",
+      "provider": "Copilot"
+    },
+    {
+      "id": "teamplus/gpt-5.2",
+      "label": "teamplus/gpt-5.2",
+      "provider": "OpenClaw"
+    }
+  ],
+  "dispatchChannel": "feishu",
+  "agents": [
+    {
+      "id": "taizi",
+      "label": "太子",
+      "role": "太子",
+      "duty": "飞书消息分拣与回奏",
+      "emoji": "🤴",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-taizi",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-taizi\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "zhongshu"
+      ]
+    },
+    {
+      "id": "bingbu",
+      "label": "兵部",
+      "role": "兵部尚书",
+      "duty": "工程实现与架构设计",
+      "emoji": "⚔️",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-bingbu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-bingbu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu"
+      ]
+    },
+    {
+      "id": "libu_hr",
+      "label": "吏部",
+      "role": "吏部尚书",
+      "duty": "人事/培训/Agent管理",
+      "emoji": "👔",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu"
+      ]
+    },
+    {
+      "id": "libu",
+      "label": "礼部",
+      "role": "礼部尚书",
+      "duty": "文档/汇报/规范",
+      "emoji": "📝",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-libu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-libu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu"
+      ]
+    },
+    {
+      "id": "xingbu",
+      "label": "刑部",
+      "role": "刑部尚书",
+      "duty": "合规/审计/红线",
+      "emoji": "⚖️",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-xingbu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-xingbu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu"
+      ]
+    },
+    {
+      "id": "zhongshu",
+      "label": "中书省",
+      "role": "中书令",
+      "duty": "起草任务令与优先级",
+      "emoji": "📜",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "menxia",
+        "shangshu"
+      ]
+    },
+    {
+      "id": "zaochao",
+      "label": "钦天监",
+      "role": "朝报官",
+      "duty": "每日新闻采集与简报",
+      "emoji": "📰",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-zaochao",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-zaochao\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": []
+    },
+    {
+      "id": "gongbu",
+      "label": "工部",
+      "role": "工部尚书",
+      "duty": "基础设施与部署运维",
+      "emoji": "🔧",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-gongbu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-gongbu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu"
+      ]
+    },
+    {
+      "id": "menxia",
+      "label": "门下省",
+      "role": "侍中",
+      "duty": "审议与退回机制",
+      "emoji": "🔍",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-menxia",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-menxia\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu",
+        "zhongshu"
+      ]
+    },
+    {
+      "id": "hubu",
+      "label": "户部",
+      "role": "户部尚书",
+      "duty": "资源/预算/成本",
+      "emoji": "💰",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-hubu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-hubu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "shangshu"
+      ]
+    },
+    {
+      "id": "shangshu",
+      "label": "尚书省",
+      "role": "尚书令",
+      "duty": "派单与升级裁决",
+      "emoji": "📮",
+      "model": "teamplus/gpt-5.2",
+      "defaultModel": "teamplus/gpt-5.2",
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace-shangshu",
+      "skills": [
+        {
+          "name": "agent-browser",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\agent-browser\\SKILL.md",
+          "exists": true,
+          "description": "name: Agent Browser"
+        },
+        {
+          "name": "ai-daily-brief",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\ai-daily-brief\\SKILL.md",
+          "exists": true,
+          "description": "name: ai-daily-brief"
+        },
+        {
+          "name": "ai-web-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\ai-web-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "自动化 Web 任务执行服务。"
+        },
+        {
+          "name": "automation-workflows",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\automation-workflows\\SKILL.md",
+          "exists": true,
+          "description": "name: automation-workflows"
+        },
+        {
+          "name": "browser-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\browser-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: browser-automation"
+        },
+        {
+          "name": "capability-evolver-1.29.9",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\capability-evolver-1.29.9\\SKILL.md",
+          "exists": true,
+          "description": "name: capability-evolver"
+        },
+        {
+          "name": "clawddocs",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\clawddocs\\SKILL.md",
+          "exists": true,
+          "description": "name: clawddocs"
+        },
+        {
+          "name": "clawdhub-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\clawdhub-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: clawdhub"
+        },
+        {
+          "name": "cli-anything",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\cli-anything\\SKILL.md",
+          "exists": true,
+          "description": "name: cli-anything"
+        },
+        {
+          "name": "codex-cli",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\codex-cli\\SKILL.md",
+          "exists": true,
+          "description": "name: codex-cli"
+        },
+        {
+          "name": "desktop-control-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\desktop-control-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "description: Advanced desktop automation with mouse, keyboard, and screen control"
+        },
+        {
+          "name": "document-pro",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\document-pro\\SKILL.md",
+          "exists": true,
+          "description": "name: document-pro"
+        },
+        {
+          "name": "edict",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\edict\\SKILL.md",
+          "exists": false,
+          "description": ""
+        },
+        {
+          "name": "find-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\find-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: find-skills"
+        },
+        {
+          "name": "gog",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\gog\\SKILL.md",
+          "exists": true,
+          "description": "name: gog"
+        },
+        {
+          "name": "local-bsod-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\local-bsod-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-bsod-debugging"
+        },
+        {
+          "name": "local-system-debugging",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\local-system-debugging\\SKILL.md",
+          "exists": true,
+          "description": "name: local-system-debugging"
+        },
+        {
+          "name": "marketing-skills",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\marketing-skills\\SKILL.md",
+          "exists": true,
+          "description": "name: marketing-skills"
+        },
+        {
+          "name": "mcporter",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\mcporter\\SKILL.md",
+          "exists": true,
+          "description": "name: mcporter"
+        },
+        {
+          "name": "multi-search-engine-2.0.1",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\multi-search-engine-2.0.1\\SKILL.md",
+          "exists": true,
+          "description": "name: \"multi-search-engine\""
+        },
+        {
+          "name": "n8n-workflow-automation-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\n8n-workflow-automation-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: n8n-workflow-automation"
+        },
+        {
+          "name": "news-summary",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\news-summary\\SKILL.md",
+          "exists": true,
+          "description": "name: news-summary"
+        },
+        {
+          "name": "nlm-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\nlm-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: nlm-skill"
+        },
+        {
+          "name": "office-automation",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\office-automation\\SKILL.md",
+          "exists": true,
+          "description": "name: office-automation"
+        },
+        {
+          "name": "ontology",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\ontology\\SKILL.md",
+          "exists": true,
+          "description": "name: ontology"
+        },
+        {
+          "name": "openclaw-backup",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\openclaw-backup\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-backup"
+        },
+        {
+          "name": "openclaw-cli-1.0.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\openclaw-cli-1.0.0\\SKILL.md",
+          "exists": true,
+          "description": "name: openclaw-cli"
+        },
+        {
+          "name": "openclaw-tavily-search",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\openclaw-tavily-search\\SKILL.md",
+          "exists": true,
+          "description": "name: tavily-search"
+        },
+        {
+          "name": "playwright",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\playwright\\SKILL.md",
+          "exists": true,
+          "description": "name: Playwright (Automation + MCP + Scraper)"
+        },
+        {
+          "name": "playwright-scraper-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\playwright-scraper-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: playwright-scraper-skill"
+        },
+        {
+          "name": "proactive-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\proactive-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: proactive-agent"
+        },
+        {
+          "name": "self-evolving-skill",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\self-evolving-skill\\SKILL.md",
+          "exists": true,
+          "description": "name: Self-Evolving Skill"
+        },
+        {
+          "name": "self-improving-agent",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\self-improving-agent\\SKILL.md",
+          "exists": true,
+          "description": "name: self-improvement"
+        },
+        {
+          "name": "skill-builder-1.0.5",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\skill-builder-1.0.5\\SKILL.md",
+          "exists": true,
+          "description": "name: Skill Builder / Creator"
+        },
+        {
+          "name": "skill-creator-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\skill-creator-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: skill-creator"
+        },
+        {
+          "name": "using-superpowers-0.1.0",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\using-superpowers-0.1.0\\SKILL.md",
+          "exists": true,
+          "description": "name: using-superpowers"
+        },
+        {
+          "name": "video-frames",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\video-frames\\SKILL.md",
+          "exists": true,
+          "description": "name: video-frames"
+        },
+        {
+          "name": "web-scraper",
+          "path": "C:\\Users\\20961\\.openclaw\\workspace-shangshu\\skills\\web-scraper\\SKILL.md",
+          "exists": true,
+          "description": "name: web-scraper-as-a-service"
+        }
+      ],
+      "allowAgents": [
+        "zhongshu",
+        "menxia",
+        "hubu",
+        "libu",
+        "bingbu",
+        "xingbu",
+        "gongbu",
+        "libu_hr"
+      ]
+    }
+  ]
+}

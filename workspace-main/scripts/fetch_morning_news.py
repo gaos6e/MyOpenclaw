@@ -1,0 +1,1 @@
+C:/Users/20961/.openclaw/workspace/skills/edict/scripts/fetch_morning_news.py

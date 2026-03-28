@@ -1,0 +1,1 @@
+C:/Users/20961/.openclaw/workspace/skills/edict/scripts/sync_officials_stats.py
