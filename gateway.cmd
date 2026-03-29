@@ -2,7 +2,6 @@
 rem OpenClaw Gateway launcher (SAFE TEMPLATE)
 rem - Do NOT hardcode API keys here.
 rem - Put secrets into environment variables or use a local untracked file (gateway.local.cmd).
-rem
 rem Required env vars (examples):
 rem   set "OPENAI_API_KEY=..."
 rem   set "QWEN_API_KEY=..."
@@ -20,11 +19,4 @@ rem Point it at a private directory so OpenClaw and Codex accounts do not overwr
 set "CODEX_HOME=%~dp0.codex-openclaw"
 
 set "OPENCLAW_GATEWAY_PORT=18789"
-set "OPENCLAW_LOG_DIR=%~dp0logs"
-set "OPENCLAW_GATEWAY_LOG=%OPENCLAW_LOG_DIR%\gateway-runtime.log"
-
-if not exist "%OPENCLAW_LOG_DIR%" mkdir "%OPENCLAW_LOG_DIR%"
-
-echo [gateway.cmd] Starting OpenClaw Gateway at %DATE% %TIME% >> "%OPENCLAW_GATEWAY_LOG%"
-
-"C:\Program Files\nodejs\node.exe" C:\Users\20961\AppData\Roaming\npm\node_modules\openclaw\dist\index.js gateway --port %OPENCLAW_GATEWAY_PORT% >> "%OPENCLAW_GATEWAY_LOG%" 2>&1
+"C:\Program Files\nodejs\node.exe" C:\Users\20961\AppData\Roaming\npm\node_modules\openclaw\dist\index.js gateway --port %OPENCLAW_GATEWAY_PORT%

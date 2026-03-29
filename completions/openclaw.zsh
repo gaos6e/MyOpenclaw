@@ -7,11 +7,12 @@ _openclaw_root_completion() {
   
   _arguments -C \
     "(--version -V)"{--version,-V}"[output the version number]" \
+    "--container[Run the CLI inside a running Podman/Docker container named <name> (default: env OPENCLAW_CONTAINER)]" \
     "--dev[Dev profile: isolate state under ~/.openclaw-dev, default gateway port 19001, and shift derived ports (browser/canvas)]" \
     "--profile[Use a named profile (isolates OPENCLAW_STATE_DIR/OPENCLAW_CONFIG_PATH under ~/.openclaw-<name>)]" \
     "--log-level[Global log level override for file + console (silent|fatal|error|warn|info|debug|trace)]" \
     "--no-color[Disable ANSI colors]" \
-    "1: :_values 'command' 'mcp[Manage embedded Pi MCP servers]' 'completion[Generate shell completion script]' 'setup[Initialize ~/.openclaw/openclaw.json and the agent workspace]' 'onboard[Interactive onboarding for the gateway, workspace, and skills]' 'configure[Interactive configuration for credentials, channels, gateway, and agent defaults]' 'config[Non-interactive config helpers (get/set/unset/file/validate). Run without subcommand for guided setup.]' 'backup[Create and verify local backup archives for OpenClaw state]' 'doctor[Health checks + quick fixes for the gateway and channels]' 'dashboard[Open the Control UI with your current token]' 'reset[Reset local config/state (keeps the CLI installed)]' 'uninstall[Uninstall the gateway service + local data (CLI remains)]' 'message[Send, read, and manage messages and channel actions]' 'memory[Search, inspect, and reindex memory files]' 'agent[Run an agent turn via the Gateway (use --local for embedded)]' 'agents[Manage isolated agents (workspaces + auth + routing)]' 'status[Show channel health and recent session recipients]' 'health[Fetch health from the running gateway]' 'sessions[List stored conversation sessions]' 'browser[Manage OpenClaw'\''s dedicated browser (Chrome/Chromium)]' 'acp[Run an ACP bridge backed by the Gateway]' 'gateway[Run, inspect, and query the WebSocket Gateway]' 'daemon[Manage the Gateway service (launchd/systemd/schtasks)]' 'logs[Tail gateway file logs via RPC]' 'system[System tools (events, heartbeat, presence)]' 'models[Model discovery, scanning, and configuration]' 'approvals[Manage exec approvals (gateway or node host)]' 'nodes[Manage gateway-owned nodes (pairing, status, invoke, and media)]' 'devices[Device pairing and auth tokens]' 'node[Run and manage the headless node host service]' 'sandbox[Manage sandbox containers (Docker-based agent isolation)]' 'tui[Open a terminal UI connected to the Gateway]' 'cron[Manage cron jobs (via Gateway)]' 'dns[DNS helpers for wide-area discovery (Tailscale + CoreDNS)]' 'docs[Search the live OpenClaw docs]' 'hooks[Manage internal agent hooks]' 'webhooks[Webhook helpers and integrations]' 'qr[Generate an iOS pairing QR code and setup code]' 'clawbot[Legacy clawbot command aliases]' 'feishu-diagnose[运行飞书插件诊断，检查配置、连通性和权限状态]' 'memory-hub[OpenClaw memory hub commands]' 'pairing[Secure DM pairing (approve inbound requests)]' 'plugins[Manage OpenClaw plugins and extensions]' 'channels[Manage connected chat channels and accounts]' 'directory[Lookup contact and group IDs (self, peers, groups) for supported chat channels]' 'security[Audit local config and state for common security foot-guns]' 'secrets[Secrets runtime controls]' 'skills[List and inspect available skills]' 'update[Update OpenClaw and inspect update channel status]'" \
+    "1: :_values 'command' 'mcp[Manage OpenClaw MCP config and channel bridge]' 'completion[Generate shell completion script]' 'setup[Initialize ~/.openclaw/openclaw.json and the agent workspace]' 'onboard[Interactive onboarding for the gateway, workspace, and skills]' 'configure[Interactive configuration for credentials, channels, gateway, and agent defaults]' 'config[Non-interactive config helpers (get/set/unset/file/schema/validate). Run without subcommand for guided setup.]' 'backup[Create and verify local backup archives for OpenClaw state]' 'doctor[Health checks + quick fixes for the gateway and channels]' 'dashboard[Open the Control UI with your current token]' 'reset[Reset local config/state (keeps the CLI installed)]' 'uninstall[Uninstall the gateway service + local data (CLI remains)]' 'message[Send, read, and manage messages and channel actions]' 'agent[Run an agent turn via the Gateway (use --local for embedded)]' 'agents[Manage isolated agents (workspaces + auth + routing)]' 'status[Show channel health and recent session recipients]' 'health[Fetch health from the running gateway]' 'sessions[List stored conversation sessions]' 'acp[Run an ACP bridge backed by the Gateway]' 'gateway[Run, inspect, and query the WebSocket Gateway]' 'daemon[Manage the Gateway service (launchd/systemd/schtasks)]' 'logs[Tail gateway file logs via RPC]' 'system[System tools (events, heartbeat, presence)]' 'models[Model discovery, scanning, and configuration]' 'approvals[Manage exec approvals (gateway or node host)]' 'nodes[Manage gateway-owned nodes (pairing, status, invoke, and media)]' 'devices[Device pairing and auth tokens]' 'node[Run and manage the headless node host service]' 'sandbox[Manage sandbox containers (Docker-based agent isolation)]' 'tui[Open a terminal UI connected to the Gateway]' 'cron[Manage cron jobs (via Gateway)]' 'dns[DNS helpers for wide-area discovery (Tailscale + CoreDNS)]' 'docs[Search the live OpenClaw docs]' 'hooks[Manage internal agent hooks]' 'webhooks[Webhook helpers and integrations]' 'qr[Generate an iOS pairing QR code and setup code]' 'clawbot[Legacy clawbot command aliases]' 'memory-hub[OpenClaw memory hub commands]' 'pairing[Secure DM pairing (approve inbound requests)]' 'plugins[Manage OpenClaw plugins and extensions]' 'channels[Manage connected chat channels and accounts]' 'directory[Lookup contact and group IDs (self, peers, groups) for supported chat channels]' 'security[Audit local config and state for common security foot-guns]' 'secrets[Secrets runtime controls]' 'skills[List and inspect available skills]' 'update[Update OpenClaw and inspect update channel status]'" \
     "*::arg:->args"
 
   case $state in
@@ -29,13 +30,11 @@ _openclaw_root_completion() {
         (reset) _openclaw_reset ;;
         (uninstall) _openclaw_uninstall ;;
         (message) _openclaw_message ;;
-        (memory) _openclaw_memory ;;
         (agent) _openclaw_agent ;;
         (agents) _openclaw_agents ;;
         (status) _openclaw_status ;;
         (health) _openclaw_health ;;
         (sessions) _openclaw_sessions ;;
-        (browser) _openclaw_browser ;;
         (acp) _openclaw_acp ;;
         (gateway) _openclaw_gateway ;;
         (daemon) _openclaw_daemon ;;
@@ -55,7 +54,6 @@ _openclaw_root_completion() {
         (webhooks) _openclaw_webhooks ;;
         (qr) _openclaw_qr ;;
         (clawbot) _openclaw_clawbot ;;
-        (feishu-diagnose) _openclaw_feishu_diagnose ;;
         (memory-hub) _openclaw_memory_hub ;;
         (pairing) _openclaw_pairing ;;
         (plugins) _openclaw_plugins ;;
@@ -103,7 +101,7 @@ _openclaw_onboard() {
     "--accept-risk[Acknowledge that agents are powerful and full system access is risky (required for --non-interactive)]" \
     "--flow[Onboard flow: quickstart|advanced|manual]" \
     "--mode[Onboard mode: local|remote]" \
-    "--auth-choice[Auth: chutes|litellm-api-key|custom-api-key|skip|setup-token|oauth|claude-cli|codex-cli|token|apiKey|byteplus-api-key|chutes-api-key|cloudflare-ai-gateway-api-key|copilot-proxy|deepseek-api-key|github-copilot|gemini-api-key|google-gemini-cli|huggingface-api-key|kilocode-api-key|kimi-code-api-key|minimax-global-oauth|minimax-global-api|minimax-cn-oauth|minimax-cn-api|mistral-api-key|modelstudio-standard-api-key-cn|modelstudio-standard-api-key|modelstudio-api-key-cn|modelstudio-api-key|moonshot-api-key|moonshot-api-key-cn|ollama|openai-codex|openai-api-key|opencode-zen|opencode-go|openrouter-api-key|qianfan-api-key|sglang|synthetic-api-key|together-api-key|venice-api-key|ai-gateway-api-key|vllm|volcengine-api-key|xai-api-key|xiaomi-api-key|zai-api-key|zai-coding-global|zai-coding-cn|zai-global|zai-cn|qwen-portal]" \
+    "--auth-choice[Auth: custom-api-key|skip|setup-token|oauth|claude-cli|codex-cli|anthropic-cli|token|apiKey|byteplus-api-key|chutes|chutes-api-key|cloudflare-ai-gateway-api-key|copilot-proxy|deepseek-api-key|github-copilot|gemini-api-key|google-gemini-cli|huggingface-api-key|kilocode-api-key|kimi-code-api-key|litellm-api-key|microsoft-foundry-entra|microsoft-foundry-apikey|minimax-global-oauth|minimax-global-api|minimax-cn-oauth|minimax-cn-api|mistral-api-key|modelstudio-standard-api-key-cn|modelstudio-standard-api-key|modelstudio-api-key-cn|modelstudio-api-key|moonshot-api-key|moonshot-api-key-cn|ollama|openai-codex|openai-api-key|opencode-zen|opencode-go|openrouter-api-key|qianfan-api-key|sglang|synthetic-api-key|together-api-key|venice-api-key|ai-gateway-api-key|vllm|volcengine-api-key|xai-api-key|xiaomi-api-key|zai-api-key|zai-coding-global|zai-coding-cn|zai-global|zai-cn]" \
     "--token-provider[Token provider id (non-interactive; used with --auth-choice token)]" \
     "--token[Token value (non-interactive; used with --auth-choice token)]" \
     "--token-profile-id[Auth profile id (non-interactive; default: <provider>:manual)]" \
@@ -111,7 +109,6 @@ _openclaw_onboard() {
     "--secret-input-mode[API key persistence mode: plaintext|ref (default: plaintext)]" \
     "--cloudflare-ai-gateway-account-id[Cloudflare Account ID]" \
     "--cloudflare-ai-gateway-gateway-id[Cloudflare AI Gateway ID]" \
-    "--litellm-api-key[LiteLLM API key]" \
     "--anthropic-api-key[Anthropic API key]" \
     "--byteplus-api-key[BytePlus API key]" \
     "--chutes-api-key[Chutes API key]" \
@@ -121,7 +118,8 @@ _openclaw_onboard() {
     "--gemini-api-key[Gemini API key]" \
     "--huggingface-api-key[Hugging Face API key (HF token)]" \
     "--kilocode-api-key[Kilo Gateway API key]" \
-    "--kimi-code-api-key[Kimi Code API key]" \
+    "--kimi-code-api-key[Kimi Code API key (subscription)]" \
+    "--litellm-api-key[LiteLLM API key]" \
     "--minimax-api-key[MiniMax API key]" \
     "--mistral-api-key[Mistral API key]" \
     "--modelstudio-standard-api-key-cn[Alibaba Cloud Model Studio Standard API key (China)]" \
@@ -219,6 +217,11 @@ _openclaw_config_file() {
     
 }
 
+_openclaw_config_schema() {
+  _arguments -C \
+    
+}
+
 _openclaw_config_validate() {
   _arguments -C \
     "--json[Output validation result as JSON]"
@@ -235,7 +238,7 @@ Examples:
 openclaw config set gateway.port 19001 --strict-json
 openclaw config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN
 openclaw config set secrets.providers.vault --provider-source file --provider-path /etc/openclaw/secrets.json --provider-mode json
-openclaw config set --batch-file ./config-set.batch.json --dry-run]' 'unset[Remove a config value by dot path]' 'file[Print the active config file path]' 'validate[Validate the current config against the schema without starting the gateway]'" \
+openclaw config set --batch-file ./config-set.batch.json --dry-run]' 'unset[Remove a config value by dot path]' 'file[Print the active config file path]' 'schema[Print the JSON schema for openclaw.json]' 'validate[Validate the current config against the schema without starting the gateway]'" \
     "*::arg:->args"
 
   case $state in
@@ -245,6 +248,7 @@ openclaw config set --batch-file ./config-set.batch.json --dry-run]' 'unset[Remo
         (set) _openclaw_config_set ;;
         (unset) _openclaw_config_unset ;;
         (file) _openclaw_config_file ;;
+        (schema) _openclaw_config_schema ;;
         (validate) _openclaw_config_validate ;;
       esac
       ;;
@@ -927,51 +931,6 @@ _openclaw_message() {
   esac
 }
 
-_openclaw_memory_status() {
-  _arguments -C \
-    "--agent[Agent id (default: default agent)]" \
-    "--json[Print JSON]" \
-    "--deep[Probe embedding provider availability]" \
-    "--index[Reindex if dirty (implies --deep)]" \
-    "--verbose[Verbose logging]"
-}
-
-_openclaw_memory_index() {
-  _arguments -C \
-    "--agent[Agent id (default: default agent)]" \
-    "--force[Force full reindex]" \
-    "--verbose[Verbose logging]"
-}
-
-_openclaw_memory_search() {
-  _arguments -C \
-    "--query[Search query (alternative to positional argument)]" \
-    "--agent[Agent id (default: default agent)]" \
-    "--max-results[Max results]" \
-    "--min-score[Minimum score]" \
-    "--json[Print JSON]"
-}
-
-_openclaw_memory() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'status[Show memory search index status]' 'index[Reindex memory files]' 'search[Search memory files]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (status) _openclaw_memory_status ;;
-        (index) _openclaw_memory_index ;;
-        (search) _openclaw_memory_search ;;
-      esac
-      ;;
-  esac
-}
-
 _openclaw_agent() {
   _arguments -C \
     "(--message -m)"{--message,-m}"[Message body for the agent]" \
@@ -1124,557 +1083,6 @@ _openclaw_sessions() {
   esac
 }
 
-_openclaw_browser_status() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_start() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_stop() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_reset_profile() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_tabs() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_tab_new() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_tab_select() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_tab_close() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_tab() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'new[Open a new tab (about:blank)]' 'select[Focus tab by index (1-based)]' 'close[Close tab by index (1-based); default: first tab]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (new) _openclaw_browser_tab_new ;;
-        (select) _openclaw_browser_tab_select ;;
-        (close) _openclaw_browser_tab_close ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser_open() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_focus() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_close() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_profiles() {
-  _arguments -C \
-    
-}
-
-_openclaw_browser_create_profile() {
-  _arguments -C \
-    "--name[Profile name (lowercase, numbers, hyphens)]" \
-    "--color[Profile color (hex format, e.g. #0066CC)]" \
-    "--cdp-url[CDP URL for remote Chrome (http/https)]" \
-    "--user-data-dir[User data dir for existing-session Chromium attach]" \
-    "--driver[Profile driver (openclaw|existing-session). Default: openclaw]"
-}
-
-_openclaw_browser_delete_profile() {
-  _arguments -C \
-    "--name[Profile name to delete]"
-}
-
-_openclaw_browser_screenshot() {
-  _arguments -C \
-    "--full-page[Capture full scrollable page]" \
-    "--ref[ARIA ref from ai snapshot]" \
-    "--element[CSS selector for element screenshot]" \
-    "--type[Output type (default: png)]"
-}
-
-_openclaw_browser_snapshot() {
-  _arguments -C \
-    "--format[Snapshot format (default: ai)]" \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--limit[Max nodes (default: 500/800)]" \
-    "--mode[Snapshot preset (efficient)]" \
-    "--efficient[Use the efficient snapshot preset]" \
-    "--interactive[Role snapshot: interactive elements only]" \
-    "--compact[Role snapshot: compact output]" \
-    "--depth[Role snapshot: max depth]" \
-    "--selector[Role snapshot: scope to CSS selector]" \
-    "--frame[Role snapshot: scope to an iframe selector]" \
-    "--labels[Include viewport label overlay screenshot]" \
-    "--out[Write snapshot to a file]"
-}
-
-_openclaw_browser_navigate() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_resize() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_click() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--double[Double click]" \
-    "--button[Mouse button to use]" \
-    "--modifiers[Comma-separated modifiers (Shift,Alt,Meta)]"
-}
-
-_openclaw_browser_type() {
-  _arguments -C \
-    "--submit[Press Enter after typing]" \
-    "--slowly[Type slowly (human-like)]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_press() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_hover() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_scrollintoview() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--timeout-ms[How long to wait for scroll (default: 20000)]"
-}
-
-_openclaw_browser_drag() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_select() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_upload() {
-  _arguments -C \
-    "--ref[Ref id from snapshot to click after arming]" \
-    "--input-ref[Ref id for <input type=file> to set directly]" \
-    "--element[CSS selector for <input type=file>]" \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--timeout-ms[How long to wait for the next file chooser (default: 120000)]"
-}
-
-_openclaw_browser_waitfordownload() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--timeout-ms[How long to wait for the next download (default: 120000)]"
-}
-
-_openclaw_browser_download() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--timeout-ms[How long to wait for the download to start (default: 120000)]"
-}
-
-_openclaw_browser_dialog() {
-  _arguments -C \
-    "--accept[Accept the dialog]" \
-    "--dismiss[Dismiss the dialog]" \
-    "--prompt[Prompt response text]" \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--timeout-ms[How long to wait for the next dialog (default: 120000)]"
-}
-
-_openclaw_browser_fill() {
-  _arguments -C \
-    "--fields[JSON array of field objects]" \
-    "--fields-file[Read JSON array from a file]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_wait() {
-  _arguments -C \
-    "--time[Wait for N milliseconds]" \
-    "--text[Wait for text to appear]" \
-    "--text-gone[Wait for text to disappear]" \
-    "--url[Wait for URL (supports globs like **/dash)]" \
-    "--load[Wait for load state]" \
-    "--fn[Wait for JS condition (passed to waitForFunction)]" \
-    "--timeout-ms[How long to wait for each condition (default: 20000)]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_evaluate() {
-  _arguments -C \
-    "--fn[Function source, e.g. (el) => el.textContent]" \
-    "--ref[Ref from snapshot]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_console() {
-  _arguments -C \
-    "--level[Filter by level (error, warn, info)]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_pdf() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_responsebody() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--timeout-ms[How long to wait for the response (default: 20000)]" \
-    "--max-chars[Max body chars to return (default: 200000)]"
-}
-
-_openclaw_browser_highlight() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_errors() {
-  _arguments -C \
-    "--clear[Clear stored errors after reading]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_requests() {
-  _arguments -C \
-    "--filter[Only show URLs that contain this substring]" \
-    "--clear[Clear stored requests after reading]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_trace_start() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "--no-screenshots[Disable screenshots]" \
-    "--no-snapshots[Disable snapshots]" \
-    "--sources[Include sources (bigger traces)]"
-}
-
-_openclaw_browser_trace_stop() {
-  _arguments -C \
-    "--out[Output path within openclaw temp dir (e.g. trace.zip or /tmp/openclaw/trace.zip)]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_trace() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'start[Start trace recording]' 'stop[Stop trace recording and write a .zip]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (start) _openclaw_browser_trace_start ;;
-        (stop) _openclaw_browser_trace_stop ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser_cookies_set() {
-  _arguments -C \
-    "--url[Cookie URL scope (recommended)]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_cookies_clear() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_cookies() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]" \
-    "1: :_values 'command' 'set[Set a cookie (requires --url or domain+path)]' 'clear[Clear all cookies]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (set) _openclaw_browser_cookies_set ;;
-        (clear) _openclaw_browser_cookies_clear ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser_storage_local_get() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_storage_local_set() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_storage_local_clear() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_storage_local() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'get[Get localStorage (all keys or one key)]' 'set[Set a localStorage key]' 'clear[Clear all localStorage keys]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (get) _openclaw_browser_storage_local_get ;;
-        (set) _openclaw_browser_storage_local_set ;;
-        (clear) _openclaw_browser_storage_local_clear ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser_storage_session_get() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_storage_session_set() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_storage_session_clear() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_storage_session() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'get[Get sessionStorage (all keys or one key)]' 'set[Set a sessionStorage key]' 'clear[Clear all sessionStorage keys]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (get) _openclaw_browser_storage_session_get ;;
-        (set) _openclaw_browser_storage_session_set ;;
-        (clear) _openclaw_browser_storage_session_clear ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser_storage() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'local[localStorage commands]' 'session[sessionStorage commands]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (local) _openclaw_browser_storage_local ;;
-        (session) _openclaw_browser_storage_session ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser_set_viewport() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_offline() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_headers() {
-  _arguments -C \
-    "--headers-json[JSON object of headers]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_credentials() {
-  _arguments -C \
-    "--clear[Clear credentials]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_geo() {
-  _arguments -C \
-    "--clear[Clear geolocation + permissions]" \
-    "--accuracy[Accuracy in meters]" \
-    "--origin[Origin to grant permissions for]" \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_media() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_timezone() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_locale() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set_device() {
-  _arguments -C \
-    "--target-id[CDP target id (or unique prefix)]"
-}
-
-_openclaw_browser_set() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-     \
-    "1: :_values 'command' 'viewport[Set viewport size (alias for resize)]' 'offline[Toggle offline mode]' 'headers[Set extra HTTP headers (JSON object)]' 'credentials[Set HTTP basic auth credentials]' 'geo[Set geolocation (and grant permission)]' 'media[Emulate prefers-color-scheme]' 'timezone[Override timezone (CDP)]' 'locale[Override locale (CDP)]' 'device[Apply a Playwright device descriptor (e.g. "iPhone 14")]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (viewport) _openclaw_browser_set_viewport ;;
-        (offline) _openclaw_browser_set_offline ;;
-        (headers) _openclaw_browser_set_headers ;;
-        (credentials) _openclaw_browser_set_credentials ;;
-        (geo) _openclaw_browser_set_geo ;;
-        (media) _openclaw_browser_set_media ;;
-        (timezone) _openclaw_browser_set_timezone ;;
-        (locale) _openclaw_browser_set_locale ;;
-        (device) _openclaw_browser_set_device ;;
-      esac
-      ;;
-  esac
-}
-
-_openclaw_browser() {
-  local -a commands
-  local -a options
-  
-  _arguments -C \
-    "--browser-profile[Browser profile name (default from config)]" \
-    "--json[Output machine-readable JSON]" \
-    "--url[Gateway WebSocket URL (defaults to gateway.remote.url when configured)]" \
-    "--token[Gateway token (if required)]" \
-    "--timeout[Timeout in ms]" \
-    "--expect-final[Wait for final response (agent)]" \
-    "1: :_values 'command' 'status[Show browser status]' 'start[Start the browser (no-op if already running)]' 'stop[Stop the browser (best-effort)]' 'reset-profile[Reset browser profile (moves it to Trash)]' 'tabs[List open tabs]' 'tab[Tab shortcuts (index-based)]' 'open[Open a URL in a new tab]' 'focus[Focus a tab by target id (or unique prefix)]' 'close[Close a tab (target id optional)]' 'profiles[List all browser profiles]' 'create-profile[Create a new browser profile]' 'delete-profile[Delete a browser profile]' 'screenshot[Capture a screenshot (MEDIA:<path>)]' 'snapshot[Capture a snapshot (default: ai; aria is the accessibility tree)]' 'navigate[Navigate the current tab to a URL]' 'resize[Resize the viewport]' 'click[Click an element by ref from snapshot]' 'type[Type into an element by ref from snapshot]' 'press[Press a key]' 'hover[Hover an element by ai ref]' 'scrollintoview[Scroll an element into view by ref from snapshot]' 'drag[Drag from one ref to another]' 'select[Select option(s) in a select element]' 'upload[Arm file upload for the next file chooser]' 'waitfordownload[Wait for the next download (and save it)]' 'download[Click a ref and save the resulting download]' 'dialog[Arm the next modal dialog (alert/confirm/prompt)]' 'fill[Fill a form with JSON field descriptors]' 'wait[Wait for time, selector, URL, load state, or JS conditions]' 'evaluate[Evaluate a function against the page or a ref]' 'console[Get recent console messages]' 'pdf[Save page as PDF]' 'responsebody[Wait for a network response and return its body]' 'highlight[Highlight an element by ref]' 'errors[Get recent page errors]' 'requests[Get recent network requests (best-effort)]' 'trace[Record a Playwright trace]' 'cookies[Read/write cookies]' 'storage[Read/write localStorage/sessionStorage]' 'set[Browser environment settings]'" \
-    "*::arg:->args"
-
-  case $state in
-    (args)
-      case $line[1] in
-        (status) _openclaw_browser_status ;;
-        (start) _openclaw_browser_start ;;
-        (stop) _openclaw_browser_stop ;;
-        (reset-profile) _openclaw_browser_reset_profile ;;
-        (tabs) _openclaw_browser_tabs ;;
-        (tab) _openclaw_browser_tab ;;
-        (open) _openclaw_browser_open ;;
-        (focus) _openclaw_browser_focus ;;
-        (close) _openclaw_browser_close ;;
-        (profiles) _openclaw_browser_profiles ;;
-        (create-profile) _openclaw_browser_create_profile ;;
-        (delete-profile) _openclaw_browser_delete_profile ;;
-        (screenshot) _openclaw_browser_screenshot ;;
-        (snapshot) _openclaw_browser_snapshot ;;
-        (navigate) _openclaw_browser_navigate ;;
-        (resize) _openclaw_browser_resize ;;
-        (click) _openclaw_browser_click ;;
-        (type) _openclaw_browser_type ;;
-        (press) _openclaw_browser_press ;;
-        (hover) _openclaw_browser_hover ;;
-        (scrollintoview) _openclaw_browser_scrollintoview ;;
-        (drag) _openclaw_browser_drag ;;
-        (select) _openclaw_browser_select ;;
-        (upload) _openclaw_browser_upload ;;
-        (waitfordownload) _openclaw_browser_waitfordownload ;;
-        (download) _openclaw_browser_download ;;
-        (dialog) _openclaw_browser_dialog ;;
-        (fill) _openclaw_browser_fill ;;
-        (wait) _openclaw_browser_wait ;;
-        (evaluate) _openclaw_browser_evaluate ;;
-        (console) _openclaw_browser_console ;;
-        (pdf) _openclaw_browser_pdf ;;
-        (responsebody) _openclaw_browser_responsebody ;;
-        (highlight) _openclaw_browser_highlight ;;
-        (errors) _openclaw_browser_errors ;;
-        (requests) _openclaw_browser_requests ;;
-        (trace) _openclaw_browser_trace ;;
-        (cookies) _openclaw_browser_cookies ;;
-        (storage) _openclaw_browser_storage ;;
-        (set) _openclaw_browser_set ;;
-      esac
-      ;;
-  esac
-}
-
 _openclaw_acp_client() {
   _arguments -C \
     "--cwd[Working directory for the ACP session]" \
@@ -1728,7 +1136,8 @@ _openclaw_gateway_run() {
     "--reset[Reset dev config + credentials + sessions + workspace (requires --dev)]" \
     "--force[Kill any existing listener on the target port before starting]" \
     "--verbose[Verbose logging to stdout/stderr]" \
-    "--claude-cli-logs[Only show claude-cli logs in the console (includes stdout/stderr)]" \
+    "--cli-backend-logs[Only show CLI backend logs in the console (includes stdout/stderr)]" \
+    "--claude-cli-logs[Deprecated alias for --cli-backend-logs]" \
     "--ws-log[WebSocket log style (\"auto\"|\"full\"|\"compact\")]" \
     "--compact[Alias for \"--ws-log compact\"]" \
     "--raw-stream[Log raw model stream events to jsonl]" \
@@ -1844,7 +1253,8 @@ _openclaw_gateway() {
     "--reset[Reset dev config + credentials + sessions + workspace (requires --dev)]" \
     "--force[Kill any existing listener on the target port before starting]" \
     "--verbose[Verbose logging to stdout/stderr]" \
-    "--claude-cli-logs[Only show claude-cli logs in the console (includes stdout/stderr)]" \
+    "--cli-backend-logs[Only show CLI backend logs in the console (includes stdout/stderr)]" \
+    "--claude-cli-logs[Deprecated alias for --cli-backend-logs]" \
     "--ws-log[WebSocket log style (\"auto\"|\"full\"|\"compact\")]" \
     "--compact[Alias for \"--ws-log compact\"]" \
     "--raw-stream[Log raw model stream events to jsonl]" \
@@ -3414,12 +2824,6 @@ _openclaw_clawbot() {
   esac
 }
 
-_openclaw_feishu_diagnose() {
-  _arguments -C \
-    "--trace[按 message_id 追踪完整处理链路]" \
-    "--analyze[分析追踪日志（需配合 --trace 使用）]"
-}
-
 _openclaw_memory_hub_status() {
   _arguments -C \
     "--json[output json]"
@@ -3498,14 +2902,14 @@ _openclaw_memory_hub() {
 
 _openclaw_pairing_list() {
   _arguments -C \
-    "--channel[Channel (feishu)]" \
+    "--channel[Channel ()]" \
     "--account[Account id (for multi-account channels)]" \
     "--json[Print JSON]"
 }
 
 _openclaw_pairing_approve() {
   _arguments -C \
-    "--channel[Channel (feishu)]" \
+    "--channel[Channel ()]" \
     "--account[Account id (for multi-account channels)]" \
     "--notify[Notify the requester on the same channel]"
 }
@@ -4019,4 +3423,20 @@ _openclaw_update() {
 }
 
 
-compdef _openclaw_root_completion openclaw
+_openclaw_register_completion() {
+  if (( ! $+functions[compdef] )); then
+    return 0
+  fi
+
+  compdef _openclaw_root_completion openclaw
+  precmd_functions=(${precmd_functions:#_openclaw_register_completion})
+  unfunction _openclaw_register_completion 2>/dev/null
+}
+
+_openclaw_register_completion
+if (( ! $+functions[compdef] )); then
+  typeset -ga precmd_functions
+  if [[ -z "${precmd_functions[(r)_openclaw_register_completion]}" ]]; then
+    precmd_functions+=(_openclaw_register_completion)
+  fi
+fi

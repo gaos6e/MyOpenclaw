@@ -110,7 +110,9 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
   }
 
   // 后台版本检查（供 /bot-version、/bot-upgrade 指令被动查询）
-  triggerUpdateCheck(log);
+  if (account.updateCheckOnStartup) {
+    triggerUpdateCheck(log);
+  }
 
   // 初始化 API 配置（markdown 支持）
   initApiConfig({
@@ -171,7 +173,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
     await ensureImageServer(log, account.imageServerBaseUrl);
     imageServerBaseUrl = account.imageServerBaseUrl;
     log?.info(`[qqbot:${account.accountId}] Image server enabled with URL: ${imageServerBaseUrl}`);
-  } else {
+  } else if (account.logImageServerDisabled) {
     log?.info(`[qqbot:${account.accountId}] Image server disabled (no imageServerBaseUrl configured)`);
   }
 

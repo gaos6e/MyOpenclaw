@@ -23,6 +23,10 @@ export interface ResolvedQQBotAccount {
   imageServerBaseUrl?: string;
   /** 是否支持 markdown 消息（默认 true） */
   markdownSupport: boolean;
+  /** 是否在启动时检查插件更新（默认 true） */
+  updateCheckOnStartup: boolean;
+  /** 未配置图床时是否打印禁用日志（默认 false） */
+  logImageServerDisabled: boolean;
   config: QQBotAccountConfig;
 }
 
@@ -43,6 +47,10 @@ export interface QQBotAccountConfig {
   imageServerBaseUrl?: string;
   /** 是否支持 markdown 消息（默认 true，设为 false 可禁用） */
   markdownSupport?: boolean;
+  /** 是否在启动时检查插件更新（默认 true） */
+  updateCheckOnStartup?: boolean;
+  /** 未配置图床时是否打印禁用日志（默认 false） */
+  logImageServerDisabled?: boolean;
   /**
    * @deprecated 请使用 audioFormatPolicy.uploadDirectFormats
    * 可直接上传的音频格式（不转换为 SILK），向后兼容
