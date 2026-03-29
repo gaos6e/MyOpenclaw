@@ -22,7 +22,6 @@ const ROOT_ALLOWLIST = new Set([
   "browser",
   "canvas",
   "completions",
-  "control-ui",
   "cron",
   "debug.jsonl",
   "delivery-queue",

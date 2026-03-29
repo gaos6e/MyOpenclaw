@@ -1,10 +1,14 @@
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$gatewayCmd = Join-Path $scriptDir "gateway.cmd"
+$nodeExe = "C:\Program Files\nodejs\node.exe"
+$gatewayEntry = "C:\Users\20961\AppData\Roaming\npm\node_modules\openclaw\dist\index.js"
 
-if (-not (Test-Path $gatewayCmd)) {
-    throw "gateway.cmd not found: $gatewayCmd"
+if (-not (Test-Path $nodeExe)) {
+    throw "node.exe not found: $nodeExe"
+}
+if (-not (Test-Path $gatewayEntry)) {
+    throw "OpenClaw gateway entry not found: $gatewayEntry"
 }
 
 $logDir = Join-Path $env:LOCALAPPDATA "Temp\openclaw"
@@ -15,9 +19,12 @@ if (-not (Test-Path $logDir)) {
 $stdoutLog = Join-Path $logDir "gateway-wrapper-stdout.log"
 $stderrLog = Join-Path $logDir "gateway-wrapper-stderr.log"
 
+$env:CODEX_HOME = Join-Path $scriptDir ".codex-openclaw"
+$env:OPENCLAW_GATEWAY_PORT = "18789"
+
 $proc = Start-Process `
-    -FilePath "$env:SystemRoot\System32\cmd.exe" `
-    -ArgumentList @("/d", "/s", "/c", "`"$gatewayCmd`"") `
+    -FilePath $nodeExe `
+    -ArgumentList @($gatewayEntry, "gateway", "--port", $env:OPENCLAW_GATEWAY_PORT) `
     -WorkingDirectory $scriptDir `
     -WindowStyle Hidden `
     -RedirectStandardOutput $stdoutLog `
