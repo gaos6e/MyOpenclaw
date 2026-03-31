@@ -4,6 +4,9 @@
 > 自我提升执行时优先清理此清单。
 
 ## 待做
+- [高] 收紧 elevated exec allowFrom（qqbot/webchat 目前为 "*"） -> 降低多用户/被滥用风险
+- [中] 评估关闭 defaults.autoAllowSkills（exec 审批自动放行） -> 降低隐式信任面
+- [中] 清点 .openclaw 根目录的 openclaw.json.clobbered* / workspace-* 目录用途，决定保留/归档策略 -> 减少根目录杂物与误清风险
 
 ## 记录规则
 - 触发：出现可提升点但不适合立刻执行

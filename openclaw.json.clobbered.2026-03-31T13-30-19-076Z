@@ -1,0 +1,619 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.28",
+    "lastTouchedAt": "2026-03-31T13:30:18.562Z"
+  },
+  "env": {
+    "shellEnv": {
+      "enabled": true
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-29T02:55:47.868Z",
+    "lastRunVersion": "2026.3.28",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "cli": {
+    "banner": {
+      "taglineMode": "default"
+    }
+  },
+  "update": {
+    "channel": "stable",
+    "checkOnStart": true,
+    "auto": {
+      "enabled": true
+    }
+  },
+  "browser": {
+    "enabled": true,
+    "attachOnly": false,
+    "defaultProfile": "openclaw"
+  },
+  "auth": {
+    "profiles": {
+      "openai-codex:default": {
+        "provider": "openai-codex",
+        "mode": "oauth"
+      },
+      "openai-codex:13113158938@163.com": {
+        "provider": "openai-codex",
+        "mode": "oauth"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "DEEPSEEK_API_KEY"
+        },
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek Chat",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "compat": {
+              "supportsUsageInStreaming": true
+            }
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek Reasoner",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 65536,
+            "compat": {
+              "supportsUsageInStreaming": true
+            }
+          }
+        ]
+      },
+      "qwen": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "QWEN_API_KEY"
+        },
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen3-vl-plus",
+            "name": "Qwen3 VL Plus",
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          }
+        ]
+      },
+      "teamplus": {
+        "baseUrl": "https://teamplus.space/v1",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "TEAMPLUS_API_KEY"
+        },
+        "api": "openai-completions",
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        },
+        "authHeader": true,
+        "models": [
+          {
+            "id": "gpt-5.2",
+            "name": "gpt-5.2",
+            "reasoning": true,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 272000,
+            "maxTokens": 128000
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "teamplus/gpt-5.2",
+        "fallbacks": []
+      },
+      "imageModel": {
+        "primary": "qwen/qwen3-vl-plus"
+      },
+      "models": {
+        "openai-codex/gpt-5.2-codex": {
+          "params": {
+            "responsesCompactThreshold": 217600,
+            "responsesServerCompaction": true
+          }
+        },
+        "openai-codex/gpt-5.4": {},
+        "teamplus/gpt-5.2": {
+          "alias": "TeamPlus"
+        }
+      },
+      "workspace": "C:\\Users\\20961\\.openclaw\\workspace",
+      "memorySearch": {
+        "enabled": true,
+        "sources": [
+          "memory",
+          "sessions"
+        ],
+        "experimental": {
+          "sessionMemory": true
+        },
+        "provider": "openai",
+        "remote": {
+          "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+          "apiKey": {
+            "source": "env",
+            "provider": "default",
+            "id": "QWEN_API_KEY"
+          }
+        },
+        "model": "text-embedding-v4"
+      },
+      "contextPruning": {
+        "mode": "cache-ttl",
+        "ttl": "1h"
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 54400,
+        "memoryFlush": {
+          "enabled": true
+        }
+      },
+      "thinkingDefault": "medium",
+      "elevatedDefault": "full",
+      "heartbeat": {
+        "every": "30m",
+        "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. If you actually execute any checklist item, do not reply HEARTBEAT_OK. Always send a concise Chinese summary covering: what you checked or did, what you found or changed, and whether user input is needed. If you executed checks and found nothing abnormal, still send a short summary stating that. Only reply HEARTBEAT_OK when you truly took no action and have nothing to report."
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace",
+        "model": "teamplus/gpt-5.2",
+        "identity": {
+          "name": "main",
+          "emoji": "🤖"
+        },
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "taizi",
+        "name": "taizi",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-taizi",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\taizi\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "bingbu",
+        "name": "bingbu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-bingbu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\bingbu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "libu_hr",
+        "name": "libu_hr",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-libu_hr",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\libu_hr\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "libu",
+        "name": "libu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-libu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\libu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "xingbu",
+        "name": "xingbu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-xingbu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\xingbu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "zhongshu",
+        "name": "zhongshu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-zhongshu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\zhongshu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "zaochao",
+        "name": "zaochao",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-zaochao",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\zaochao\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "gongbu",
+        "name": "gongbu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-gongbu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\gongbu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "menxia",
+        "name": "menxia",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-menxia",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\menxia\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "hubu",
+        "name": "hubu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-hubu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\hubu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      },
+      {
+        "id": "shangshu",
+        "name": "shangshu",
+        "workspace": "C:\\Users\\20961\\.openclaw\\workspace-shangshu",
+        "agentDir": "C:\\Users\\20961\\.openclaw\\agents\\shangshu\\agent",
+        "tools": {
+          "profile": "full"
+        }
+      }
+    ]
+  },
+  "tools": {
+    "profile": "full",
+    "media": {
+      "audio": {
+        "enabled": true,
+        "maxBytes": 10485760,
+        "timeoutSeconds": 90,
+        "models": [
+          {
+            "type": "cli",
+            "command": "node",
+            "args": [
+              "C:\\Users\\20961\\.openclaw\\scripts\\qwen_asr_cli.mjs",
+              "--file",
+              "{{MediaPath}}",
+              "--base-url",
+              "https://dashscope.aliyuncs.com/compatible-mode/v1",
+              "--api-key-env",
+              "QWEN_API_KEY",
+              "--model",
+              "qwen3-asr-flash"
+            ]
+          }
+        ]
+      }
+    },
+    "sessions": {
+      "visibility": "all"
+    },
+    "elevated": {
+      "enabled": true,
+      "allowFrom": {
+        "qqbot": [
+          "*"
+        ],
+        "webchat": [
+          "*"
+        ]
+      }
+    }
+  },
+  "bindings": [
+    {
+      "agentId": "main",
+      "match": {
+        "channel": "qqbot",
+        "accountId": "default"
+      }
+    }
+  ],
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer",
+    "idleMinutes": 10080
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "self-improvement": {
+          "enabled": false
+        },
+        "task-ack": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "web": {
+    "enabled": true
+  },
+  "channels": {
+    "qqbot": {
+      "allowFrom": [
+        "*"
+      ],
+      "appId": "1903522532",
+      "clientSecret": "pzAMYlyCQfuAQhyGZsCWrCYuHe2RqGg7",
+      "enabled": true,
+      "updateCheckOnStartup": false,
+      "logImageServerDisabled": false,
+      "healthMonitor": {
+        "enabled": false
+      }
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "controlUi": {
+      "root": "C:\\Users\\20961\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\control-ui",
+      "allowedOrigins": [
+        "file://"
+      ]
+    },
+    "auth": {
+      "mode": "token",
+      "token": "openclaw-f525e69c4e995e60fa33ea7373fca5b6"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "mcp": {
+    "servers": {
+      "notebooklm-mcp": {
+        "command": "C:\\Users\\20961\\.local\\bin\\notebooklm-mcp.exe"
+      }
+    }
+  },
+  "skills": {
+    "entries": {
+      "agent-browser": {
+        "env": {
+          "AGENT_BROWSER_EXECUTABLE_PATH": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+        }
+      },
+      "brave-web-search": {
+        "enabled": true
+      },
+      "docx": {
+        "enabled": true
+      },
+      "find-skills": {
+        "enabled": true
+      },
+      "openclaw-tavily-search": {
+        "apiKey": "REDACTED",
+        "env": {
+          "TAVILY_API_KEY": "REDACTED"
+        }
+      },
+      "pdf": {
+        "enabled": true
+      },
+      "pptx": {
+        "enabled": true
+      },
+      "self-improving-agent": {
+        "enabled": true
+      },
+      "tavily-search": {
+        "enabled": true,
+        "env": {
+          "TAVILY_API_KEY": "REDACTED"
+        }
+      },
+      "xlsx": {
+        "enabled": true
+      },
+      "api-gateway": {
+        "enabled": true,
+        "env": {
+          "MATON_API_KEY": "2EC6piN2DSFgJKMlysbZGxtGjmLAEgf2ikphVJns_YGxPIQAbk8UzQY9SnYUjFl439Q_FtyJ9ZNTMj8qMzv1fP73Ln_ZIJd-q_8"
+        }
+      },
+      "humanizer": {
+        "enabled": true
+      },
+      "summarize": {
+        "enabled": true
+      },
+      "qa-gate": {
+        "enabled": true
+      },
+      "clawlite-investigate": {
+        "enabled": true
+      },
+      "data-analyst-pro": {
+        "enabled": true
+      },
+      "data-analyst": {
+        "enabled": true
+      },
+      "elite-longterm-memory": {
+        "enabled": true
+      },
+      "evolver": {
+        "enabled": false
+      }
+    }
+  },
+  "plugins": {
+    "allow": [
+      "openclaw-qqbot",
+      "openclaw-memory-hub",
+      "openclaw-context-engine",
+      "openclaw-checkpoint-guardian",
+      "memory-lancedb"
+    ],
+    "slots": {
+      "memory": "openclaw-memory-hub",
+      "contextEngine": "openclaw-context-engine"
+    },
+    "entries": {
+      "openclaw-checkpoint-guardian": {
+        "enabled": true,
+        "config": {
+          "explorationThreshold": 6,
+          "reminderCooldown": 4
+        }
+      },
+      "openclaw-context-engine": {
+        "enabled": true,
+        "config": {
+          "maxChars": 2200
+        }
+      },
+      "openclaw-memory-hub": {
+        "enabled": true,
+        "config": {}
+      },
+      "openclaw-qqbot": {
+        "enabled": true,
+        "config": {}
+      },
+      "memory-lancedb": {
+        "enabled": true,
+        "config": {
+          "embedding": {
+            "apiKey": "${OPENAI_API_KEY}",
+            "model": "text-embedding-3-small"
+          },
+          "autoCapture": false,
+          "autoRecall": true
+        }
+      }
+    },
+    "installs": {
+      "openclaw-checkpoint-guardian": {
+        "source": "path",
+        "spec": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-checkpoint-guardian",
+        "sourcePath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-checkpoint-guardian",
+        "installPath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-checkpoint-guardian",
+        "version": "0.1.0",
+        "resolvedName": "@local/openclaw-checkpoint-guardian",
+        "resolvedVersion": "0.1.0",
+        "resolvedSpec": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-checkpoint-guardian",
+        "installedAt": "2026-03-21T11:00:00.000Z"
+      },
+      "openclaw-context-engine": {
+        "source": "path",
+        "spec": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-context-engine",
+        "sourcePath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-context-engine",
+        "installPath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-context-engine",
+        "version": "0.1.0",
+        "resolvedName": "@local/openclaw-context-engine",
+        "resolvedVersion": "0.1.0",
+        "resolvedSpec": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-context-engine",
+        "installedAt": "2026-03-21T11:00:00.000Z"
+      },
+      "openclaw-memory-hub": {
+        "source": "path",
+        "spec": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-memory-hub",
+        "sourcePath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-memory-hub",
+        "installPath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-memory-hub",
+        "version": "0.1.0",
+        "resolvedName": "@local/openclaw-memory-hub",
+        "resolvedVersion": "0.1.0",
+        "resolvedSpec": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-memory-hub",
+        "installedAt": "2026-03-21T10:30:00.000Z"
+      },
+      "openclaw-qqbot": {
+        "source": "npm",
+        "spec": "@tencent-connect/openclaw-qqbot@latest",
+        "installPath": "C:\\Users\\20961\\.openclaw\\extensions\\openclaw-qqbot",
+        "version": "1.6.4",
+        "resolvedName": "@tencent-connect/openclaw-qqbot",
+        "resolvedVersion": "1.6.4",
+        "resolvedSpec": "@tencent-connect/openclaw-qqbot@1.6.4",
+        "integrity": "sha512-1tMIqKOlhTk+8mZA/G9uTSbMp8cspLjv0Z2jpfn+Ewz6kz2zbmZa9mxbXwOhg67/hwEGiUgYHB7nKQ1QQjjvkQ==",
+        "shasum": "d0db258464aa7bb935af3d920ea93668af0be537",
+        "resolvedAt": "2026-03-23T17:00:56.813Z",
+        "installedAt": "2026-03-23T17:01:43.689Z"
+      }
+    }
+  }
+}

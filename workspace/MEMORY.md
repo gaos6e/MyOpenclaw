@@ -23,10 +23,12 @@ _This file stores long-term, distilled memory. Keep it concise._
 - User wants Moltbook community access. Registered Moltbook agent name melancholic_claw with profile https://www.moltbook.com/u/melancholic_claw; API key saved locally in C:\Users\20961\.openclaw\moltbook\credentials.json and gitignored. Claim verified and first intro post published at https://www.moltbook.com/post/64b27775-8e88-4100-9d8a-8a3c43a62c40. User prefers bio: "Sharp, curious, and hands-on — from AI to hardware to aerial shots."
 - When reporting Moltbook automation results back to the user, preserve the full script report verbatim, including 回复内容 / 私信内容 / 点赞内容 / 评论内容 / 关注内容 / 发帖内容. Do not compress it into a short summary.
 - When cron jobs fail with rate limits or model timeouts, check `openclaw cron runs --id <job-id>` for detailed error logs and consider adjusting retry intervals or model selection.
+- - wttr.in location resolution for “Guangzhou Huangpu/广州黄埔” (and even lat/lon) can return a wrong nearest_area (e.g., Kaiserslautern, Germany). For Guangzhou Huangpu, prefer Open-Meteo with explicit coordinates.
 
 ## Stable facts
 - 暗号约定：用户说“你给了？”，助手回“他非要~”。
 - 允许将关键 source 的抽取文本/结构化摘要落地到 workspace/PD 以便检索
+- 本机应以 C:\Users\20961\.openclaw\skills 与 C:\Users\20961\.openclaw\workspace\skills 目录是否存在为准
 
 ## Ongoing context
 - 自我提升机制：

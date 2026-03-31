@@ -7,6 +7,15 @@ description: Helps users discover and install agent skills when they ask questio
 
 This skill helps you discover and install skills from the open agent skills ecosystem.
 
+Important boundary:
+
+- Use this skill for "find/install/recommend a skill" tasks.
+- Do not use this skill as the primary path for "catalog inventory" tasks such as:
+  - "这个网站有哪些 skills"
+  - "我本地装了哪些 skills"
+  - "帮我对比网站 catalog 和本机已安装 skills"
+- For those inventory/comparison tasks, answer from static fetch + local inventory first, and stay in that lightweight path unless the user explicitly wants interactive browsing.
+
 ## When to Use This Skill
 
 Use this skill when the user:
@@ -17,6 +26,8 @@ Use this skill when the user:
 - Expresses interest in extending agent capabilities
 - Wants to search for tools, templates, or workflows
 - Mentions they wish they had help with a specific domain (design, testing, deployment, etc.)
+
+Do not use this skill just because the user's message contains the word "skills". If the user is asking for an inventory, comparison, or audit of existing skills rather than discovery/installation, stay on the inventory path instead.
 
 ## What is the Skills CLI?
 
@@ -113,6 +124,32 @@ When searching, consider these common categories:
 1. **Use specific keywords**: "react testing" is better than just "testing"
 2. **Try alternative terms**: If "deploy" doesn't work, try "deployment" or "ci-cd"
 3. **Check popular sources**: Many skills come from `vercel-labs/agent-skills` or `ComposioHQ/awesome-claude-skills`
+
+## Static Catalog Queries
+
+When the user asks questions like:
+
+- "这个网站有哪些 skills"
+- "我本地装了哪些 skills"
+- "帮我对比网站 catalog 和本地已安装 skills"
+
+Prefer a lightweight path:
+
+1. Fetch the catalog page or API with `web_fetch` first.
+2. Enumerate local installed skills with:
+
+```powershell
+powershell -NoProfile -File C:\Users\20961\.openclaw\workspace\scripts\list_skills_inventory.ps1
+```
+
+3. Summarize what you found directly from those results.
+
+Avoid escalating to browser automation by default. Do **not** use `agent-browser open` or long-running interactive browser commands unless:
+
+- static fetch clearly failed to expose the catalog, and
+- the user still needs the live rendered page inspected.
+
+If browser automation is required, tell the user briefly that the site appears to need interactive rendering/login before starting a long-running browser step.
 
 ## When No Skills Are Found
 

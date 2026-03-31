@@ -1,0 +1,135 @@
+{
+  "skill": {
+    "slug": "elite-longterm-memory",
+    "displayName": "Elite Longterm Memory",
+    "summary": "Ultimate AI agent memory system for Cursor, Claude, ChatGPT & Copilot. WAL protocol + vector search + git-notes + cloud backup. Never lose context again. Vibe-coding ready.",
+    "tags": {
+      "ai": "0.1.0",
+      "clawdbot": "0.1.0",
+      "latest": "1.2.3",
+      "long-term": "0.1.0",
+      "memory": "0.1.0",
+      "openclaw": "0.1.0",
+      "persistence": "0.1.0"
+    },
+    "stats": {
+      "comments": 5,
+      "downloads": 44355,
+      "installsAllTime": 488,
+      "installsCurrent": 459,
+      "stars": 170,
+      "versions": 4
+    },
+    "createdAt": 1770050243398,
+    "updatedAt": 1774927152644
+  },
+  "latestVersion": {
+    "version": "1.2.3",
+    "createdAt": 1770799020241,
+    "changelog": "- Expanded description and keywords for improved discoverability, highlighting ChatGPT, Copilot, Cursor, and developer tooling.\n- Updated version to 1.2.3.\n- Clarified compatibility and marketing text in SKILL.md.\n- No functional or implementation changes to code logic.",
+    "license": null
+  },
+  "owner": {
+    "handle": "nextfrontierbuilds",
+    "userId": "publishers:nextfrontierbuilds",
+    "displayName": "NextFrontierBuilds",
+    "image": "https://avatars.githubusercontent.com/u/257253317?v=4"
+  },
+  "version": {
+    "version": "1.2.3",
+    "createdAt": 1770799020241,
+    "changelog": "- Expanded description and keywords for improved discoverability, highlighting ChatGPT, Copilot, Cursor, and developer tooling.\n- Updated version to 1.2.3.\n- Clarified compatibility and marketing text in SKILL.md.\n- No functional or implementation changes to code logic.",
+    "changelogSource": "auto",
+    "license": null,
+    "files": [
+      {
+        "path": "README.md",
+        "size": 5593,
+        "sha256": "17c0c112c1363fe9568fdbd10674660aa6755f6ba454f5d919bc332a34c0c653",
+        "contentType": "text/markdown"
+      },
+      {
+        "path": "SKILL.md",
+        "size": 12723,
+        "sha256": "56bb341604f951985e451df450744d1d78cd9ba905b6df8952084343b35a95b3",
+        "contentType": "text/markdown"
+      },
+      {
+        "path": "bin/elite-memory.js",
+        "size": 4875,
+        "sha256": "a937f5aab36c4b6ee0760a4ebe7499aab204f663b97c71da8e066b206dcc9e2d",
+        "contentType": "text/javascript"
+      },
+      {
+        "path": "package.json",
+        "size": 1288,
+        "sha256": "188612db5a262a29f2ee6f68ddb138597966f5e5e46a8856de75a23aad76450f",
+        "contentType": "application/json"
+      }
+    ],
+    "security": {
+      "status": "suspicious",
+      "hasWarnings": true,
+      "checkedAt": 1774927152463,
+      "model": "gpt-5-mini",
+      "hasScanResult": true,
+      "sha256hash": "55a605501672910d979f05101ef64267c2c4d83c2f39ecf007e53c3dfae597ca",
+      "virustotalUrl": "https://www.virustotal.com/gui/file/55a605501672910d979f05101ef64267c2c4d83c2f39ecf007e53c3dfae597ca",
+      "scanners": {
+        "vt": {
+          "status": "suspicious",
+          "verdict": "suspicious",
+          "normalizedStatus": "suspicious",
+          "analysis": "Type: OpenClaw Skill\nName: elite-longterm-memory\nVersion: 1.2.3\n\nThe skill bundle provides a multi-layered memory system for AI agents. While the `bin/elite-memory.js` script performs benign local file system operations, the `SKILL.md` contains instructions for the AI agent that involve executing external Python scripts (`python3 skills/git-notes-memory/memory.py`), installing npm packages (`npm install mem0ai`), and running external binaries (`supermemory`). These actions introduce supply chain risks and potential shell injection vulnerabilities if the external scripts or their arguments are not properly secured. Additionally, the `SKILL.md` instructs the agent to perform certain actions 'SILENTLY', which is a prompt injection technique, though in this context it appears intended for managing agent verbosity rather than hiding malicious activity. The `rm -rf` command is also present for a 'nuclear option' memory clear. These capabilities, while potentially useful for the stated purpose, carry significant risks without clear evidence of intentional malice.",
+          "source": "palm",
+          "checkedAt": 1774927152463
+        },
+        "llm": {
+          "status": "clean",
+          "verdict": "benign",
+          "normalizedStatus": "clean",
+          "confidence": "high",
+          "summary": "The skill's requirements and instructions are consistent with a scaffolding/documentation-first memory system: it creates local memory files, recommends vector/third-party services, and asks only for an OpenAI key; nothing in the package appears disproportionate or covert.",
+          "dimensions": [
+            {
+              "detail": "Name/description promise (WAL + vector search + git-notes + optional cloud backup) matches what the skill actually provides: templates, instructions, and a small CLI to initialize local files and recommend integrations. The single required env var (OPENAI_API_KEY) aligns with the documented use of OpenAI as the memory search provider.",
+              "label": "Purpose & Capability",
+              "name": "purpose_capability",
+              "rating": "ok"
+            },
+            {
+              "detail": "SKILL.md instructs the agent/user to create SESSION-STATE.md, edit agent config files (~/.openclaw/openclaw.json, ~/.clawdbot/clawdbot.json) and optionally configure third-party services (LanceDB, Mem0, SuperMemory). Those actions are within scope for a memory system but the instructions reference external tools (python memory.py, memory_recall, mem0, supermemory) that are not bundled — user will need to install/configure them separately. No instructions attempt to read unrelated system secrets or exfiltrate data.",
+              "label": "Instruction Scope",
+              "name": "instruction_scope",
+              "rating": "note"
+            },
+            {
+              "detail": "There is no install spec (instruction-only style) and the package contains a small benign CLI (bin/elite-memory.js) that writes/reads local markdown files and checks a local path for LanceDB. No remote downloads or extracts are performed by the skill itself. package.json lists mem0ai as an optional dependency, which is reasonable for optional auto-extraction functionality.",
+              "label": "Install Mechanism",
+              "name": "install_mechanism",
+              "rating": "ok"
+            },
+            {
+              "detail": "Only OPENAI_API_KEY is declared as required, which matches the documented use when enabling OpenAI-backed memory search. The SKILL.md mentions additional optional API keys (MEM0_API_KEY, SUPERMEMORY_API_KEY) for third-party features; these are optional and not required by the CLI. This is proportionate, but users should be aware that enabling optional features will require providing those extra credentials.",
+              "label": "Credentials",
+              "name": "environment_proportionality",
+              "rating": "note"
+            },
+            {
+              "detail": "The skill does not request always:true and does not attempt to modify other skills or system-wide agent settings programmatically. Its CLI writes files into the current workspace and reads HOME to inspect a local LanceDB path — expected behavior for this kind of tool.",
+              "label": "Persistence & Privilege",
+              "name": "persistence_privilege",
+              "rating": "ok"
+            }
+          ],
+          "guidance": "This package is primarily a scaffolding and documentation bundle with a small CLI that creates local memory files (SESSION-STATE.md, MEMORY.md, daily logs). Before installing: 1) Review the GitHub/homepage and publisher identity (registry metadata lists owner but source was noted as unknown). 2) Back up any agent config files (~/.openclaw/openclaw.json, ~/.clawdbot/clawdbot.json) before editing them. 3) Understand that optional features (Mem0, SuperMemory, LanceDB) require additional API keys and external services you must trust. 4) Inspect bin/elite-memory.js (it only writes/reads local markdown files and checks a local path) and the SKILL.md to confirm you want the agent to create persistent local memory files. If you plan to enable cloud backups or third-party memory providers, verify those providers' privacy/security practices before supplying keys.",
+          "findings": null,
+          "model": "gpt-5-mini",
+          "checkedAt": 1770799687449
+        }
+      }
+    }
+  },
+  "versions": null,
+  "file": null
+}

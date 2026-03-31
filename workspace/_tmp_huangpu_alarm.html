@@ -1,0 +1,275 @@
+﻿
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+<!-- å¨ç«å¬å±èµæºé¡µé¢ï¼ç¨äºå®ä¹ç»ä¸çé¡µé¢å¤´é¨å£°æãå¨å±æ ·å¼ãå¨å±JavaScriptåé -->
+
+
+
+
+<meta content="å¹¿å·å¸æ°è±¡å°,å¹¿å·æ°è±¡,å¹¿å·å¤©æ°,tqyb,å¹¿å·æ°è±¡ç½ç«" name="keywords">
+<meta content="å¹¿å·å¤©æ°æ¯å¹¿å·å¸æ°è±¡å±çå®æ¹ä¸å¡ç½ç«ï¼ä¸ºæ¨æä¾æå¨ãåæ¶ãåç¡®çå¹¿å·å¤©æ°é¢æ¥ãç½æ ¼ç²¾ç»åé¢æ¥ãå¤©æ°é¢è­¦ãå¤©æ°å®åµãé·è¾¾åæ³¢å¾ãå«æäºå¾ãå°é£è·¯å¾ãå¹¿å·æ°åç­ä¿¡æ¯æå¡" name="description">
+<meta charset="UTF-8" http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="refresh" content="300">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,Chrome=1">
+<meta name="baidu-site-verification" content="5IUrE5FoJX">
+<!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none'; style-src cdn.example.org third-party.org; child-src https:">
+ --><!--verification5IUrE5FoJX-->
+<link rel="shortcut icon" href="http://www.tqyb.com.cn/favion.ico">
+<link rel="stylesheet" href="/designs/css/style.css" type="text/css" media="all">
+<link rel="stylesheet" href="/designs/css/column.css" type="text/css" media="all">
+<script type="text/javascript">
+var DATA_PATH = '/data/';
+var WEB_ROOT = '/';
+var WEB_PAGE_ROOT = '/';
+var AREA_CODE = {
+		"GDHX":["huadu","è±é½åº"],
+		"GDCO":["conghua","ä»ååº"],
+		"GDZC":["zengcheng","å¢ååº"],
+		"GDPY":["panyu","çªç¦ºåº"],
+		"GDHH":["haizhu","æµ·ç åº"],
+		"GDLW":["liwan","èæ¹¾åº"],
+		"GDYX":["yuexiu","è¶ç§åº"],
+		"GDTH":["tianhe","å¤©æ²³åº"],
+		"GDNS":["nansha","åæ²åº"],
+		"GDBY":["baiyun","ç½äºåº"],
+		"GDHU":["huangpu","é»ååº"],
+		"BCGZ":["guagnzhou","å¹¿å·å¸"],
+		"è±é½åº":["huadu","GDHX"],
+		"ä»ååº":["conghua","GDCO"],
+		"å¢ååº":["zengcheng","GDZC"],
+		"çªç¦ºåº":["panyu","GDPY"],
+		"æµ·ç åº":["haizhu","GDHH"],
+		"èæ¹¾åº":["liwan","GDLW"],
+		"è¶ç§åº":["yuexiu","GDYX"],
+		"å¤©æ²³åº":["tianhe","GDTH"],
+		"åæ²åº":["nansha","GDNS"],
+		"ç½äºåº":["baiyun","GDBY"],
+		"é»ååº":["huangpu","GDHU"],
+		"å¹¿å·å¸":["guagnzhou","BCGZ"]
+		};
+</script>
+<title>é»åå¤©æ°</title>
+<link rel="stylesheet" href="/designs/css/home.css" type="text/css" media="all">
+<link rel="stylesheet" href="/designs/css/modules/weatherAlarm.css" type="text/css" media="all">
+<script type="text/javascript" src="/designs/js/require.js" data-main="/designs/js/index.js" data-modules="jquery,gControl,vanwins,raphael,areaAlarm,history"></script>
+</head>
+<body>
+<!--å¤´é¨ å¼å§-->
+
+<script type="text/javascript">
+	var areaname="GDHU";
+</script>
+ <div class="wrapper head-wrap">
+	<div class="wrapper-container">
+	    <div class="head">
+			<div class="huangpu_logo"></div>
+		</div>
+	</div>		
+</div> 
+
+<!--æ ç®å¯¼èª å¼å§-->
+<div class="wrapper" id="column-nav">
+	<div class="wrapper-container" id="nav">
+		<ul>
+			<li class="topnav-wrap"><a href="/huangpu/"><span class="column-links">é¦é¡µ</span></a></li>
+			<li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/weatherForecast"><span class="column-links">å¤©æ°é¢æ¥</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+				<li><a href="/huangpu/weatherForecast">24å°æ¶é¢æ¥</a></li>
+				<li><a href="/huangpu/weatherForecast/7day/">ä¸å¤©é¢æ¥</a></li>
+				<li><a href="/huangpu/weatherForecast/life/">çæ´»æ°è±¡ææ°</a></li>
+			</ul>
+			</li>
+			<li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/weatherLive/autoStation/"><span class="column-links">å¤©æ°å®åµ</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+				<li><a href="/huangpu/weatherLive/autoStation/">ååºèªå¨æ°è±¡ç«æ°æ®</a></li>
+				<li><a href="/huangpu/weatherLive/radar/">é·è¾¾åæ³¢å¾</a></li>
+				<li><a href="/huangpu/weatherLive/cloudPicture/">å«æäºå¾</a></li>
+				</ul>
+			</li>
+             <li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/weatherAlarm/"><span class="column-links">å¤©æ°é¢è­¦</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+				<li><a href="/huangpu/weatherAlarm/">é»ååºé¢è­¦ä¿¡å·</a></li>
+				<li><a href="/huangpu/weatherAlarm/guide/">é¢è­¦ä¿¡å·é²å¾¡æå¼</a></li>
+				<li><a href="/huangpu/weatherAlarm/winball/">å¹¿å·æ¸¯é£çä¿¡å·</a></li>
+				</ul>
+			</li>
+			 <li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/science/"><span class="column-links">æ°è±¡ç§æ®</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+					<li><a href="/huangpu/science/consult/">æ°è±¡èµè®¯</a></li>
+				</ul>
+			</li>
+			<li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/climaticprediction/bulletin/"><span class="column-links">æ°åé¢æµ</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+					<li><a href="/huangpu/climaticprediction/bulletin/">æ°åå¬æ¥</a></li>	
+					<li><a href="/huangpu/climaticprediction/appraise/">æ°åè¯ä»·</a></li>	
+				</ul>
+			</li>
+			<li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/departments/"><span class="column-links">ä¸é¡¹é¢æ¥</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+					<li><a href="/huangpu/departments/">æ±¡ææ°è±¡æ¡ä»¶</a></li>
+					<li><a href="/huangpu/departments/aqi/">ç©ºæ°è´¨éé¢æ¥</a></li>
+					<li><a href="/huangpu/departments/agriculture/">åä¸æ°è±¡æå¡</a></li>
+					<li><a href="/huangpu/departments/forestFire/">æ£®æç«é©é¢æ¥</a></li>
+					<li><a href="/huangpu/departments/geologic/">å°è´¨ç¾å®³é¢è­¦</a></li>
+					<li><a href="/huangpu/departments/waterlogging/">åå¸åæ¶é¢è­¦</a></li>
+					<li><a href="/huangpu/departments/travel/">é»åæ¯ç¹å¤©æ°</a></li>
+					<li><a href="/huangpu/departments/subway/">å°éå¤©æ°é¢æ¥</a></li>
+				</ul>
+			</li>
+			<li class="topnav-wrap">
+				<a class="topnav" href="/huangpu/about/"><span class="column-links">å³äºæä»¬</span></a>
+				<ul class="zsubnav navigation" style="display: none;">
+				<li><a href="/huangpu/about/">èç³»æä»¬</a></li>
+				<li><a href="/huangpu/about/copyright/">çæå£°æ</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</div>
+<!--æ ç®å¯¼èª ç»æ-->
+<!--æç´¢æ¡ å¼å§ -->
+	<div class="serch-bar">
+		<div class="serch-wrap">
+			<input type="text" id="kw" maxlength="30" size="35" name="word"
+				value="ååºãè¡éãæ¯ç¹" onfocus="if(value=='ååºãè¡éãæ¯ç¹') {value=''}"
+				onblur="if (value=='') {value='ååºãè¡éãæ¯ç¹'}">
+			<div id="serch">æ¥å¤©æ°</div>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<!--æç´¢æ¡ ç»æ -->
+<!--å¤´é¨ ç»æ-->
+
+<div class="wrapper">
+<div class="wrapper-container">
+<!--å·¦ä¾§å¯¼èª å¼å§-->
+
+
+
+<div class="g-left-nav">
+<div id="leftnav-top">
+<ul>
+<li class="selected"><a href="/huangpu/weatherAlarm">é»ååºé¢è­¦ä¿¡å·</a></li>
+<li  ><a href="/huangpu/weatherAlarm/guide/">é¢è­¦ä¿¡å·é²å¾¡æå¼</a></li>
+<li  ><a href="/huangpu/weatherAlarm/winball/">å¹¿å·æ¸¯é£çä¿¡å·</a></li>
+
+
+</ul>
+</div>
+<div id="leftnav-b"></div>
+</div>
+<!--å·¦ä¾§å¯¼èª ç»æ-->
+
+<!--ä¸»ä½åå®¹ å¼å§-->
+<div class="g-column-cont">
+	<div class="g-column-module">
+		<div class="g-column-module-head">
+			<span class="g-column-module-title">é»ååºé¢è­¦ä¿¡å·</span>
+		</div>
+		<div class="g-column-module-head-datetime">
+		</div>
+		<!--g-column-module-weatherAlarm start-->
+		<div class="g-column-module-weatherAlarm alarm-effect" style="height:750px;">
+			<div id="alarm-current">
+				<div class="alarm-icons"></div>
+				<div class="alarm-list"></div>
+				<div class="alarm-cont">
+					<div  style="width:100%;border: 1px solid #d1d0d0">
+						<div style="width:100%;height:30px;background-color: #28A1E5;color:#fff;font-size:18px;text-align:center;line-height:30px;">è¡éé¢è­¦ä¿¡å·</div>
+						<div id="street-map" style="height:600px;width: 100%;" class="steet-map"></div>
+					</div>
+					<div class="alarm-msg" style="width: 100%;height: 20px; float: left; padding-top:10px;color:red">æ³¨ï¼æ¬å¾ççº¿ä¸ä½ä¸ºæå±äºè®®çä¾æ®</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<div class="nonecont">
+				<image class="nonepic" src="/designs/images/none.png"/>å½åæ çæå¤©æ°é¢è­¦
+			</div>
+			<div id="alarm-history">
+				<div class="yjbn-wrap">
+					<div class="yjbn-left"></div>
+					<div class="yjbn-cen">
+						<span>è¯·éæ©è¦æ¥è¯¢çæ¥æï¼</span>
+						<div class="divselect-wrap"><div class="divselect" id="select-year"><a>2013</a>å¹´</div>
+							<ul style="display: none;">
+							<li>2013</li>
+							<li>2012</li>
+							<li>2011</li>
+							</ul>
+						</div>
+						<div class="divselect-wrap"><div class="divselect" id="select-month"><a>8</a>æ</div>
+							<ul style="display: none;">
+							<li>1</li>
+							<li>2</li>
+							<li>3</li>
+							<li>4</li>
+							<li>5</li>
+							<li>6</li>
+							<li>7</li>
+							<li>8</li>
+							<li>9</li>
+							<li>10</li>
+							<li>11</li>
+							<li>12</li>
+							</ul>
+						</div>
+						<span id="bn-query">æ¥è¯¢</span>
+					</div>
+					<div class="yjbn-right"></div>
+					<div class="clear"></div>
+				</div>
+				<div class="datatitle">åå²é¢è­¦ä¿¡å·æ¥è¯¢ç»æ</div>
+				<div>
+					<table class="datatable" cellpadding="0" cellspacing="0">
+						<tr><th width="200px">é¢è­¦ä¿¡å·åå¸æ¶é´</th><th>åå¸åå®¹</th></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!--g-column-module-weatherAlarm end-->
+	</div>
+</div>
+<!--ä¸»ä½åå®¹ ç»æ-->
+</div>
+</div>
+
+<!--é¡µè å¼å§-->
+
+<div class="footer">
+<ul class="links" style="background: url(/designs/images/gzhuangpu/footer-logo.png) 30px center no-repeat;">
+	<li>
+		<div class="title">çæå£°æ</div>
+		<div class="cont">
+		çæææÂ© å¹¿å·å¸æ°è±¡å±<br/>
+		<a target="_blank" href="http://www.miibeian.gov.cn/">ç²¤ICPå¤ 06082644å·</a><br/>
+		<span>Copyright(C) 2013-2015 <br/>by Guangzhou Meteorological Service All Rights Reserved</span>
+		</div>
+	</li>
+	<li>
+		<div class="title">èç³»æä»¬</div>
+		<div class="cont">
+		å¹¿å·å¸é»ååºæ°´è¥¿è·¯12å·è¡æ¿æ§æ³ç»¼åæ¥¼ <br/>
+		å¤©æ°å¨è¯¢ï¼12121<br/>
+		èç³»çµè¯ï¼ 020-82111722<br/>
+		ä¼ çï¼ 020-82111718<br/>
+		</div>
+	</li>
+	<li>
+		<div class="title">å³æ³¨æä»¬</div>
+		<div class="cont weixin">
+		æ¿åºææº<br/>[ æ«ä¸æ« ]
+		</div>
+	</li>
+	<div class="clear"></div>
+</ul>
+</div>
+<!--é¡µè ç»æ-->
+</body>
+</html>
