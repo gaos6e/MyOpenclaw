@@ -287,6 +287,54 @@ test("completeVerification solves challenge and calls /verify once", async () =>
   ]);
 });
 
+test("completeVerification retries with a generator answer after an incorrect deterministic answer", async () => {
+  const calls = [];
+  const client = {
+    async postJson(endpoint, body) {
+      calls.push({ endpoint, body });
+      if (calls.length === 1) {
+        throw new Error("POST /verify failed (400): Incorrect answer");
+      }
+      return { success: true, message: "Verification successful!" };
+    },
+  };
+
+  const result = await completeVerification({
+    client,
+    generator: {
+      async solveVerification() {
+        return "33.00";
+      },
+    },
+    submissionResult: {
+      success: true,
+      post: {
+        id: "post-1",
+        verification_status: "pending",
+        verification: {
+          verification_code: "verify-456",
+          challenge_text: "A] lO^bSt-Er S[wImS aT/ tW]eNn-Tyy mE^tE[rS aNd] SlO/wS bY^ fI[vE",
+          instructions: "Solve and return only the number with 2 decimal places.",
+        },
+      },
+    },
+    contentType: "post",
+  });
+
+  assert.equal(result.verified, true);
+  assert.deepEqual(result.attemptedAnswers, ["15.00", "33.00"]);
+  assert.deepEqual(calls, [
+    {
+      endpoint: "/verify",
+      body: { verification_code: "verify-456", answer: "15.00" },
+    },
+    {
+      endpoint: "/verify",
+      body: { verification_code: "verify-456", answer: "33.00" },
+    },
+  ]);
+});
+
 test("normalizeVerificationAnswer extracts and formats numeric answers", () => {
   assert.equal(normalizeVerificationAnswer("15"), "15.00");
   assert.equal(normalizeVerificationAnswer("Answer: 15.5"), "15.50");

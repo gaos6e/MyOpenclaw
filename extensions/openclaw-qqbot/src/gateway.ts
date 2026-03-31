@@ -769,12 +769,16 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
           const toolTexts: string[] = []; // 收集所有 tool deliver 文本
           const toolMediaUrls: string[] = []; // 收集所有 tool deliver 媒体 URL
           let toolFallbackSent = false; // 兜底消息是否已发送（只发一次）
-          const responseTimeout = 300000; // 300秒超时（5分钟，兼容 GPT-5.2 + medium 等较慢回复）
+          let failureNoticeSent = false; // 错误提示是否已发送（只发一次）
+          const responseSoftTimeout = 300000; // 300秒仅记日志，继续等待真实结果
+          const responseHardTimeout = 1800000; // 30分钟仅记日志，避免无限挂起无可观测性
           const toolOnlyTimeout = 120000; // tool-only 兜底超时：120秒内没有 block 就兜底
           const maxToolRenewals = 3; // tool 续期上限：最多续期 3 次（总等待 = 60s × 3 = 180s）
           let toolRenewalCount = 0; // 已续期次数
           let timeoutId: ReturnType<typeof setTimeout> | null = null;
+          let hardTimeoutId: ReturnType<typeof setTimeout> | null = null;
           let toolOnlyTimeoutId: ReturnType<typeof setTimeout> | null = null;
+          let softTimeoutTriggered = false;
 
           // tool-only 兜底：转发工具产生的实际内容（媒体/文本），而非生硬的提示语
           const sendToolFallback = async (): Promise<void> => {
@@ -817,13 +821,32 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
             log?.info(`[qqbot:${account.accountId}] Tool fallback: no media or text collected from ${toolDeliverCount} tool deliver(s), silently dropping`);
           };
 
-          const timeoutPromise = new Promise<void>((_, reject) => {
+          const timeoutPromise = new Promise<void>((resolve) => {
             timeoutId = setTimeout(() => {
               if (!hasResponse) {
-                reject(new Error("Response timeout"));
+                softTimeoutTriggered = true;
+                log?.info(`[qqbot:${account.accountId}] Response still running after ${responseSoftTimeout / 1000}s, continuing to wait`);
               }
-            }, responseTimeout);
+            }, responseSoftTimeout);
+            hardTimeoutId = setTimeout(() => {
+              if (!hasResponse) {
+                log?.error(`[qqbot:${account.accountId}] Response still running after ${responseHardTimeout / 1000}s, continuing without user-facing timeout notice`);
+              }
+              resolve();
+            }, responseHardTimeout);
           });
+
+          const sendFailureNoticeOnce = async (message: string): Promise<void> => {
+            if (failureNoticeSent || hasBlockResponse || toolFallbackSent) {
+              return;
+            }
+            failureNoticeSent = true;
+            try {
+              await sendErrorMessage(message);
+            } catch (sendErr) {
+              log?.error(`[qqbot:${account.accountId}] Failed to send failure notice: ${sendErr}`);
+            }
+          };
 
           const dispatchPromise = pluginRuntime.channel.reply.dispatchReplyWithBufferedBlockDispatcher({
             ctx: ctxPayload,
@@ -918,6 +941,10 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
                   clearTimeout(timeoutId);
                   timeoutId = null;
                 }
+                if (hardTimeoutId) {
+                  clearTimeout(hardTimeoutId);
+                  hardTimeoutId = null;
+                }
                 if (toolOnlyTimeoutId) {
                   clearTimeout(toolOnlyTimeoutId);
                   toolOnlyTimeoutId = null;
@@ -987,17 +1014,27 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
               onError: async (err: unknown) => {
                 log?.error(`[qqbot:${account.accountId}] Dispatch error: ${err}`);
                 hasResponse = true;
+                typing.keepAlive?.stop();
                 if (timeoutId) {
                   clearTimeout(timeoutId);
                   timeoutId = null;
                 }
+                if (hardTimeoutId) {
+                  clearTimeout(hardTimeoutId);
+                  hardTimeoutId = null;
+                }
+                if (toolOnlyTimeoutId) {
+                  clearTimeout(toolOnlyTimeoutId);
+                  toolOnlyTimeoutId = null;
+                }
                 
-                // 发送错误提示给用户，显示完整错误信息
                 const errMsg = String(err);
                 if (errMsg.includes("401") || errMsg.includes("key") || errMsg.includes("auth")) {
                   log?.error(`[qqbot:${account.accountId}] AI auth error: ${errMsg}`);
+                  await sendFailureNoticeOnce("这次请求失败了，当前 AI 服务认证异常。你稍后再试，或者让我继续排查配置。");
                 } else {
                   log?.error(`[qqbot:${account.accountId}] AI process error: ${errMsg}`);
+                  await sendFailureNoticeOnce("这次请求失败了，上游模型服务暂时不稳定。你可以稍后重试一次。");
                 }
               },
             },
@@ -1012,15 +1049,32 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
           } catch (err) {
             if (timeoutId) {
               clearTimeout(timeoutId);
+              timeoutId = null;
             }
-            if (!hasResponse) {
-              log?.error(`[qqbot:${account.accountId}] No response within timeout`);
+            if (hardTimeoutId) {
+              clearTimeout(hardTimeoutId);
+              hardTimeoutId = null;
+            }
+            if (toolOnlyTimeoutId) {
+              clearTimeout(toolOnlyTimeoutId);
+              toolOnlyTimeoutId = null;
+            }
+            if (!hasResponse && !softTimeoutTriggered) {
+              log?.error(`[qqbot:${account.accountId}] Dispatch promise ended without a user-visible response`);
             }
           } finally {
             // 清理 tool-only 兜底定时器
             if (toolOnlyTimeoutId) {
               clearTimeout(toolOnlyTimeoutId);
               toolOnlyTimeoutId = null;
+            }
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+              timeoutId = null;
+            }
+            if (hardTimeoutId) {
+              clearTimeout(hardTimeoutId);
+              hardTimeoutId = null;
             }
             // dispatch 完成后，如果只有 tool 没有 block，且尚未发过兜底，立即兜底
             if (toolDeliverCount > 0 && !hasBlockResponse && !toolFallbackSent) {

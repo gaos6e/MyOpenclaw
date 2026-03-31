@@ -211,6 +211,25 @@ function hasProxyEnv(env = process.env) {
   return Boolean(env.HTTPS_PROXY || env.HTTP_PROXY || env.ALL_PROXY);
 }
 
+function summarizeProxyEnv(env = process.env) {
+  const summarize = (value) => {
+    if (!value) return null;
+    try {
+      const parsed = new URL(String(value));
+      return `${parsed.protocol}//${parsed.hostname}${parsed.port ? `:${parsed.port}` : ""}`;
+    } catch {
+      return String(value).slice(0, 80);
+    }
+  };
+  return {
+    hasProxy: hasProxyEnv(env),
+    httpsProxy: summarize(env.HTTPS_PROXY),
+    httpProxy: summarize(env.HTTP_PROXY),
+    allProxy: summarize(env.ALL_PROXY),
+    noProxy: env.NO_PROXY || null,
+  };
+}
+
 function resolveSiteProfile(site = DEFAULT_SITE_ID) {
   const profile = SITE_PROFILES[site || DEFAULT_SITE_ID];
   if (!profile) {
@@ -542,28 +561,64 @@ async function completeVerification({ client, generator, submissionResult, conte
     return { verified: false, skipped: true };
   }
 
-  if (!generator || typeof generator.solveVerification !== "function") {
-    throw new Error("Verification required but no solver is available");
+  const challengeText = verification.challenge_text || "";
+  const instructions = verification.instructions || "";
+  const attemptedAnswers = [];
+  const candidateAnswers = [];
+
+  try {
+    candidateAnswers.push(normalizeVerificationAnswer(solveObfuscatedMathChallenge(challengeText)));
+  } catch {}
+
+  if (generator && typeof generator.solveVerification === "function") {
+    try {
+      const generatedAnswer = await generator.solveVerification({
+        challengeText,
+        instructions,
+      });
+      candidateAnswers.push(normalizeVerificationAnswer(generatedAnswer));
+    } catch {}
   }
 
-  let answer;
-  try {
-    answer = solveObfuscatedMathChallenge(verification.challenge_text || "");
-  } catch {
-    answer = await generator.solveVerification({
-      challengeText: verification.challenge_text || "",
-      instructions: verification.instructions || "",
-    });
+  const uniqueAnswers = [...new Set(candidateAnswers.filter(Boolean))];
+  if (uniqueAnswers.length === 0) {
+    throw new Error("Verification required but no solver produced a usable numeric answer");
   }
-  const normalizedAnswer = normalizeVerificationAnswer(answer);
-  const response = await client.postJson("/verify", {
-    verification_code: verification.verification_code,
-    answer: normalizedAnswer,
-  });
+
+  let response = null;
+  let lastError = null;
+  for (const answer of uniqueAnswers) {
+    attemptedAnswers.push(answer);
+    try {
+      response = await client.postJson("/verify", {
+        verification_code: verification.verification_code,
+        answer,
+      });
+      return {
+        verified: Boolean(response?.success),
+        answer,
+        attemptedAnswers,
+        response,
+      };
+    } catch (error) {
+      lastError = error;
+      if (!/incorrect answer/i.test(String(error?.message || error))) {
+        throw error;
+      }
+    }
+  }
+
+  const challengePreview = String(challengeText).replace(/\s+/g, " ").trim().slice(0, 120);
+  throw new Error(
+    `POST /verify failed after ${attemptedAnswers.length} answer attempt(s): ${attemptedAnswers.join(", ")} | challenge: ${challengePreview}${
+      lastError ? ` | last error: ${String(lastError.message || lastError)}` : ""
+    }`,
+  );
 
   return {
     verified: Boolean(response?.success),
-    answer: normalizedAnswer,
+    answer: null,
+    attemptedAnswers,
     response,
   };
 }
@@ -769,7 +824,7 @@ function readJsonIfExists(filePath, fallbackValue) {
   if (!fs.existsSync(filePath)) {
     return fallbackValue;
   }
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
 }
 
 function writeJson(filePath, value) {
@@ -1686,6 +1741,7 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
 }
 
 function createApiClient({ apiKey, baseUrl = API_BASE_URL, fetchImpl = fetch, curlImpl = spawnSync, env = process.env }) {
+  const requestDiagnostics = [];
   const defaultHeaders = {
     Authorization: `Bearer ${apiKey}`,
     Accept: "application/json",
@@ -1700,6 +1756,7 @@ function createApiClient({ apiKey, baseUrl = API_BASE_URL, fetchImpl = fetch, cu
       label: `${method} ${endpoint}`,
       env,
       curlImpl,
+      diagnostics: requestDiagnostics,
       perform: () =>
         fetchImpl(url, {
           method,
@@ -1735,6 +1792,9 @@ function createApiClient({ apiKey, baseUrl = API_BASE_URL, fetchImpl = fetch, cu
     },
     deleteJson(endpoint) {
       return request("DELETE", endpoint);
+    },
+    getRequestDiagnostics() {
+      return requestDiagnostics.slice(-20);
     },
   };
 }
@@ -1772,17 +1832,41 @@ function runCurlRequest({ url, method, headers, body, curlImpl = spawnSync }) {
   return new Response(responseBody, { status });
 }
 
-async function fetchWithRetries({ label, perform, curlRequest, curlImpl = spawnSync, env = process.env }) {
-  if (curlRequest && hasProxyEnv(env)) {
+async function fetchWithRetries({ label, perform, curlRequest, curlImpl = spawnSync, env = process.env, diagnostics }) {
+  const proxy = summarizeProxyEnv(env);
+  if (curlRequest && proxy.hasProxy) {
+    diagnostics && diagnostics.push({ label, strategy: "curl_proxy", phase: "start", proxy });
     try {
-      return runCurlRequest({ ...curlRequest, curlImpl });
+      const response = runCurlRequest({ ...curlRequest, curlImpl });
+      diagnostics && diagnostics.push({ label, strategy: "curl_proxy", phase: "success", proxy });
+      return response;
     } catch (curlError) {
+      diagnostics &&
+        diagnostics.push({
+          label,
+          strategy: "curl_proxy",
+          phase: "error",
+          proxy,
+          error: String(curlError?.message || curlError),
+        });
       let lastFetchError = null;
       for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
         try {
-          return await perform();
+          diagnostics && diagnostics.push({ label, strategy: "fetch_fallback", phase: "attempt", attempt, proxy });
+          const response = await perform();
+          diagnostics && diagnostics.push({ label, strategy: "fetch_fallback", phase: "success", attempt, proxy });
+          return response;
         } catch (fetchError) {
           lastFetchError = fetchError;
+          diagnostics &&
+            diagnostics.push({
+              label,
+              strategy: "fetch_fallback",
+              phase: "error",
+              attempt,
+              proxy,
+              error: String(fetchError?.message || fetchError),
+            });
           if (attempt >= MAX_FETCH_ATTEMPTS) {
             break;
           }
@@ -1800,9 +1884,21 @@ async function fetchWithRetries({ label, perform, curlRequest, curlImpl = spawnS
   let lastError = null;
   for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
     try {
-      return await perform();
+      diagnostics && diagnostics.push({ label, strategy: "fetch_direct", phase: "attempt", attempt, proxy });
+      const response = await perform();
+      diagnostics && diagnostics.push({ label, strategy: "fetch_direct", phase: "success", attempt, proxy });
+      return response;
     } catch (error) {
       lastError = error;
+      diagnostics &&
+        diagnostics.push({
+          label,
+          strategy: "fetch_direct",
+          phase: "error",
+          attempt,
+          proxy,
+          error: String(error?.message || error),
+        });
       if (attempt >= MAX_FETCH_ATTEMPTS) {
         break;
       }
@@ -2664,6 +2760,7 @@ async function runSlot({
       interacted_submolts: currentState.interacted_submolts,
       visited_modules_today: currentState.visited_modules_today,
     },
+    network: typeof apiClient.getRequestDiagnostics === "function" ? apiClient.getRequestDiagnostics() : undefined,
   });
 
   report.details = await localizeReportDetails(report, contentGenerator, fallbackGenerator);
