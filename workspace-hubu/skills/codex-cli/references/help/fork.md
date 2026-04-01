@@ -1,6 +1,6 @@
 # `codex fork`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Fork a previous interactive session (picker by default; use --last to fork the most recent)
@@ -40,6 +40,10 @@ Options:
           Connect the app-server-backed TUI to a remote app server websocket endpoint.
           
           Accepted forms: `ws://host:port` or `wss://host:port`.
+
+      --remote-auth-token-env <ENV_VAR>
+          Name of the environment variable containing the bearer token to send to a remote app
+          server websocket
 
   -i, --image <FILE>...
           Optional image(s) to attach to the initial prompt

@@ -1,6 +1,6 @@
 # `codex debug app-server send-message-v2`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Usage: codex debug app-server send-message-v2 [OPTIONS] <USER_MESSAGE>

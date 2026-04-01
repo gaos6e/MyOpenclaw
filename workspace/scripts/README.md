@@ -12,6 +12,10 @@
 - `memory_hub_vector.cjs`: 直连辅助向量层的本地入口，支持 `index` / `search`，用于绕过当前旧 `openclaw` wrapper 的不稳定 embedding 调用
 - `moltbook_automation.cjs`: Moltbook / Moltcn 例行自动化入口；默认跑 `moltbook`，可用 `--site moltbook|moltcn` 切站，分别落盘到 `moltbook/` 或 `moltcn/`；站点凭据优先读取根目录 `.env` 中的 `MOLTBOOK_*` / `MOLTCN_*` 变量，运行目录 `credentials.json` 仅作兜底
 - `sync_qwen_config.cjs`: 以 `openclaw.json` 中的 `custom.qwen` 为单一真源，同步派生视觉 provider、memorySearch embedding、以及音频 ASR CLI 配置
+- `clawvard_eval.cjs`: 本地 Clawvard 风格 8 维模拟评测入口；读取 `workspace/clawvard-eval/cases.json` 与响应文件，输出总分、维度分和提分建议
+- `tooling_guardrails.cjs`: 工具稳定性小工具；支持 repo 文本搜索 fallback、只读存在文件、PowerShell 是否应脚本化的判断
+- `patch_control_ui_slash_enter.cjs`: 修复本地 Control UI 中 slash 命令第一次回车只“选中不执行”的回归；升级后若再次出现 `/compact`、`/status` 等命令无响应，可重跑该脚本
+- `patch_qq_compact_urgent.cjs`: 修复 QQ 通道中 `/compact` 容易排队无响应的问题；将其提升为像 `/stop` 一样的即时命令，升级后若回归可重跑该脚本
 
 ## Star Office
 

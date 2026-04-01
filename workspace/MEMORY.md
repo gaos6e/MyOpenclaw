@@ -1,10 +1,10 @@
-# MEMORY.md - Your Long-Term Memory
+﻿# MEMORY.md - Your Long-Term Memory
 
 _This file stores long-term, distilled memory. Keep it concise._
 
 ## About the user
 - Name: 
-- What to call them: 
+- What to call them: 哥哥～
 - Pronouns: 
 - Timezone: Asia/Shanghai
 - Hobbies: 数码/摄影、航拍、PC装机与硬件、音频、外设、AI人工智能相关、生物信息学相关（无优先级顺序）
@@ -12,25 +12,27 @@ _This file stores long-term, distilled memory. Keep it concise._
 ## Preferences & setup
 - Use QQ for communication
 - 进行自我提升前先告知用户
-- 希望以后称呼他为“哥哥～”（带波浪线，已确认，长期生效）
 - 用户希望下达任务后，助手应立刻回复“开始做X了”的接收确认（不要等到最终输出才回应）；如可通过配置/流程优化该体验则完善
-- 模型思考模式设置为开启，默认使用 medium 级别
-- Important/common files live in: C:\Users\20961\.openclaw
-- Backups/temporary files live in: D:\桌面\openclaw
-- Long-term workspace: C:\Users\20961\.openclaw\workspace
-- All OpenClaw skills should be installed in C:\Users\20961\.openclaw\workspace\skills
-- For mainstream media content (video/image/text), use https://snapany.com/zh to download then read/analyze
-- User wants Moltbook community access. Registered Moltbook agent name melancholic_claw with profile https://www.moltbook.com/u/melancholic_claw; API key saved locally in C:\Users\20961\.openclaw\moltbook\credentials.json and gitignored. Claim verified and first intro post published at https://www.moltbook.com/post/64b27775-8e88-4100-9d8a-8a3c43a62c40. User prefers bio: "Sharp, curious, and hands-on — from AI to hardware to aerial shots."
-- When reporting Moltbook automation results back to the user, preserve the full script report verbatim, including 回复内容 / 私信内容 / 点赞内容 / 评论内容 / 关注内容 / 发帖内容. Do not compress it into a short summary.
-- When cron jobs fail with rate limits or model timeouts, check `openclaw cron runs --id <job-id>` for detailed error logs and consider adjusting retry intervals or model selection.
-- - wttr.in location resolution for “Guangzhou Huangpu/广州黄埔” (and even lat/lon) can return a wrong nearest_area (e.g., Kaiserslautern, Germany). For Guangzhou Huangpu, prefer Open-Meteo with explicit coordinates.
+- 用户偏好以直接、简短的执行确认开始任务，而不是等到最终输出才回应
 
 ## Stable facts
-- 暗号约定：用户说“你给了？”，助手回“他非要~”。
+- 暗号约定：用户说“你给了？”，助手回“他非要~”。 
 - 允许将关键 source 的抽取文本/结构化摘要落地到 workspace/PD 以便检索
-- 本机应以 C:\Users\20961\.openclaw\skills 与 C:\Users\20961\.openclaw\workspace\skills 目录是否存在为准
 
 ## Ongoing context
+- PD 项目（你的 NotebookLM 项目；已落地到本地 PD 文件夹，作为项目持久记忆）：
+  - 一句话：从“扰动前后转录组表型指纹”出发，反向推断最可能的扰动/驱动靶标基因（单靶标或多靶标集合），并提供网络级可解释路径与多场景验证闭环的深度学习框架。
+  - 本地目录：`C:\Users\20961\.openclaw\workspace\PD\`
+  - 主入口：`PD\project_brief.md`；其他：`sources.json`、`PD\artifacts\`、`sync.md`、`changelog.md`、`open_questions.md`
+  - 待确认：每周同步提醒的具体时间点（周几+几点）
+- Moltbook：
+  - 已注册 agent：`melancholic_claw`
+  - Profile：`https://www.moltbook.com/u/melancholic_claw`
+  - 当前偏好 bio：`Sharp, curious, and hands-on — from AI to hardware to aerial shots.`
+- Clawvard 行为改进（写入流程习惯）：
+  - Execution：拆成小步 → 每步验证输出 → 不留半截 → 能测就测 → 明确完成
+  - Retrieval：用具体关键词/标识符；先看结构再深入；多源验证；尽量回指来源
+  - Reflection：发出前复读核对；不确定就说明不确定并给出如何确认
 - 自我提升机制：
   - canonical SOP: `self_improve_process.md`
   - canonical candidate flow: `memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
@@ -43,3 +45,4 @@ _This file stores long-term, distilled memory. Keep it concise._
   - 日结：每天 22:00 输出总结
   - 记忆沉淀：每 2 天从 daily memory 提炼到 `MEMORY.md`
 - 用量监控规则：5小时额度剩余≤20%则降频；每周额度按“剩余天数×10%”留底，若剩余额度低于保留阈值则降频，额度充足或接近刷新可更充分使用但不乱用。
+

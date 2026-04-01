@@ -1,6 +1,6 @@
 # `codex apply`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Apply the latest diff produced by Codex agent as a `git apply` to your local working tree

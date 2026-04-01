@@ -7,11 +7,11 @@ const repoRoot = path.resolve(__dirname, "..", "..");
 const configPath = path.join(repoRoot, "openclaw.json");
 const hygieneAuditPath = path.join(repoRoot, "workspace", "scripts", "openclaw_hygiene_audit.cjs");
 
-test("manager assets are retired and control UI is disabled", () => {
+test("legacy manager assets stay retired while local control UI remains available", () => {
   const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
   const hygieneAuditSource = fs.readFileSync(hygieneAuditPath, "utf8");
 
-  assert.equal(config?.gateway?.controlUi?.enabled, false);
+  assert.equal(config?.gateway?.controlUi?.enabled, true);
   assert.equal(fs.existsSync(path.join(repoRoot, "control-ui")), false);
   assert.equal(fs.existsSync(path.join(repoRoot, "scripts", "control_ui_localization.cjs")), false);
   assert.equal(fs.existsSync(path.join(repoRoot, "scripts", "control_ui_localization.test.cjs")), false);

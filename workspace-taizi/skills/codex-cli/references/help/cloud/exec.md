@@ -1,6 +1,6 @@
 # `codex cloud exec`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Submit a new Codex Cloud task without launching the TUI

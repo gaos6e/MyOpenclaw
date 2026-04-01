@@ -5,6 +5,7 @@
 ## 0. 运行时机制
 - `openclaw-context-engine`：为 private/direct/cron/subagent 会话注入压缩后的工作区上下文快照；shared 会话默认不注入私人 durable memory。
 - `openclaw-checkpoint-guardian`：在长探索链路后提醒做 checkpoint，并在 reset 前记录未落盘探索审计。
+- `self-improvement` hook：可选提醒层；当前默认保持禁用，主链路以 workspace bootstrap + context-engine + checkpoint-guardian 为准。
 
 ## 1. 触发条件（来自 MEMORY.md）
 - 空闲≥30分钟且无新任务时主动提升
@@ -44,6 +45,7 @@
    - 重要规则/偏好 → MEMORY.md
    - canonical candidate flow：`memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
    - 候选抽取结果 → 先写入 `memory/inbox/*.jsonl`，再人工审核沉淀到 `MEMORY.md`
+   - 操作流程/工具习惯/排障命令/路径治理 → `AGENTS.md` / `TOOLS.md`
    - `.openclaw` 环境卫生安全动作执行结果 → `self_improve_status.md`
    - 需要人工确认的目录卫生问题 → `self_improve_todo.md`
    - 若目录卫生问题反复出现，说明流程仍有缺口 → `self_improve_quality.md`

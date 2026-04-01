@@ -20,6 +20,7 @@ import { sendStartupGreetings, type AdminResolverContext } from "./admin-resolve
 import { sendWithTokenRetry, sendErrorToTarget, handleStructuredPayload, type ReplyContext, type MessageTarget } from "./reply-dispatcher.js";
 import { TypingKeepAlive, TYPING_INPUT_SECOND } from "./typing-keepalive.js";
 import { parseAndSendMediaTags, sendPlainReply, type DeliverEventContext, type DeliverAccountContext } from "./outbound-deliver.js";
+import { buildWorkspaceProjectHints, buildWorkspaceProjectPreviews, getQQChannelStabilityInstruction, resolveAgentWorkspaceDir } from "./context-hints.js";
 
 // QQ Bot intents - 按权限级别分组
 const INTENTS = {
@@ -487,6 +488,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
             id: peerId,
           },
         });
+        const agentWorkspaceDir = resolveAgentWorkspaceDir(cfg, route.agentId);
 
         const envelopeOptions = pluginRuntime.channel.reply.resolveEnvelopeFormatOptions(cfg);
 
@@ -501,6 +503,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
         if (account.systemPrompt) {
           systemPrompts.push(account.systemPrompt);
         }
+        systemPrompts.push(getQQChannelStabilityInstruction());
         
         // 处理附件（图片等）- 下载到本地供 openclaw 访问
         const processed = await processAttachments(event.attachments, { accountId: account.accountId, cfg, log });
@@ -645,6 +648,20 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
 
         // --- 动态上下文（仅框架信封未覆盖的附件信息） ---
         const dynLines: string[] = [];
+        const projectHints = buildWorkspaceProjectHints({
+          workspaceDir: agentWorkspaceDir,
+          content: userContent,
+        });
+        const projectPreviews = buildWorkspaceProjectPreviews({
+          workspaceDir: agentWorkspaceDir,
+          content: userContent,
+        });
+        if (projectHints.length > 0) {
+          dynLines.push(...projectHints);
+        }
+        if (projectPreviews.length > 0) {
+          dynLines.push(...projectPreviews);
+        }
         if (imageUrls.length > 0) {
           dynLines.push(`- 图片: ${imageUrls.join(", ")}`);
         }

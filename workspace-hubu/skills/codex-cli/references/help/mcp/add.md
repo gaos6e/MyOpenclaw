@@ -1,6 +1,6 @@
 # `codex mcp add`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Usage: codex mcp add [OPTIONS] <NAME> (--url <URL> | -- <COMMAND>...)
