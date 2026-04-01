@@ -1,6 +1,6 @@
 # `codex exec`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Run Codex non-interactively
@@ -81,9 +81,6 @@ Options:
           
           [default: auto]
           [possible values: always, never, auto]
-
-      --progress-cursor
-          Force cursor-based progress updates in exec mode
 
       --json
           Print events to stdout as JSONL

@@ -3,7 +3,7 @@
   "slug": "codex-cli",
   "source": "local-binary",
   "binary": "codex",
-  "sourceVersion": "codex-cli 0.116.0",
+  "sourceVersion": "codex-cli 0.118.0-alpha.2",
   "localFirst": true,
   "generatedReferences": true,
   "risk": [

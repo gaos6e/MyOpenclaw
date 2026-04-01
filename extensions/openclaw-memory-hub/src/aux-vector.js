@@ -318,18 +318,10 @@ export async function searchAuxVectorIndex(params) {
     .map(({ embedding, ...item }) => item);
 }
 
-function resolveApiKey(memorySearchConfig) {
-  const source = memorySearchConfig?.remote?.apiKey;
-  if (source?.source === "env" && source?.id) {
-    return process.env[source.id] ?? null;
-  }
-  return null;
-}
-
-export function createRemoteEmbedMany(memorySearchConfig, fetchImpl = fetch) {
-  const baseUrl = String(memorySearchConfig?.remote?.baseUrl ?? "").trim();
-  const model = String(memorySearchConfig?.model ?? "").trim();
-  const apiKey = resolveApiKey(memorySearchConfig);
+export function createRemoteEmbedMany(config, fetchImpl = fetch) {
+  const baseUrl = String(config?.baseUrl ?? "").trim();
+  const model = String(config?.model ?? "").trim();
+  const apiKey = String(config?.apiKey ?? "").trim();
   if (!baseUrl || !model || !apiKey) {
     return null;
   }

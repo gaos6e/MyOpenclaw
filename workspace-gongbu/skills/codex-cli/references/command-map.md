@@ -1,6 +1,6 @@
 # Codex CLI Command Map
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 Use `SKILL.md` for workflow and `execution-policy.md` before executing any Codex command.
 
@@ -61,6 +61,7 @@ Usage: codex [OPTIONS] [PROMPT]
 - `--enable <FEATURE>` — Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
 - `--disable <FEATURE>` — Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
 - `--remote <ADDR>` — Connect the app-server-backed TUI to a remote app server websocket endpoint. Accepted forms: `ws://host:port` or `wss://host:port`.
+- `--remote-auth-token-env <ENV_VAR>` — Name of the environment variable containing the bearer token to send to a remote app server websocket
 - `-i, --image <FILE>...` — Optional image(s) to attach to the initial prompt
 - `-m, --model <MODEL>` — Model the agent should use
 - `--oss` — Convenience flag to select the local open source model provider. Equivalent to -c model_provider=oss; verifies a local LM Studio or Ollama server is running
@@ -100,8 +101,13 @@ Usage: codex app-server [OPTIONS] [COMMAND]
 - `--enable <FEATURE>` — Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
 - `--disable <FEATURE>` — Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
 - `--listen <URL>` — Transport endpoint URL. Supported values: `stdio://` (default), `ws://IP:PORT` [default: stdio://]
-- `--session-source <SOURCE>` — Session source stamped into new threads started by this app-server. Known values such as `vscode`, `cli`, `exec`, and `mcp` map to built-in sources. Any other non-empty value is recorded as a custom source. [default: vscode]
 - `--analytics-default-enabled` — Controls whether analytics are enabled by default. Analytics are disabled by default for app-server. Users have to explicitly opt in via the `analytics` section in the config.toml file. However, for first-party use cases like the VSCode IDE extension, we default analytics to be enabled by default by setting this flag. Users can still opt out by setting this in their config.toml: ```toml [analytics] enabled = false ``` See https://developers.openai.com/codex/config-advanced/#metrics for more details.
+- `--ws-auth <MODE>` — Websocket auth mode for non-loopback listeners [possible values: capability-token, signed-bearer-token]
+- `--ws-token-file <PATH>` — Absolute path to the capability-token file
+- `--ws-shared-secret-file <PATH>` — Absolute path to the shared secret file for signed JWT bearer tokens
+- `--ws-issuer <ISSUER>` — Expected issuer for signed JWT bearer tokens
+- `--ws-audience <AUDIENCE>` — Expected audience for signed JWT bearer tokens
+- `--ws-max-clock-skew-seconds <SECONDS>` — Maximum clock skew when validating signed JWT bearer tokens
 - `-h, --help` — Print help (see a summary with '-h')
 
 **Help Snapshot:** [`help/app-server.md`](help/app-server.md)
@@ -416,7 +422,6 @@ Usage: codex exec [OPTIONS] [PROMPT] [COMMAND]
 - `--ephemeral` — Run without persisting session files to disk
 - `--output-schema <FILE>` — Path to a JSON Schema file describing the model's final response shape
 - `--color <COLOR>` — Specifies color settings for use in the output [default: auto] [possible values: always, never, auto]
-- `--progress-cursor` — Force cursor-based progress updates in exec mode
 - `--json` — Print events to stdout as JSONL
 - `-o, --output-last-message <FILE>` — Specifies file where the last message from the agent should be written
 - `-h, --help` — Print help (see a summary with '-h')
@@ -583,6 +588,7 @@ Usage: codex fork [OPTIONS] [SESSION_ID] [PROMPT]
 - `--enable <FEATURE>` — Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
 - `--disable <FEATURE>` — Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
 - `--remote <ADDR>` — Connect the app-server-backed TUI to a remote app server websocket endpoint. Accepted forms: `ws://host:port` or `wss://host:port`.
+- `--remote-auth-token-env <ENV_VAR>` — Name of the environment variable containing the bearer token to send to a remote app server websocket
 - `-i, --image <FILE>...` — Optional image(s) to attach to the initial prompt
 - `-m, --model <MODEL>` — Model the agent should use
 - `--oss` — Convenience flag to select the local open source model provider. Equivalent to -c model_provider=oss; verifies a local LM Studio or Ollama server is running
@@ -836,7 +842,9 @@ Usage: codex resume [OPTIONS] [SESSION_ID] [PROMPT]
 - `--all` — Show all sessions (disables cwd filtering and shows CWD column)
 - `--enable <FEATURE>` — Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
 - `--disable <FEATURE>` — Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
+- `--include-non-interactive` — Include non-interactive sessions in the resume picker and --last selection
 - `--remote <ADDR>` — Connect the app-server-backed TUI to a remote app server websocket endpoint. Accepted forms: `ws://host:port` or `wss://host:port`.
+- `--remote-auth-token-env <ENV_VAR>` — Name of the environment variable containing the bearer token to send to a remote app server websocket
 - `-i, --image <FILE>...` — Optional image(s) to attach to the initial prompt
 - `-m, --model <MODEL>` — Model the agent should use
 - `--oss` — Convenience flag to select the local open source model provider. Equivalent to -c model_provider=oss; verifies a local LM Studio or Ollama server is running

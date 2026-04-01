@@ -102,6 +102,8 @@ test("context engine assembles private session snapshot with memory and self-imp
     assert.match(result.systemPromptAddition ?? "", /What to call them: Xiao Gao/);
     assert.match(result.systemPromptAddition ?? "", /Use QQ for communication/);
     assert.match(result.systemPromptAddition ?? "", /完成 checkpoint 守卫/);
+    assert.match(result.systemPromptAddition ?? "", /fresh verification/i);
+    assert.match(result.systemPromptAddition ?? "", /Select-String/i);
     assert.doesNotMatch(result.systemPromptAddition ?? "", /This section is human-readable only/);
   }));
 
@@ -124,8 +126,61 @@ test("context engine omits private durable memory in shared sessions", async () 
 
     assert.match(result.systemPromptAddition ?? "", /Context Snapshot/);
     assert.match(result.systemPromptAddition ?? "", /checkpoint/i);
+    assert.match(result.systemPromptAddition ?? "", /optional files gracefully/i);
     assert.doesNotMatch(result.systemPromptAddition ?? "", /Xiao Gao/);
     assert.doesNotMatch(result.systemPromptAddition ?? "", /User lives in Guangzhou/);
+  }));
+
+test("context engine tolerates missing optional governance files without failing assembly", async () =>
+  withTempWorkspace(async ({ workspaceDir }) => {
+    fs.rmSync(path.join(workspaceDir, "self_improve_todo.md"));
+    fs.rmSync(path.join(workspaceDir, "self_improve_status.md"));
+
+    const { OpenClawWorkspaceContextEngine } = await import(moduleUrl);
+    const engine = new OpenClawWorkspaceContextEngine({
+      workspaceDir,
+      createLegacyEngine: async () => ({
+        compact: async () => ({ ok: true, compacted: false, reason: "legacy-stub" }),
+      }),
+    });
+
+    const result = await engine.assemble({
+      sessionId: "sess-optional",
+      sessionKey: "agent:main:qqbot:direct:abc",
+      messages: [{ role: "user", content: "继续" }],
+      tokenBudget: 2000,
+    });
+
+    assert.match(result.systemPromptAddition ?? "", /Optional files gracefully/i);
+    assert.match(result.systemPromptAddition ?? "", /fresh verification/i);
+    assert.doesNotMatch(result.systemPromptAddition ?? "", /Self-improve TODO/);
+  }));
+
+test("context engine includes project entry previews for referenced local project aliases", async () =>
+  withTempWorkspace(async ({ workspaceDir }) => {
+    const projectDir = path.join(workspaceDir, "PD");
+    fs.mkdirSync(projectDir, { recursive: true });
+    fs.writeFileSync(path.join(projectDir, "README.md"), "# PD 项目\n目标：做反向扰动推断框架。\n", "utf8");
+    fs.writeFileSync(path.join(projectDir, "project_brief.md"), "# Brief\n关键点：多靶标解释路径。\n", "utf8");
+
+    const { OpenClawWorkspaceContextEngine } = await import(moduleUrl);
+    const engine = new OpenClawWorkspaceContextEngine({
+      workspaceDir,
+      createLegacyEngine: async () => ({
+        compact: async () => ({ ok: true, compacted: false, reason: "legacy-stub" }),
+      }),
+    });
+
+    const result = await engine.assemble({
+      sessionId: "sess-project",
+      sessionKey: "agent:main:qqbot:direct:abc",
+      messages: [{ role: "user", content: "帮我继续看 PD 项目" }],
+      tokenBudget: 2200,
+    });
+
+    assert.match(result.systemPromptAddition ?? "", /Project entry previews/);
+    assert.match(result.systemPromptAddition ?? "", /PD\/README\.md/);
+    assert.match(result.systemPromptAddition ?? "", /反向扰动推断框架/);
   }));
 
 test("context engine delegates compaction to legacy engine", async () =>

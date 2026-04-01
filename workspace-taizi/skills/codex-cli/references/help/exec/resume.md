@@ -1,6 +1,6 @@
 # `codex exec resume`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Resume a previous session by id or pick the most recent with --last

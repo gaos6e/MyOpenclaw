@@ -13,12 +13,16 @@ const moduleUrl = pathToFileURL(
 test("memory-hub plugin does not auto-capture candidates on heartbeat end", async () => {
   const { default: plugin } = await import(moduleUrl);
   const events = [];
+  let runtime = null;
   const api = {
     config: {},
     pluginConfig: {},
     logger: { info() {} },
     registerTool() {},
     registerCli() {},
+    registerMemoryRuntime(value) {
+      runtime = value;
+    },
     on(eventName, handler) {
       events.push({ eventName, handler });
     },
@@ -27,6 +31,7 @@ test("memory-hub plugin does not auto-capture candidates on heartbeat end", asyn
   plugin.register(api);
 
   assert.equal(events.some((entry) => entry.eventName === "agent_end"), false);
+  assert.equal(typeof runtime?.getMemorySearchManager, "function");
 });
 
 test("memory_extract_candidates writes an operation log", async () => {
@@ -67,6 +72,46 @@ test("memory_extract_candidates writes an operation log", async () => {
   assert.equal(lines.at(-1).event, "memory_extract_candidates");
   assert.equal(lines.at(-1).candidateCount, 2);
   assert.deepEqual(lines.at(-1).schemaKeys, ["notify_before_self_improve", "preferred_address"]);
+});
+
+test("memory-hub runtime reports an available manager for the selected workspace", async () => {
+  const { default: plugin } = await import(moduleUrl);
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "memory-hub-runtime-"));
+  const workspaceDir = path.join(tempRoot, "workspace");
+  fs.mkdirSync(path.join(workspaceDir, "memory", "ontology"), { recursive: true });
+  fs.writeFileSync(
+    path.join(workspaceDir, "MEMORY.md"),
+    "# MEMORY.md\n\n## Preferences & setup\n- Use QQ for communication\n\n## Stable facts\n",
+    "utf8",
+  );
+  fs.writeFileSync(path.join(workspaceDir, "memory", "history.jsonl"), "", "utf8");
+  fs.writeFileSync(path.join(workspaceDir, "memory", "ontology", "graph.jsonl"), "", "utf8");
+
+  let runtime = null;
+  const api = {
+    config: { agents: { defaults: { workspace: workspaceDir } } },
+    pluginConfig: {},
+    logger: { info() {} },
+    registerTool() {},
+    registerCli() {},
+    registerMemoryRuntime(value) {
+      runtime = value;
+    },
+    on() {},
+  };
+
+  plugin.register(api);
+
+  const resolved = await runtime.getMemorySearchManager({
+    cfg: { agents: { defaults: { workspace: workspaceDir } } },
+    agentId: "main",
+    purpose: "status",
+  });
+
+  assert.equal(resolved.error, undefined);
+  assert.equal(typeof resolved.manager?.status, "function");
+  assert.equal(typeof resolved.manager?.search, "function");
+  assert.equal(resolved.manager.status().provider, "openclaw-memory-hub");
 });
 
 test("memory_vector_search builds auxiliary vector index and logs semantic recall", async () => {

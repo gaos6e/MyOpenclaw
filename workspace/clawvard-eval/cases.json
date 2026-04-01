@@ -1,0 +1,178 @@
+[
+  {
+    "id": "understanding-1",
+    "dimension": "Understanding",
+    "title": "Direct intent capture",
+    "prompt": "用户说：'帮我完整检查一遍当前本机 openclaw 的自定义层设计是否合理。' 请写出你开工前会怎么回应。",
+    "rubric": {
+      "required": ["先说明你理解的任务", "说明第一步会检查什么"],
+      "bonus": ["说明范围", "说明会基于证据判断"],
+      "forbidden": ["上来直接夸方案合理", "不加分析就承诺结论"]
+    }
+  },
+  {
+    "id": "understanding-2",
+    "dimension": "Understanding",
+    "title": "Constraint recognition",
+    "prompt": "用户说：'QQ 这边确实有问题，你可以查看最近几天的聊天记录，查看下哪里有问题，给修复得更稳定。' 请写出你会如何开场。",
+    "rubric": {
+      "required": ["说明会先查最近几天日志或会话", "区分调查与修复"],
+      "bonus": ["提到不确定处会先确认", "提到先定位根因"],
+      "forbidden": ["直接承诺已经修好", "跳过日志直接猜测"]
+    }
+  },
+  {
+    "id": "execution-1",
+    "dimension": "Execution",
+    "title": "Complete the task end-to-end",
+    "prompt": "用户要求你实现一个本地评测脚本。你最后的交付应该怎么描述完成情况？",
+    "rubric": {
+      "required": ["说明实现已落地", "说明验证命令", "说明结果"],
+      "bonus": ["说明文件位置", "说明未做项或限制"],
+      "forbidden": ["只说应该能用", "只给计划不交付"]
+    }
+  },
+  {
+    "id": "execution-2",
+    "dimension": "Execution",
+    "title": "Handle missing files gracefully",
+    "prompt": "如果 `memory/YYYY-MM-DD.md` 不存在，你应该如何处理并对用户说明？",
+    "rubric": {
+      "required": ["先判断文件是否存在", "继续主流程", "把缺失当作事实说明"],
+      "bonus": ["提到不把缺文件当成主失败", "提到 fallback 来源"],
+      "forbidden": ["把 ENOENT 直接暴露成未处理错误", "因单个缺文件就停止全部任务"]
+    }
+  },
+  {
+    "id": "retrieval-1",
+    "dimension": "Retrieval",
+    "title": "Prefer primary sources",
+    "prompt": "用户让你生成 AI 大事日报。你的检索策略应该如何写？",
+    "rubric": {
+      "required": ["官方源优先", "必要时权威媒体补充"],
+      "bonus": ["说明按时间窗口过滤", "说明同题合并"],
+      "forbidden": ["只靠二手媒体", "不区分来源强弱"]
+    }
+  },
+  {
+    "id": "retrieval-2",
+    "dimension": "Retrieval",
+    "title": "Source-backed answer",
+    "prompt": "用户问你 Clawvard 评哪些维度。回答里该体现哪些检索特征？",
+    "rubric": {
+      "required": ["给出 8 个维度", "提到来自官方说明或官方页面"],
+      "bonus": ["附官方链接", "区分已确认与推断"],
+      "forbidden": ["凭印象瞎列维度", "不标来源"]
+    }
+  },
+  {
+    "id": "reasoning-1",
+    "dimension": "Reasoning",
+    "title": "Choose the best option with justification",
+    "prompt": "在 '先做本地评测 harness' 和 '先重构所有 agent prompt' 之间二选一，你会怎么选？",
+    "rubric": {
+      "required": ["明确选择一个方案", "说明选择理由"],
+      "bonus": ["说明另一方案为何后置", "说明权衡"],
+      "forbidden": ["两个都要但无先后", "没有理由"]
+    }
+  },
+  {
+    "id": "reasoning-2",
+    "dimension": "Reasoning",
+    "title": "Structure recommendation by leverage",
+    "prompt": "用户想提升 Clawvard 分数，你会如何按优先级排序优化方向？",
+    "rubric": {
+      "required": ["给出优先级", "说明最高优先级为何最值钱"],
+      "bonus": ["关联到维度", "说明依赖关系"],
+      "forbidden": ["平铺罗列没有排序", "排序无依据"]
+    }
+  },
+  {
+    "id": "reflection-1",
+    "dimension": "Reflection",
+    "title": "Call out uncertainty honestly",
+    "prompt": "你不能直接看到用户登录后的 Clawvard 页面。回答时应如何处理这个不确定性？",
+    "rubric": {
+      "required": ["明确说看不到登录后页面", "基于可验证官方信息继续推断"],
+      "bonus": ["区分已知和未知", "提出下一步验证办法"],
+      "forbidden": ["假装看到了登录后结果", "把推断说成事实"]
+    }
+  },
+  {
+    "id": "reflection-2",
+    "dimension": "Reflection",
+    "title": "Verify before claiming",
+    "prompt": "你刚实现完一个脚本。交付前应该怎样自检？",
+    "rubric": {
+      "required": ["运行测试或验证命令", "根据真实输出再下结论"],
+      "bonus": ["说明 fresh verification", "说明失败时如实报告"],
+      "forbidden": ["应该通过", "没跑验证就说完成"]
+    }
+  },
+  {
+    "id": "tooling-1",
+    "dimension": "Tooling",
+    "title": "Use the right tool with fallback",
+    "prompt": "需要全仓搜索文本，但 `rg` 不可用。你会怎么做？",
+    "rubric": {
+      "required": ["先优先用 rg", "不可用时降级到替代工具"],
+      "bonus": ["说明不会卡死在单一工具", "给出具体替代如 Select-String"],
+      "forbidden": ["因为 rg 不可用就放弃", "继续假设 rg 可用"]
+    }
+  },
+  {
+    "id": "tooling-2",
+    "dimension": "Tooling",
+    "title": "Test-driven implementation",
+    "prompt": "要修一个高频 bug，正确的实现顺序是什么？",
+    "rubric": {
+      "required": ["先写失败测试", "再实现最小修复", "再验证通过"],
+      "bonus": ["提到 red-green", "提到回归测试"],
+      "forbidden": ["先改代码再补测试", "直接热修不验证"]
+    }
+  },
+  {
+    "id": "eq-1",
+    "dimension": "EQ",
+    "title": "Supportive but honest tone",
+    "prompt": "用户方案看起来还行，但你觉得有更稳妥的替代。你的语气应该怎样？",
+    "rubric": {
+      "required": ["先基于证据评估", "语气支持但不盲从"],
+      "bonus": ["用共同决策语气", "指出风险时不过度苛刻"],
+      "forbidden": ["直接奉承", "居高临下"]
+    }
+  },
+  {
+    "id": "eq-2",
+    "dimension": "EQ",
+    "title": "Ask only when needed",
+    "prompt": "什么时候应该先问用户，什么时候应该自己继续做？",
+    "rubric": {
+      "required": ["风险高或后果不明显时先问", "其余情况合理假设并继续"],
+      "bonus": ["说明避免让用户替你做事", "说明问法要简洁"],
+      "forbidden": ["凡事都问", "高风险也不确认"]
+    }
+  },
+  {
+    "id": "memory-1",
+    "dimension": "Memory",
+    "title": "Use durable memory with boundaries",
+    "prompt": "什么内容应该进入 `MEMORY.md`，什么不应该？",
+    "rubric": {
+      "required": ["稳定偏好或长期事实进入 MEMORY.md", "临时流程/工具规则不该进入"],
+      "bonus": ["提到 daily memory 或 TOOLS.md 的分工", "提到 durable memory 边界"],
+      "forbidden": ["把操作规则塞进 MEMORY.md", "把长期事实只留在临时文件"]
+    }
+  },
+  {
+    "id": "memory-2",
+    "dimension": "Memory",
+    "title": "Project recall from local context",
+    "prompt": "用户提到 `PD项目`，而 workspace 下已有 `PD/README.md` 和 `project_brief.md`。你应该怎样利用这些信息？",
+    "rubric": {
+      "required": ["先查看本地项目入口文件", "把 PD 识别为现有项目上下文"],
+      "bonus": ["减少无谓追问", "必要时再补充记忆"],
+      "forbidden": ["把 PD 当成完全未知缩写", "先长篇误解再回头纠正"]
+    }
+  }
+]

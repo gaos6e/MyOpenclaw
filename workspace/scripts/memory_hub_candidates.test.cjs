@@ -16,14 +16,13 @@ test("heuristic extraction captures stable preferences and facts", async () => {
     sourceRef: "sessions/example.jsonl",
     texts: [
       "我喜欢航拍、摄影和 PC 装机。",
-      "Important/common files live in: C:\\Users\\20961\\.openclaw",
-      "Long-term workspace: C:\\Users\\20961\\.openclaw\\workspace",
+      "以后直接用QQ联系我。",
     ],
   });
 
   assert.equal(candidates.length >= 2, true);
   assert.equal(candidates.some((item) => item.candidate_kind === "preference"), true);
-  assert.equal(candidates.some((item) => item.normalized.includes(".openclaw\\workspace")), true);
+  assert.equal(candidates.some((item) => item.schema_key === "communication_channel"), true);
 });
 
 test("heuristic extraction ignores platform/tooling rules", async () => {
@@ -53,22 +52,21 @@ test("heuristic extraction splits natural language into structured candidates", 
     ],
   });
 
-  assert.equal(candidates.length, 3);
+  assert.equal(candidates.length, 2);
   assert.deepEqual(
     candidates.map((item) => item.normalized),
     [
       "希望以后称呼他为“哥哥～”",
       "进行自我提升前先告知用户",
-      "Backups/temporary files live in: D:\\桌面\\openclaw",
     ],
   );
   assert.deepEqual(
     candidates.map((item) => item.schema_key),
-    ["preferred_address", "notify_before_self_improve", "temporary_files_path"],
+    ["preferred_address", "notify_before_self_improve"],
   );
 });
 
-test("structured extraction covers current high-frequency memory rules", async () => {
+test("structured extraction ignores tooling and environment rules that do not belong in durable memory", async () => {
   const { extractHeuristicCandidates } = await import(moduleUrl);
 
   const candidates = extractHeuristicCandidates({
@@ -84,28 +82,7 @@ test("structured extraction covers current high-frequency memory rules", async (
     ],
   });
 
-  assert.deepEqual(
-    candidates.map((item) => item.schema_key),
-    [
-      "thinking_default_medium",
-      "important_files_path",
-      "skills_install_path",
-      "media_download_workflow",
-      "moltbook_report_verbatim",
-      "cron_failure_diagnostics",
-    ],
-  );
-  assert.deepEqual(
-    candidates.map((item) => item.normalized),
-    [
-      "模型思考模式设置为开启，默认使用 medium 级别",
-      "Important/common files live in: C:\\Users\\20961\\.openclaw",
-      "All OpenClaw skills should be installed in C:\\Users\\20961\\.openclaw\\workspace\\skills",
-      "For mainstream media content (video/image/text), use https://snapany.com/zh to download then read/analyze",
-      "When reporting Moltbook automation results back to the user, preserve the full script report verbatim, including 回复内容 / 私信内容 / 点赞内容 / 评论内容 / 关注内容 / 发帖内容. Do not compress it into a short summary.",
-      "When cron jobs fail with rate limits or model timeouts, check `openclaw cron runs --id <job-id>` for detailed error logs and consider adjusting retry intervals or model selection.",
-    ],
-  );
+  assert.deepEqual(candidates, []);
 });
 
 test("structured extraction captures direct communication and codeword conventions", async () => {

@@ -1,6 +1,31 @@
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+
+const require = createRequire(import.meta.url);
+
+function loadReadExistingFiles() {
+  try {
+    const modulePath = path.resolve(process.cwd(), "workspace", "scripts", "tooling_guardrails.cjs");
+    const loaded = require(modulePath);
+    if (typeof loaded.readExistingFiles === "function") {
+      return loaded.readExistingFiles;
+    }
+  } catch {}
+
+  return function fallbackReadExistingFiles(filePaths, options = {}) {
+    const maxChars = options.maxCharsPerFile ?? 4000;
+    return filePaths
+      .filter((filePath) => typeof filePath === "string" && fs.existsSync(filePath))
+      .map((filePath) => ({
+        path: filePath,
+        content: fs.readFileSync(filePath, "utf8").slice(0, maxChars),
+      }));
+  };
+}
+
+const readExistingFiles = loadReadExistingFiles();
 
 function normalizeSessionKey(sessionKey) {
   return String(sessionKey ?? "").trim().toLowerCase();
@@ -16,10 +41,6 @@ function inferSessionScope(sessionKey) {
     isPrivate: !isShared,
     sessionKey: normalized,
   };
-}
-
-function readIfExists(filePath) {
-  return fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "";
 }
 
 function parseMarkdownSections(text) {
@@ -112,28 +133,88 @@ function truncateSnapshot(text, maxChars) {
   return `${normalized.slice(0, Math.max(0, maxChars - 16)).trimEnd()}\n[truncated]`;
 }
 
-function resolveWorkspaceGovernanceSnapshot(workspaceDir, scope) {
+function extractMessageText(message) {
+  if (!message) {
+    return "";
+  }
+  if (typeof message.content === "string") {
+    return message.content;
+  }
+  if (!Array.isArray(message.content)) {
+    return "";
+  }
+  return message.content
+    .map((block) => (typeof block?.text === "string" ? block.text : ""))
+    .join("\n");
+}
+
+function extractProjectAliases(text) {
+  const aliases = new Set();
+  const pattern = /(^|[^A-Z0-9_-])([A-Z][A-Z0-9_-]{1,15})(?=$|[^A-Z0-9_-])/g;
+  let match = pattern.exec(String(text ?? ""));
+  while (match) {
+    aliases.add(match[2]);
+    match = pattern.exec(String(text ?? ""));
+  }
+  return [...aliases];
+}
+
+function collectProjectPreviewLines(workspaceDir, messages) {
+  const recentText = (messages ?? [])
+    .slice(-4)
+    .map(extractMessageText)
+    .join("\n");
+  const aliases = extractProjectAliases(recentText).slice(0, 2);
+  const previewLines = [];
+
+  for (const alias of aliases) {
+    const projectDir = path.join(workspaceDir, alias);
+    if (!fs.existsSync(projectDir) || !fs.statSync(projectDir).isDirectory()) {
+      continue;
+    }
+    const entries = readExistingFiles(
+      [
+        path.join(projectDir, "README.md"),
+        path.join(projectDir, "project_brief.md"),
+      ],
+      { maxCharsPerFile: 140 },
+    );
+    for (const entry of entries) {
+      const preview = entry.content.replace(/\s+/g, " ").trim();
+      previewLines.push(`- ${alias}/${path.basename(entry.path)}: ${preview}`);
+    }
+  }
+
+  return previewLines;
+}
+
+function resolveWorkspaceGovernanceSnapshot(workspaceDir, scope, messages) {
   const memoryPath = path.join(workspaceDir, "MEMORY.md");
   const todoPath = path.join(workspaceDir, "self_improve_todo.md");
   const statusPath = path.join(workspaceDir, "self_improve_status.md");
-  const qualityPath = path.join(workspaceDir, "self_improve_quality.md");
+  const optionalFiles = readExistingFiles([memoryPath, todoPath, statusPath]);
+  const fileMap = new Map(optionalFiles.map((entry) => [entry.path, entry.content]));
 
-  const memorySections = parseMarkdownSections(readIfExists(memoryPath));
+  const memorySections = parseMarkdownSections(fileMap.get(memoryPath) ?? "");
   const lines = [
     "OpenClaw Context Snapshot",
     "- Canonical memory flow: memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate",
     "- Ongoing context in MEMORY.md is human-readable only and should not be promoted directly.",
     "- Checkpoint discipline: persist durable learnings after extended exploration before continuing.",
+    "- Execution guardrail: do not claim completion without fresh verification.",
+    "- Tooling guardrail: if rg is unavailable, fall back to Get-ChildItem + Select-String instead of stopping the search flow.",
+    "- Retrieval guardrail: handle optional files gracefully; check existence first and continue if a file is missing.",
   ];
 
   if (scope.isPrivate) {
+    const projectPreviewLines = collectProjectPreviewLines(workspaceDir, messages);
     lines.push(
       ...formatList("About user", collectNonEmptyIdentityBullets(memorySections.get("About the user")).slice(0, 4)),
-      ...formatList("Preferences & setup", collectTopLevelBullets(memorySections.get("Preferences & setup")).slice(0, 6)),
-      ...formatList("Stable facts", collectTopLevelBullets(memorySections.get("Stable facts")).slice(0, 6)),
-      ...formatList("Self-improve TODO", collectTodoItems(readIfExists(todoPath), 3)),
-      ...formatList("Recent status", collectStatusItems(readIfExists(statusPath), 3)),
-      ...formatList("Recent quality signals", collectQualityItems(readIfExists(qualityPath), 2)),
+      ...formatList("Preferences & setup", collectTopLevelBullets(memorySections.get("Preferences & setup")).slice(0, 4)),
+      ...formatList("Stable facts", collectTopLevelBullets(memorySections.get("Stable facts")).slice(0, 4)),
+      ...formatList("Project entry previews", projectPreviewLines),
+      ...formatList("Self-improve TODO", collectTodoItems(fileMap.get(todoPath) ?? "", 2)),
+      ...formatList("Recent status", collectStatusItems(fileMap.get(statusPath) ?? "", 2)),
     );
   } else {
     lines.push("- Shared-session safety mode: omit private durable memory and local self-improvement state.");
@@ -253,7 +334,7 @@ export class OpenClawWorkspaceContextEngine {
   async assemble(params) {
     const scope = inferSessionScope(params.sessionKey);
     const snapshot = truncateSnapshot(
-      resolveWorkspaceGovernanceSnapshot(this.workspaceDir, scope),
+      resolveWorkspaceGovernanceSnapshot(this.workspaceDir, scope, params.messages),
       computeMaxChars(params.tokenBudget, this.maxChars),
     );
     return {

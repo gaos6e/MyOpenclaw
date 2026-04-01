@@ -1,6 +1,6 @@
 # `codex mcp-server`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Start Codex as an MCP server (stdio)

@@ -10,6 +10,9 @@
 - parked:暂缓/搁置
 
 ## 事项列表
+- done | 隔离未启用高风险 vendor skills/extensions | 2026-04-01 | 将未启用的 openclaw-weixin/qqbot/wecom/_quarantine 扩展及 evolver/self-evolving-skill/capability-evolver 副本迁入 backup/quarantined-*
+- done | 记忆主干统一到 openclaw-memory-hub | 2026-04-01 | 启用 memory slot/runtime；移除 memory-lancedb 悬空主槽；收紧 durable memory 候选边界
+- done | OpenClaw 本地安全默认值收紧 | 2026-04-01 | 关闭 elevated + autoAllowSkills；qq allowFrom 改为单一 operator；工具面收敛到 coding/workspaceOnly
 - done | 心跳触发自我提升执行 | 2026-03-25 | 环境卫生自检 + 定时任务异常记录 + 质量自检更新 + 定时任务错误分析改进
 - done | `.openclaw` 环境卫生自检机制落地 | 2026-03-24 | 新增 audit script，并接入 HEARTBEAT / SOP / 临时文件规则
 - done | 修复 Star-Office state JSON 解析问题 | 2026-03-21 | set_state.py 增加 JSONDecodeError 容错+备份

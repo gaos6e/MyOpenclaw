@@ -29,11 +29,31 @@ function getIndexer(paths) {
   return INDEXERS.get(key);
 }
 
-function getVectorEmbedMany(api) {
+function resolveEmbedClientConfig(memorySearchConfig) {
+  const baseUrl = String(memorySearchConfig?.remote?.baseUrl ?? "").trim();
+  const model = String(memorySearchConfig?.model ?? "").trim();
+  const source = memorySearchConfig?.remote?.apiKey;
+  const apiKey =
+    source?.source === "env" && source?.id
+      ? String(process.env[source.id] ?? "").trim()
+      : typeof source === "string"
+        ? source.trim()
+        : "";
+  return { baseUrl, model, apiKey };
+}
+
+function getVectorEmbedMany(api, memorySearchConfig = api.config?.agents?.defaults?.memorySearch) {
   if (typeof api.pluginConfig?.embedMany === "function") {
     return api.pluginConfig.embedMany;
   }
-  return createRemoteEmbedMany(api.config?.agents?.defaults?.memorySearch);
+  return createRemoteEmbedMany(resolveEmbedClientConfig(memorySearchConfig));
+}
+
+function resolveAgentWorkspaceDir(config, agentId) {
+  const configured =
+    config?.agents?.list?.find?.((entry) => entry?.id === agentId)?.workspace
+    ?? config?.agents?.defaults?.workspace;
+  return configured ? path.resolve(configured) : path.resolve(process.cwd(), "workspace");
 }
 
 async function preparePaths(api, toolContext) {
@@ -62,6 +82,93 @@ async function ensureOntologyAndIndex(paths) {
     ontologyPath: paths.ontologyPath,
   });
   await getIndexer(paths).reindex({ force: true });
+}
+
+function buildRuntimeStatus(paths, indexerStatus, vectorAvailable, requestedModel) {
+  return {
+    backend: "builtin",
+    provider: "openclaw-memory-hub",
+    model: requestedModel || undefined,
+    files: Number(indexerStatus.docs ?? 0),
+    chunks: Number(indexerStatus.chunks ?? 0),
+    workspaceDir: paths.workspaceDir,
+    dbPath: paths.dbPath,
+    sources: ["memory", "sessions"],
+    fts: {
+      enabled: true,
+      available: true,
+    },
+    vector: {
+      enabled: true,
+      available: vectorAvailable,
+      extensionPath: paths.vectorIndexPath,
+    },
+    custom: {
+      backend: indexerStatus.backend,
+      inboxDir: paths.inboxDir,
+      historyPath: paths.historyPath,
+      ontologyPath: paths.ontologyPath,
+    },
+  };
+}
+
+function createMemoryRuntimeManager(api, paths, memorySearchConfig) {
+  const indexer = getIndexer(paths);
+  const embedMany = getVectorEmbedMany(api, memorySearchConfig);
+  const requestedModel = String(memorySearchConfig?.model ?? "").trim();
+
+  return {
+    async search(query, opts = {}) {
+      await indexer.reindex();
+      const results = await indexer.search(query, {
+        maxResults: opts.maxResults,
+        minScore: opts.minScore,
+      });
+      return results.map((item) => ({
+        path: item.path,
+        startLine: item.startLine,
+        endLine: item.endLine,
+        score: item.score,
+        snippet: item.snippet,
+        source: "memory",
+      }));
+    },
+    async readFile(params) {
+      return indexer.readFile({
+        relPath: params.relPath,
+        from: params.from,
+        lines: params.lines,
+      });
+    },
+    status() {
+      return buildRuntimeStatus(paths, indexer.status(), typeof embedMany === "function", requestedModel);
+    },
+    async sync(params = {}) {
+      await ensureOntologyAndIndex(paths);
+      if (typeof embedMany === "function") {
+        await ensureAuxVectorIndex({
+          workspaceDir: paths.workspaceDir,
+          stateDir: paths.stateDir,
+          agentId: "main",
+          indexPath: paths.vectorIndexPath,
+          embedMany,
+          maxSessionFiles: paths.vectorMaxSessionFiles,
+          maxSessionMessagesPerFile: paths.vectorMaxSessionMessagesPerFile,
+        });
+      }
+      if (typeof params.progress === "function") {
+        params.progress({ completed: 1, total: 1, label: "memory-hub sync" });
+      }
+    },
+    async probeEmbeddingAvailability() {
+      return typeof embedMany === "function"
+        ? { ok: true }
+        : { ok: false, error: "memorySearch embedding settings are missing" };
+    },
+    async probeVectorAvailability() {
+      return typeof embedMany === "function";
+    },
+  };
 }
 
 const plugin = {
@@ -93,6 +200,32 @@ const plugin = {
     },
   },
   register(api) {
+    if (typeof api.registerMemoryRuntime === "function") {
+      api.registerMemoryRuntime({
+        async getMemorySearchManager({ cfg, agentId }) {
+          const workspaceDir = resolveAgentWorkspaceDir(cfg, agentId);
+          const paths = resolveMemoryHubPaths({
+            config: cfg,
+            pluginConfig: api.pluginConfig,
+            toolContext: { workspaceDir },
+          });
+          ensureMemoryHubFiles(paths);
+          return {
+            manager: createMemoryRuntimeManager(api, paths, cfg?.agents?.defaults?.memorySearch),
+          };
+        },
+        resolveMemoryBackendConfig() {
+          return { backend: "builtin" };
+        },
+        async closeAllMemorySearchManagers() {
+          for (const indexer of INDEXERS.values()) {
+            indexer.close();
+          }
+          INDEXERS.clear();
+        },
+      });
+    }
+
     api.registerTool(
       (ctx) => {
         return [

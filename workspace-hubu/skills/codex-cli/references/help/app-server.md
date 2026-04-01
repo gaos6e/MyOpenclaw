@@ -1,6 +1,6 @@
 # `codex app-server`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 [experimental] Run the app server or related tooling
@@ -32,14 +32,6 @@ Options:
           
           [default: stdio://]
 
-      --session-source <SOURCE>
-          Session source stamped into new threads started by this app-server.
-          
-          Known values such as `vscode`, `cli`, `exec`, and `mcp` map to built-in sources. Any other
-          non-empty value is recorded as a custom source.
-          
-          [default: vscode]
-
       --analytics-default-enabled
           Controls whether analytics are enabled by default.
           
@@ -53,6 +45,26 @@ Options:
           ```toml [analytics] enabled = false ```
           
           See https://developers.openai.com/codex/config-advanced/#metrics for more details.
+
+      --ws-auth <MODE>
+          Websocket auth mode for non-loopback listeners
+          
+          [possible values: capability-token, signed-bearer-token]
+
+      --ws-token-file <PATH>
+          Absolute path to the capability-token file
+
+      --ws-shared-secret-file <PATH>
+          Absolute path to the shared secret file for signed JWT bearer tokens
+
+      --ws-issuer <ISSUER>
+          Expected issuer for signed JWT bearer tokens
+
+      --ws-audience <AUDIENCE>
+          Expected audience for signed JWT bearer tokens
+
+      --ws-max-clock-skew-seconds <SECONDS>
+          Maximum clock skew when validating signed JWT bearer tokens
 
   -h, --help
           Print help (see a summary with '-h')

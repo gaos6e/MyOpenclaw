@@ -1,6 +1,6 @@
 # `codex resume`
 
-Detected from local binary: `codex-cli 0.116.0`
+Detected from local binary: `codex-cli 0.118.0-alpha.2`
 
 ```text
 Resume a previous interactive session (picker by default; use --last to continue the most recent)
@@ -36,10 +36,17 @@ Options:
       --disable <FEATURE>
           Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
 
+      --include-non-interactive
+          Include non-interactive sessions in the resume picker and --last selection
+
       --remote <ADDR>
           Connect the app-server-backed TUI to a remote app server websocket endpoint.
           
           Accepted forms: `ws://host:port` or `wss://host:port`.
+
+      --remote-auth-token-env <ENV_VAR>
+          Name of the environment variable containing the bearer token to send to a remote app
+          server websocket
 
   -i, --image <FILE>...
           Optional image(s) to attach to the initial prompt

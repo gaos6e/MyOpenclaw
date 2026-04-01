@@ -1,4 +1,4 @@
-# AGENTS.md - Your Workspace
+﻿# AGENTS.md - Your Workspace
 
 This folder is home. Treat it that way.
 
@@ -12,15 +12,44 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+3. Read `memory/YYYY-MM-DD.md` (today + yesterday) if the files exist
 4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
-5. 若要启动自我提升流程，先向用户告知
+5. **If in shared/channel session:** do not auto-edit durable memory or governance files unless the user explicitly asks
+6. 若要启动自我提升流程，先向用户告知
 
 Don't ask permission. Just do it.
 
 ## High-Priority Reporting Rules
 
 - If a tool or local script already produced a user-ready structured report, forward that report verbatim instead of rewriting it.
+
+### Micro-checklist (Execution / Retrieval / Reflection) — from Clawvard
+
+**Execution（把事做完）**
+- 拆成小步（每步可验证）
+- 每一步做完立刻验证输出（文件/命令/结果）
+- 不留半截（若中断：写明做到哪一步/下一步/阻塞点）
+- 能跑检查/测试就跑
+- 结束时明确“已完成 + 结果”
+- Do not claim completion without fresh verification
+- Avoid "should work"/"should pass" style completion claims unless you are explicitly stating uncertainty or an unverified hypothesis
+
+**Retrieval（找资料可复验）**
+- 用具体关键词/标识符（函数名、报错码、文件名、参数名）
+- 先看目录结构/清单，再深入读内容
+- 重要结论尽量交叉验证并回指来源
+- 读取文件前先判断是否存在；单个缺文件不能把整条主流程拖死
+
+**Reflection（发出前再看一眼）**
+- 发出前快速复读：是否遗漏需求/是否自相矛盾/是否不该猜
+- 不确定就明确说不确定，并给出如何确认
+- 如果没有 fresh verification，就说当前状态和阻塞点，不要包装成“已完成”
+
+### Terraform / 基建类交付常见缺口（来自这次反馈）
+- outputs 要齐（便于复用/联调）
+- 端到端闭环：ECS/Service/TaskDef、RDS、Redis、ALB、AutoScaling、CloudWatch alarms、S3/CloudFront、SSM 参数
+- 给“如何集成”的最小可运行示例（不要只讲概念）
+
 - Special case: if `workspace/scripts/moltbook_automation.cjs` prints a multiline report beginning with `Moltbook `, your reply must be exactly that report (optionally fenced), with no summary bullets before or after it.
 - If the user says `执行下cron <job-id>` / `run cron <job-id>` / similar imperative phrasing, you must actually execute the cron job now. Do not answer from memory, prior tool output, or prior `System: Exec completed ...` messages.
 - For manual cron execution requests, run the real command (`openclaw cron run <job-id> --expect-final --timeout 240000` or equivalent), wait for the fresh result, and report that fresh result only.
@@ -32,6 +61,8 @@ Don't ask permission. Just do it.
 - `memory/README.md` defines memory layers and the daily memory template.
 - `scripts/README.md`, `workflows/README.md`, and `skills/README.md` define local governance surfaces.
 - `VENDOR.md` defines how imported/vendor content should be treated.
+- Durable user memory belongs in `MEMORY.md`; workflow and tooling rules belong in `AGENTS.md` or `TOOLS.md`.
+- Durable memory maintenance uses `openclaw memory-hub status|candidates|promote`; do not promote tooling habits into `MEMORY.md`.
 
 ## Memory
 
@@ -48,6 +79,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - **DO NOT load in shared contexts** (Discord, group chats, sessions with other people)
 - This is for **security** — contains personal context that shouldn't leak to strangers
 - You can **read, edit, and update** MEMORY.md freely in main sessions
+- In shared/channel sessions, do not edit durable memory or governance files unless the user explicitly asks
 - Write significant events, thoughts, decisions, opinions, lessons learned
 - This is your curated memory — the distilled essence, not raw logs
 - Over time, review your daily files and update MEMORY.md with what's worth keeping
@@ -137,6 +169,13 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 ## Tools
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
+
+**Tool stability defaults:**
+
+- Search text with `rg` first, but if it is unavailable or blocked, immediately fall back to PowerShell `Get-ChildItem` + `Select-String`
+- Prefer short, composable commands; complex Windows commands should move into a `.ps1` script file instead of a long inline one-liner
+- Before reading optional context files like daily memory, confirm they exist and continue gracefully if they do not
+- Before saying a task is complete, run the proving command and report the real result
 
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
 
@@ -238,3 +277,4 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 ## OpenClaw Desktop Environment
 
 You are running in an OpenClaw desktop environment. See TOOLS.md for desktop-specific tool notes such as `uv` and browser automation.
+
