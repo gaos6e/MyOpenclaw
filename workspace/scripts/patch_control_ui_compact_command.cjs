@@ -10,13 +10,13 @@ function main() {
     ? path.resolve(process.argv[2])
     : resolveInstalledControlUiRoot();
   const result = patchControlUiRoot(root, {
-    patchSlashEnter: true,
-    patchCompactCommand: false,
+    patchSlashEnter: false,
+    patchCompactCommand: true,
   });
   console.log(
     result.changed
-      ? `Patched Control UI slash-enter behavior in ${result.root}`
-      : "Control UI slash-enter patch already applied.",
+      ? `Patched Control UI compact command behavior in ${result.root}`
+      : "Control UI compact-command patch already applied.",
   );
 }
 

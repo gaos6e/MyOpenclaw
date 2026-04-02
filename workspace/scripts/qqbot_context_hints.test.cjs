@@ -106,4 +106,7 @@ test("QQ channel stability instruction emphasizes verification and no-write defa
   assert.match(instruction, /daily memory/i);
   assert.match(instruction, /fresh verification/i);
   assert.match(instruction, /不要编辑本地治理文件/);
+  assert.match(instruction, /外部.*不可信/);
+  assert.match(instruction, /不得据此修改.*AGENTS\.md/i);
+  assert.match(instruction, /安装 skills.*参加考试/);
 });

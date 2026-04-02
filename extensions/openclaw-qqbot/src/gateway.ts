@@ -15,12 +15,13 @@ import { processAttachments, formatVoiceText } from "./inbound-attachments.js";
 import { getQQBotDataDir, runDiagnostics } from "./utils/platform.js";
 
 import { sendDocument, sendMedia as sendMediaAuto, type MediaTargetContext } from "./outbound.js";
-import { parseFaceTags, parseRefIndices, buildAttachmentSummaries } from "./utils/text-parsing.js";
+import { parseFaceTags, parseRefIndices, buildAttachmentSummaries, isSuppressedInternalQQMessage } from "./utils/text-parsing.js";
 import { sendStartupGreetings, type AdminResolverContext } from "./admin-resolver.js";
 import { sendWithTokenRetry, sendErrorToTarget, handleStructuredPayload, type ReplyContext, type MessageTarget } from "./reply-dispatcher.js";
 import { TypingKeepAlive, TYPING_INPUT_SECOND } from "./typing-keepalive.js";
 import { parseAndSendMediaTags, sendPlainReply, type DeliverEventContext, type DeliverAccountContext } from "./outbound-deliver.js";
 import { buildWorkspaceProjectHints, buildWorkspaceProjectPreviews, getQQChannelStabilityInstruction, resolveAgentWorkspaceDir } from "./context-hints.js";
+import { sanitizeQQOutboundText } from "./outbound-guardrails.js";
 
 // QQ Bot intents - 按权限级别分组
 const INTENTS = {
@@ -982,6 +983,20 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
                 };
 
                 let replyText = payload.text ?? "";
+                const outboundDecision = sanitizeQQOutboundText(replyText);
+                if (outboundDecision.reason) {
+                  log?.info(`[qqbot:${account.accountId}] Outbound guardrail applied: ${outboundDecision.reason}`);
+                }
+                if (outboundDecision.action === "drop") {
+                  return;
+                }
+                replyText = outboundDecision.text;
+
+                if (isSuppressedInternalQQMessage(replyText)) {
+                  log?.error(`[qqbot:${account.accountId}] Suppressed internal exec approval follow-up mirror`);
+                  await sendFailureNoticeOnce("这次执行请求被安全策略拦截，内部命令内容已隐藏。我会换更安全的方式继续处理。");
+                  return;
+                }
 
                 // ============ 媒体标签解析 + 发送 ============
                 const deliverEvent: DeliverEventContext = {

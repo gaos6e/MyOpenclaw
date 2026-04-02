@@ -266,3 +266,59 @@ test("context engine falls back to compact runtime bundle when legacy context-en
       fs.rmSync(tempDistRoot, { recursive: true, force: true });
     }
   }));
+
+test("context engine also resolves compact runtime from the dist root in OpenClaw 3.31 layouts", async () =>
+  withTempWorkspace(async ({ workspaceDir }) => {
+    const { OpenClawWorkspaceContextEngine } = await import(moduleUrl);
+    const tempDistRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-dist-root-"));
+    const previousDistDir = process.env.OPENCLAW_DIST_DIR;
+
+    try {
+      fs.writeFileSync(
+        path.join(tempDistRoot, "compact.runtime-test.js"),
+        [
+          "export async function compactEmbeddedPiSessionDirect(params) {",
+          "  return {",
+          "    ok: true,",
+          "    compacted: true,",
+          "    reason: 'dist-root-runtime',",
+          "    result: {",
+          "      summary: 'ok',",
+          "      firstKeptEntryId: 'entry-2',",
+          "      tokensBefore: params.currentTokenCount ?? 0,",
+          "      tokensAfter: 24,",
+          "      details: { workspaceDir: params.workspaceDir }",
+          "    }",
+          "  };",
+          "}",
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      process.env.OPENCLAW_DIST_DIR = tempDistRoot;
+
+      const engine = new OpenClawWorkspaceContextEngine({ workspaceDir });
+      const result = await engine.compact({
+        sessionId: "sess-5",
+        sessionKey: "agent:main:test",
+        sessionFile: "session.jsonl",
+        tokenBudget: 2000,
+        currentTokenCount: 321,
+        runtimeContext: { workspaceDir },
+      });
+
+      assert.equal(result.ok, true);
+      assert.equal(result.compacted, true);
+      assert.equal(result.reason, "dist-root-runtime");
+      assert.equal(result.result.tokensBefore, 321);
+      assert.equal(result.result.tokensAfter, 24);
+      assert.equal(result.result.details.workspaceDir, workspaceDir);
+    } finally {
+      if (previousDistDir === undefined) {
+        delete process.env.OPENCLAW_DIST_DIR;
+      } else {
+        process.env.OPENCLAW_DIST_DIR = previousDistDir;
+      }
+      fs.rmSync(tempDistRoot, { recursive: true, force: true });
+    }
+  }));

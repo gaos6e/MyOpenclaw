@@ -33,6 +33,8 @@ test("hygiene audit classifies safe root backups and protected hotspots", () => 
 
     writeFile(path.join(tempRoot, "openclaw.json"), "{}\n");
     writeFile(path.join(tempRoot, "openclaw.json.bak"), "{}\n");
+    writeFile(path.join(tempRoot, "openclaw.json.clobbered.2026-04-02T06-59-27-679Z"), "{}\n");
+    writeFile(path.join(tempRoot, "debug.jsonl"), "{\"id\":\"debug-session\"}\n");
     writeFile(path.join(tempRoot, "qqbot", "downloads", "image.png"), "binary");
     writeFile(path.join(tempRoot, "workspace", "_tmp_cli_anything", "README.md"), "# keep\n");
 
@@ -54,6 +56,8 @@ test("hygiene audit classifies safe root backups and protected hotspots", () => 
     const askFirstPaths = collectPaths(payload.askFirst);
 
     assert.ok(safePaths.has("openclaw.json.bak"));
+    assert.ok(safePaths.has("openclaw.json.clobbered.2026-04-02T06-59-27-679Z"));
+    assert.ok(safePaths.has("debug.jsonl"));
     assert.ok(safePaths.has("env-backup-20260324-140437"));
     assert.ok(askFirstPaths.has(path.join("qqbot", "downloads")));
     assert.ok(askFirstPaths.has(path.join("workspace", "_tmp_cli_anything")));
@@ -73,8 +77,11 @@ test("hygiene audit applies safe moves without touching protected hotspots", () 
 
     writeFile(path.join(tempRoot, "openclaw.json"), "{}\n");
     writeFile(path.join(tempRoot, "openclaw.json.bak"), "{}\n");
+    writeFile(path.join(tempRoot, "openclaw.json.clobbered.2026-04-02T06-59-27-679Z"), "{}\n");
+    writeFile(path.join(tempRoot, "debug.jsonl"), "{\"id\":\"debug-session\"}\n");
     writeFile(path.join(tempRoot, "tmp_root_capture.png"), "root image");
     writeFile(path.join(tempRoot, "workspace", "tmp_capture.png"), "image");
+    writeFile(path.join(tempRoot, "workspace", "clawvard_batch_ret30.ps1"), "echo temp");
     writeFile(path.join(tempRoot, "qqbot", "downloads", "image.png"), "binary");
     writeFile(path.join(tempRoot, "workspace", "_tmp_cli_anything", "README.md"), "# keep\n");
 
@@ -99,15 +106,21 @@ test("hygiene audit applies safe moves without touching protected hotspots", () 
 
     assert.equal(applyResult.status, 0, applyResult.stderr || applyResult.stdout);
 
-    const backupEntries = fs.readdirSync(path.join(tempRoot, "backup"));
     assert.equal(fs.existsSync(path.join(tempRoot, "openclaw.json.bak")), false);
-    assert.ok(backupEntries.some((entry) => /^root-backups-/.test(entry)));
+    assert.equal(fs.existsSync(path.join(tempDesktop, "openclaw.json.bak")), true);
+    assert.equal(
+      fs.existsSync(path.join(tempDesktop, "openclaw.json.clobbered.2026-04-02T06-59-27-679Z")),
+      true,
+    );
+    assert.equal(fs.existsSync(path.join(tempDesktop, "debug.jsonl")), true);
 
     assert.equal(fs.existsSync(path.join(tempRoot, "tmp_root_capture.png")), false);
     assert.equal(fs.existsSync(path.join(tempDesktop, "tmp_root_capture.png")), true);
 
     assert.equal(fs.existsSync(path.join(tempRoot, "workspace", "tmp_capture.png")), false);
     assert.equal(fs.existsSync(path.join(tempDesktop, "tmp_capture.png")), true);
+    assert.equal(fs.existsSync(path.join(tempRoot, "workspace", "clawvard_batch_ret30.ps1")), false);
+    assert.equal(fs.existsSync(path.join(tempDesktop, "clawvard_batch_ret30.ps1")), true);
 
     assert.equal(fs.existsSync(path.join(tempRoot, "qqbot", "downloads", "image.png")), true);
     assert.equal(

@@ -14,9 +14,15 @@ import { qqbotOnboardingAdapter } from "./onboarding.js";
 import { getQQBotRuntime } from "./runtime.js";
 import { saveCredentialBackup, loadCredentialBackup } from "./credential-backup.js";
 import { initApiConfig } from "./api.js";
+import { createQQInterimMessageCoalescer, sanitizeQQOutboundText } from "./outbound-guardrails.js";
 
 /** QQ Bot 单条消息文本长度上限 */
 export const TEXT_CHUNK_LIMIT = 5000;
+const proactiveTextCoalescer = createQQInterimMessageCoalescer<{
+  channel: string;
+  messageId?: string;
+  error?: Error;
+}>();
 
 /**
  * Markdown 感知的文本分块函数
@@ -220,25 +226,55 @@ export const qqbotPlugin: ChannelPlugin<ResolvedQQBotAccount> = {
     chunkerMode: "markdown",
     textChunkLimit: 5000,
     sendText: async ({ to, text, accountId, replyToId, cfg }) => {
-      console.log(`[qqbot:channel] sendText called — accountId=${accountId}, to=${to}, replyToId=${replyToId}, text.length=${text?.length ?? 0}`);
-      console.log(`[qqbot:channel] sendText text preview: ${text?.slice(0, 100)}${(text?.length ?? 0) > 100 ? "..." : ""}`);
+      const decision = sanitizeQQOutboundText(text ?? "");
+      if (decision.reason) {
+        console.log(`[qqbot:channel] outbound guardrail applied — reason=${decision.reason}`);
+      }
+      if (decision.action === "drop") {
+        return {
+          channel: "qqbot",
+          messageId: undefined,
+          error: undefined,
+        };
+      }
+
+      const safeText = decision.text;
       const account = resolveQQBotAccount(cfg, accountId);
       initApiConfig({ markdownSupport: account.markdownSupport });
-      console.log(`[qqbot:channel] sendText resolved account: id=${account.accountId}, appId=${account.appId}, enabled=${account.enabled}`);
-      const result = await sendText({ to, text, accountId, replyToId, account });
-      console.log(`[qqbot:channel] sendText result: messageId=${result.messageId}, error=${result.error ?? "none"}`);
-      return {
-        channel: "qqbot",
-        messageId: result.messageId,
-        error: result.error ? new Error(result.error) : undefined,
-      };
+      const key = `${account.accountId}:${to}`;
+      return proactiveTextCoalescer.send(
+        key,
+        safeText,
+        {
+          channel: "qqbot",
+          messageId: undefined,
+          error: undefined,
+        },
+        async () => {
+          console.log(`[qqbot:channel] sendText called — accountId=${accountId}, to=${to}, replyToId=${replyToId}, text.length=${safeText.length}`);
+          console.log(`[qqbot:channel] sendText text preview: ${safeText.slice(0, 100)}${safeText.length > 100 ? "..." : ""}`);
+          console.log(`[qqbot:channel] sendText resolved account: id=${account.accountId}, appId=${account.appId}, enabled=${account.enabled}`);
+          const result = await sendText({ to, text: safeText, accountId, replyToId, account });
+          console.log(`[qqbot:channel] sendText result: messageId=${result.messageId}, error=${result.error ?? "none"}`);
+          return {
+            channel: "qqbot",
+            messageId: result.messageId,
+            error: result.error ? new Error(result.error) : undefined,
+          };
+        },
+      );
     },
     sendMedia: async ({ to, text, mediaUrl, accountId, replyToId, cfg }) => {
-      console.log(`[qqbot:channel] sendMedia called — accountId=${accountId}, to=${to}, replyToId=${replyToId}, mediaUrl=${mediaUrl?.slice(0, 80)}, text.length=${text?.length ?? 0}`);
+      const decision = sanitizeQQOutboundText(text ?? "");
+      if (decision.reason) {
+        console.log(`[qqbot:channel] outbound media guardrail applied — reason=${decision.reason}`);
+      }
+      const safeText = decision.action === "drop" ? "" : decision.text;
+      console.log(`[qqbot:channel] sendMedia called — accountId=${accountId}, to=${to}, replyToId=${replyToId}, mediaUrl=${mediaUrl?.slice(0, 80)}, text.length=${safeText.length}`);
       const account = resolveQQBotAccount(cfg, accountId);
       initApiConfig({ markdownSupport: account.markdownSupport });
       console.log(`[qqbot:channel] sendMedia resolved account: id=${account.accountId}, appId=${account.appId}, enabled=${account.enabled}`);
-      const result = await sendMedia({ to, text: text ?? "", mediaUrl: mediaUrl ?? "", accountId, replyToId, account });
+      const result = await sendMedia({ to, text: safeText, mediaUrl: mediaUrl ?? "", accountId, replyToId, account });
       console.log(`[qqbot:channel] sendMedia result: messageId=${result.messageId}, error=${result.error ?? "none"}`);
       return {
         channel: "qqbot",

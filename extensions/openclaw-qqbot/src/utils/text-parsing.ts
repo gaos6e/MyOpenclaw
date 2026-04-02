@@ -40,6 +40,25 @@ export function filterInternalMarkers(text: string): string {
 }
 
 /**
+ * 识别不应直接透传到 QQ 的内部执行回显。
+ * 目前重点拦截 exec 审批失败后的 delivery-mirror 跟进消息，
+ * 这类文本会带上整段被拒绝的命令内容，容易把内部命令原样发给用户。
+ */
+export function isSuppressedInternalQQMessage(text: string): boolean {
+  if (!text) return false;
+
+  const normalized = text.trim();
+  if (!normalized) return false;
+
+  const isExecApprovalFollowup = /^Exec denied \(gateway id=[^,]+,\s*(?:approval-timeout|allowlist miss|denied)/i.test(normalized);
+  if (!isExecApprovalFollowup) {
+    return false;
+  }
+
+  return /\$[A-Za-z_][A-Za-z0-9_]*\s*=\s*@'|Invoke-WebRequest\b|ConvertTo-Json\b|```[a-z]*|^\s*schema\.ts\s*$/im.test(normalized);
+}
+
+/**
  * 从 message_scene.ext 数组中解析引用索引
  * ext 格式示例: ["", "ref_msg_idx=REFIDX_xxx", "msg_idx=REFIDX_yyy"]
  */

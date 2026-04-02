@@ -3,33 +3,45 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const DEFAULT_TEMP_ROOT = "D:\\桌面\\openclaw";
-const SAFE_BACKUP_PATTERNS = [/^openclaw\.json\.bak(?:\.\d+)?$/, /^env-backup-/];
+const SAFE_BACKUP_PATTERNS = [
+  /^openclaw\.json\.bak(?:\.\d+)?$/i,
+  /^openclaw\.json\.clobbered\./i,
+  /^env-backup-/i,
+];
+const SAFE_TEMP_PATTERNS = [/^debug\.jsonl$/i];
 const STALE_LOG_PATTERNS = [
   /^openclaw-update-(stdout|stderr)\.log$/i,
   /^npm-openclaw(?:-[\w.-]+)?-(stdout|stderr)\.log$/i,
 ];
 const WORKSPACE_PROTECTED_DIR_PATTERNS = [/^_tmp_/];
-const WORKSPACE_SAFE_TEMP_FILE_PATTERNS = [/^tmp_/i, /^temp_/i, /^page-\d+/i, /^screenshot-/i];
+const WORKSPACE_SAFE_TEMP_FILE_PATTERNS = [
+  /^tmp_/i,
+  /^temp_/i,
+  /^page-\d+/i,
+  /^screenshot-/i,
+  /^clawvard_batch_.*\.ps1$/i,
+];
 const ROOT_ALLOWLIST = new Set([
   ".env",
   ".git",
   ".githooks",
   ".gitignore",
+  ".learnings",
   "AGENTS.md",
   "agents",
   "backup",
+  "backups",
   "browser",
   "canvas",
   "completions",
   "cron",
-  "debug.jsonl",
   "delivery-queue",
   "devices",
   "exec-approvals.json",
   "extensions",
   "findings.md",
   "gateway-hidden.ps1",
+  "gateway-hidden.vbs",
   "gateway.cmd",
   "hooks",
   "identity",
@@ -40,21 +52,35 @@ const ROOT_ALLOWLIST = new Set([
   "moltcn",
   "openclaw-common-commands.md",
   "openclaw.json",
+  "package.json",
   "progress.md",
   "qqbot",
   "README.md",
   "scripts",
   "skills",
+  "subagents",
   "task_plan.md",
+  "tasks",
   "update-check.json",
   "workspace",
 ]);
+const ROOT_ALLOWLIST_PATTERNS = [/^workspace-[\w]+$/i];
+
+function resolveDefaultTempRoot() {
+  const desktopRoot = process.env.USERPROFILE
+    ? path.join(process.env.USERPROFILE, "Desktop", "openclaw-hygiene-archive")
+    : null;
+  if (desktopRoot && fs.existsSync(path.dirname(desktopRoot))) {
+    return desktopRoot;
+  }
+  return path.join(process.env.TEMP || process.cwd(), "openclaw-hygiene-archive");
+}
 
 function parseArgs(argv) {
   const args = argv.slice(2);
   const parsed = {
     root: path.resolve(__dirname, "..", ".."),
-    tempRoot: DEFAULT_TEMP_ROOT,
+    tempRoot: resolveDefaultTempRoot(),
     json: false,
     applySafe: false,
     archiveAgeDays: 7,
@@ -85,6 +111,10 @@ function isSafeBackupEntry(name) {
   return SAFE_BACKUP_PATTERNS.some((pattern) => pattern.test(name));
 }
 
+function isSafeRootTempEntry(name) {
+  return SAFE_TEMP_PATTERNS.some((pattern) => pattern.test(name));
+}
+
 function makeEntry(kind, relativePath, reason, extra = {}) {
   return {
     kind,
@@ -104,6 +134,10 @@ function hasChildren(targetPath) {
 
 function isSafeTempFile(name) {
   return WORKSPACE_SAFE_TEMP_FILE_PATTERNS.some((pattern) => pattern.test(name));
+}
+
+function isAllowedRootEntry(name) {
+  return ROOT_ALLOWLIST.has(name) || ROOT_ALLOWLIST_PATTERNS.some((pattern) => pattern.test(name));
 }
 
 function isStaleLowValueLog(name, stat, archiveAgeDays) {
@@ -137,14 +171,14 @@ function scanRoot(rootPath, bucket) {
 
     if (isSafeBackupEntry(entry.name)) {
       bucket.safeActions.push(
-        makeEntry("move_to_backup", relativePath, "Explicit root-level backup artifact", {
-          destinationKind: "backupRoot",
+        makeEntry("move_to_temp_root", relativePath, "Explicit root-level backup artifact", {
+          destinationKind: "tempRoot",
         }),
       );
       continue;
     }
 
-    if (entry.isFile() && isSafeTempFile(entry.name)) {
+    if (entry.isFile() && (isSafeTempFile(entry.name) || isSafeRootTempEntry(entry.name))) {
       bucket.safeActions.push(
         makeEntry("move_to_temp_root", relativePath, "Unambiguous root-level temporary file", {
           destinationKind: "tempRoot",
@@ -153,7 +187,7 @@ function scanRoot(rootPath, bucket) {
       continue;
     }
 
-    if (!ROOT_ALLOWLIST.has(entry.name)) {
+    if (!isAllowedRootEntry(entry.name)) {
       bucket.askFirst.push(
         makeEntry("review_root_entry", relativePath, "Unknown top-level entry; requires human review"),
       );
@@ -274,25 +308,16 @@ function renderHumanSummary(result, options) {
 
 function applySafeActions(rootPath, options, result) {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const backupRoot = path.join(rootPath, "backup", `root-backups-${stamp}`);
   const archiveRoot = path.join(rootPath, "backup", `hygiene-archive-${stamp}`);
+  const tempRoot = options.tempRoot;
 
   for (const entry of result.safeActions) {
     const sourcePath = path.join(rootPath, entry.path);
     if (!fs.existsSync(sourcePath)) continue;
 
-    if (entry.destinationKind === "backupRoot") {
-      ensureDir(backupRoot);
-      const destinationPath = resolveUniquePath(path.join(backupRoot, path.basename(entry.path)));
-      fs.renameSync(sourcePath, destinationPath);
-      entry.applied = true;
-      entry.destination = path.relative(rootPath, destinationPath);
-      continue;
-    }
-
     if (entry.destinationKind === "tempRoot") {
-      ensureDir(options.tempRoot);
-      const destinationPath = resolveUniquePath(path.join(options.tempRoot, path.basename(entry.path)));
+      ensureDir(tempRoot);
+      const destinationPath = resolveUniquePath(path.join(tempRoot, path.basename(entry.path)));
       fs.renameSync(sourcePath, destinationPath);
       entry.applied = true;
       entry.destination = destinationPath;

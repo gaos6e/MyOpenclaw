@@ -40,6 +40,7 @@ test("config hardens runtime approvals and pins plugin install specs", () => {
   assert.equal(config?.agents?.list?.every((entry) => entry?.tools?.profile === "coding"), true);
   assert.notDeepEqual(config?.channels?.qqbot?.allowFrom, ["*"]);
   assert.equal(config?.gateway?.controlUi?.enabled, true);
+  assert.match(config?.gateway?.controlUi?.root ?? "", /workspace[\\/]control-ui-local/i);
   assert.ok(!config?.plugins?.allow?.includes("openclaw-qqbot"));
   assert.ok(!config?.plugins?.entries?.["openclaw-qqbot"]);
   assert.ok(!config?.plugins?.installs?.["openclaw-qqbot"]);
@@ -78,11 +79,18 @@ test("tooling notes document ripgrep fallback and safer PowerShell execution pat
   assert.match(text, /complex PowerShell should prefer a `\.ps1` script file/i);
 });
 
-test("qq agent is converged to a narrower high-signal skill surface", () => {
+test("qq agent is converged to a narrower medium-thinking third-party skill surface", () => {
   const config = readJson(configPath);
   const qqAgent = config?.agents?.list?.find((entry) => entry?.id === "qq");
+  const mainAgent = config?.agents?.list?.find((entry) => entry?.id === "main");
 
-  assert.equal(qqAgent?.thinkingDefault, "low");
+  assert.equal(config?.agents?.defaults?.thinkingDefault, "medium");
+  assert.equal(config?.agents?.defaults?.model?.primary, "teamplus/gpt-5.2");
+  assert.deepEqual(config?.agents?.defaults?.model?.fallbacks, []);
+  assert.equal(config?.models?.providers?.teamplus?.baseUrl, "https://codexapi.space/v1");
+  assert.equal(mainAgent?.model, "teamplus/gpt-5.2");
+  assert.equal(qqAgent?.model, "teamplus/gpt-5.2");
+  assert.equal(qqAgent?.thinkingDefault, "medium");
   assert.deepEqual(
     qqAgent?.skills,
     [
