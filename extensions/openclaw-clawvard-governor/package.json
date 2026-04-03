@@ -1,0 +1,12 @@
+{
+  "name": "@local/openclaw-clawvard-governor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Additive response-governance plugin for Clawvard-style behavior tuning",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

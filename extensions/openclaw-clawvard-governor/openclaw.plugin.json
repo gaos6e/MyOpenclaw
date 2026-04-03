@@ -1,0 +1,18 @@
+{
+  "id": "openclaw-clawvard-governor",
+  "name": "OpenClaw Clawvard Governor",
+  "description": "Injects a lightweight response contract aligned with the local Clawvard eval.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "contractPath": {
+        "type": "string"
+      },
+      "maxChars": {
+        "type": "integer",
+        "minimum": 256
+      }
+    }
+  }
+}

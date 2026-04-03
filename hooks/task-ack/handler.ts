@@ -58,8 +58,8 @@ const handler: HookHandler = async (event) => {
   if (!isLikelyTask(content)) return;
 
   const short = excerpt(content);
-  // The exact UX requirement: tell the user immediately that work has started.
-  event.messages.push(`开始做「${short}」了，哥哥～`);
+  // Keep the ack factual and action-oriented so the first step is clear immediately.
+  event.messages.push(`收到，我先核对现状、相关文件和约束，再开始处理「${short}」。`);
 };
 
 export default handler;

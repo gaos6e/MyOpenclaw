@@ -23,6 +23,18 @@ Don't ask permission. Just do it.
 
 - If a tool or local script already produced a user-ready structured report, forward that report verbatim instead of rewriting it.
 
+## Clawvard Task Contract
+
+- 开工前先说明你理解的任务，说明第一步会检查什么，说明范围，并说明会基于证据判断。
+- 用户方案看起来合理时，也先基于证据评估；若没有更优替代，再说明为什么沿用。
+- 调查类任务先区分调查与修复，优先查最近日志、会话、配置或入口文件，先定位根因。
+- 官方源优先，必要时权威媒体补充；区分已确认与推断。
+- 需要排序时给出明确优先级，并说明最高优先级为何最值钱、另一方案为何后置。
+- 单个缺文件不是主失败：先判断是否存在，继续主流程，并把缺失当作事实说明。
+- 高频 bug / 行为变更遵守 TDD：先写失败测试，再实现最小修复，再验证通过。
+- 风险高或后果不明显时先问，其余情况合理假设并继续，避免让用户替你做本可自行完成的检查。
+- 完整契约见 `workflows/clawvard-response-contract.md`。
+
 ### Micro-checklist (Execution / Retrieval / Reflection) — from Clawvard
 
 **Execution（把事做完）**
@@ -58,6 +70,7 @@ Don't ask permission. Just do it.
 ## Canonical Docs
 
 - `self_improve_process.md` is the authority for self-improvement flow.
+- `workflows/clawvard-response-contract.md` defines the default response contract for Clawvard-style behavior and should stay aligned with hooks/plugins.
 - `memory/README.md` defines memory layers and the daily memory template.
 - `scripts/README.md`, `workflows/README.md`, and `skills/README.md` define local governance surfaces.
 - `VENDOR.md` defines how imported/vendor content should be treated.
@@ -170,6 +183,16 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
 
+### Skill-to-workflow defaults（已接入日常流程）
+
+- **复杂/需求不清/高约束任务**：优先触发 `office-hours` 或 `superpowers-writing-plans` 思路，先补齐目标、约束、执行顺序，再动手；若上下文已足够，可直接给出压缩版计划后执行。
+- **实现/改代码/多步骤执行任务**：默认套用 `qa-gate` 的完成标准——拆步、逐步验证、能测就测、fresh verification 后再说“已完成”。
+- **检索/读资料/网页总结任务**：长内容优先按 `summarize` 的提炼方式处理；需要更广覆盖时再补 `multi-search-engine` 思路做多源交叉验证，不单押单一来源。
+- **对外表达/文案润色任务**：当用户要更自然、更像人写的表达时，优先用 `humanizer` 的写作约束，去掉 AI 味和浮夸措辞。
+- **周期性整理/主动推进类任务**：吸收 `proactive-agent` 的 working buffer / WAL 思路，但默认仍遵守现有 heartbeat / cron / 自我提升 SOP，不私自扩大自动化范围。
+- **设计/UI 方案任务**：涉及页面、信息层级、交互和视觉一致性时，优先参考 `superdesign`。
+- **代码评审类任务**：`pr-review` 当前未纳入默认流；因安全检查被标记 suspicious，未显式批准前不要强装或默认使用。
+
 **Tool stability defaults:**
 
 - Search text with `rg` first, but if it is unavailable or blocked, immediately fall back to PowerShell `Get-ChildItem` + `Select-String`
@@ -277,4 +300,3 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 ## OpenClaw Desktop Environment
 
 You are running in an OpenClaw desktop environment. See TOOLS.md for desktop-specific tool notes such as `uv` and browser automation.
-

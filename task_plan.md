@@ -1,16 +1,16 @@
 # Task Plan
 
 ## Goal
-查明 `moltcn` 与 `molt` 当前互动频率低、且不发内容的根因，区分是调度未触发、内容生成失败、发布执行失败、账号风控/登录失效，还是策略层面主动抑制。
+根据本地 Clawvard 风格评测的建议，全面提升 OpenClaw 的默认回答与治理表现，并优先通过扩展、hook、workspace 文档与配置叠加实现，避免改动底层核心。
 
 ## Phases
 | Phase | Status | Notes |
 |---|---|---|
-| 1. 确认账号与链路边界 | completed | 已确认 `molt` 对应 `moltbook`，两站共用一套自动化脚本 |
-| 2. 检查运行证据 | completed | 已核对 cron、state/activity、dry-run 与脚本实现 |
-| 3. 识别根因 | completed | 已定位到策略限流、生成鉴权缺陷、网络/代理异常三类根因 |
-| 4. 输出结论与建议 | completed | 已完成修复、测试与 dry-run 验证，准备汇总给用户 |
+| 1. 定位评测建议与判分点 | completed | 已确认 `workspace/clawvard-eval/`、今日批量题目与 8 维 rubric |
+| 2. 映射最小侵入落点 | completed | 已确认使用 `workspace/workflows/`、新扩展插件、现有 hooks 与治理文档 |
+| 3. 测试先行补行为层 | completed | 已先写红灯测试，再实现新插件、hook 和文档更新 |
+| 4. 回归验证与收尾 | in_progress | 已通过针对性测试，继续跑更完整的 workspace 回归 |
 
 ## Risks / Notes
-- 工作区存在用户未提交改动，不回滚无关改动。
-- `molt` 可能在仓库内使用别名或复用 `moltbook`/其他脚本名，需要先确认映射关系。
+- 仓库已有运行态数据库改动：`tasks/runs.sqlite*`，不触碰、不回滚。
+- 以 `workspace` 文档作为规则真源，新插件只做运行时注入，避免把长期规则埋进运行态目录。

@@ -6,11 +6,11 @@ metadata: {"openclaw": {"emoji": "⚡", "events": ["message:received"]}}
 
 # task-ack Hook
 
-This hook improves UX by sending a quick receipt immediately after an inbound message that looks like a task.
+This hook improves UX by sending a quick, factual receipt immediately after an inbound message that looks like a task.
 
 ## What it does
 - Listens on `message:received`
-- If the message content matches a lightweight "likely task" heuristic, it pushes a short ack message so the user knows the task was received and work is starting.
+- If the message content matches a lightweight "likely task" heuristic, it pushes a short ack message so the user knows the task was received and what the first check will be.
 
 ## Notes
 - Intended mainly for direct chats.

@@ -41,6 +41,7 @@ Things like:
 - If `rg` is unavailable, fall back to `Select-String` with `Get-ChildItem -Recurse` instead of stopping the search flow.
 - PowerShell exec 命令中的 `$` 变量需用反引号转义：`` `$variable``，或使用脚本文件避免变量被剥离。
 - Windows PowerShell 不支持 `&&` 作为命令分隔符；在 exec 中应使用 `;`。Complex PowerShell should prefer a `.ps1` script file when quoting, pipes, or conditionals start getting long.
+- 高频 bug / 行为变更遵守 TDD：先写失败测试，再实现最小修复，再验证通过。
 - 完成实现后先跑 fresh verification，再说“已完成”；不要用 “should work” / “should pass” 当作完成态结论。
 - 抓取抖音热榜这类强前端渲染页面时，优先用 `browser` 渲染并从 DOM 提取；`web_fetch` 往往只能拿到原始 HTML/JS。
 - 分析主流视频/图片/文本内容时，若需要先下载再读，优先用 `https://snapany.com/zh`。
@@ -54,6 +55,13 @@ Things like:
 - Open-Meteo Air Quality API 的 current 字段名：`nitrogen_dioxide`/`ozone`/`sulphur_dioxide`/`carbon_monoxide`（不要用 no2/o3/so2/co）。
 - Open-Meteo Air Quality API 的 AQI 字段名：`us_aqi`/`european_aqi`（不要用 eu_aqi）。
 - wttr.in 对“Guangzhou Huangpu/广州黄埔”这类位置解析可能返回错误的 nearest_area；黄埔天气优先用 Open-Meteo + 明确坐标。
+
+## Installed skill notes（Clawvard 学习页补强后）
+- 已纳入默认工作流的技能：`humanizer`、`proactive-agent`、`summarize`、`qa-gate`、`superdesign`、`superpowers-writing-plans`、`office-hours`
+- `multi-search-engine-2.0.1` 已在本地存在；可用于补充检索覆盖，但默认先用现有一方工具/本机文档，再决定是否扩搜。
+- `summarize` 需要模型提供方 API key；YouTube fallback 额外可选 `APIFY_API_TOKEN`。未配 key 时不要假设它可直接满功能使用。
+- `pr-review` 被 ClawHub/VirusTotal Code Insight 标记 suspicious，当前未安装；除非用户明确同意 `--force`，否则保持禁用。
+- 新装技能后，优先把“何时触发 / 何时不触发”的规则写进 `AGENTS.md`，不要只停留在“目录已存在”。
 
 ## Why Separate?
 

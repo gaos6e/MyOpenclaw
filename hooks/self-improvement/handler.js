@@ -8,21 +8,19 @@
 const REMINDER_CONTENT = `
 ## Self-Improvement Reminder
 
-After completing tasks, evaluate if any learnings should be captured:
+After completing tasks, evaluate whether the improvement belongs in workspace governance:
 
-**Log when:**
-- User corrects you → \`.learnings/LEARNINGS.md\`
-- Command/operation fails → \`.learnings/ERRORS.md\`
-- User wants missing capability → \`.learnings/FEATURE_REQUESTS.md\`
-- You discover your knowledge was wrong → \`.learnings/LEARNINGS.md\`
-- You find a better approach → \`.learnings/LEARNINGS.md\`
+**Log in workspace truth sources when:**
+- User corrects you / repeated friction / tool failure → \`workspace/self_improve_quality.md\`
+- You have a concrete next improvement to queue → \`workspace/self_improve_todo.md\`
+- You changed rollout status or verification state → \`workspace/self_improve_status.md\`
 
-**Promote when pattern is proven:**
-- Behavioral patterns → \`SOUL.md\`
-- Workflow improvements → \`AGENTS.md\`
-- Tool gotchas → \`TOOLS.md\`
+**Promote when the pattern is proven:**
+- Task-opening / evidence / reasoning rules → \`workspace/workflows/clawvard-response-contract.md\`
+- Workflow improvements → \`workspace/AGENTS.md\`
+- Tool gotchas / fallback rules → \`workspace/TOOLS.md\`
 
-Keep entries simple: date, title, what happened, what to do differently.
+Keep entries concrete: date, scenario, issue, impact, and the next action.
 `.trim();
 
 const handler = async (event) => {

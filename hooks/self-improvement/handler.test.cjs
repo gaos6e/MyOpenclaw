@@ -16,6 +16,8 @@ test("self-improvement hook injects reminder for main sessions", async () => {
 
   assert.equal(event.context.bootstrapFiles.length, 1);
   assert.equal(event.context.bootstrapFiles[0].path, "SELF_IMPROVEMENT_REMINDER.md");
+  assert.match(event.context.bootstrapFiles[0].content, /workspace\/self_improve_quality\.md/i);
+  assert.match(event.context.bootstrapFiles[0].content, /clawvard-response-contract\.md/i);
 });
 
 test("self-improvement hook skips sub-agent sessions", async () => {

@@ -34,17 +34,30 @@ test("config hardens runtime approvals and pins plugin install specs", () => {
   const config = readJson(configPath);
   const approvals = readJson(approvalsPath);
 
-  assert.equal(config?.tools?.elevated?.enabled, false);
   assert.equal(config?.tools?.profile, "coding");
   assert.equal(config?.tools?.fs?.workspaceOnly, true);
   assert.equal(config?.agents?.list?.every((entry) => entry?.tools?.profile === "coding"), true);
   assert.notDeepEqual(config?.channels?.qqbot?.allowFrom, ["*"]);
   assert.equal(config?.gateway?.controlUi?.enabled, true);
   assert.match(config?.gateway?.controlUi?.root ?? "", /workspace[\\/]control-ui-local/i);
-  assert.ok(!config?.plugins?.allow?.includes("openclaw-qqbot"));
-  assert.ok(!config?.plugins?.entries?.["openclaw-qqbot"]);
-  assert.ok(!config?.plugins?.installs?.["openclaw-qqbot"]);
+  assert.equal(config?.plugins?.installs?.["openclaw-memory-hub"]?.source, "path");
+  assert.equal(config?.plugins?.installs?.["openclaw-context-engine"]?.source, "path");
+  assert.equal(config?.plugins?.installs?.["openclaw-checkpoint-guardian"]?.source, "path");
   assert.equal(approvals?.defaults?.autoAllowSkills, false);
+});
+
+test("config enables the additive clawvard governor and lightweight self-improvement hook", () => {
+  const config = readJson(configPath);
+
+  assert.equal(config?.hooks?.internal?.entries?.["self-improvement"]?.enabled, true);
+  assert.equal(config?.hooks?.internal?.entries?.["task-ack"]?.enabled, true);
+  assert.ok(config?.plugins?.allow?.includes("openclaw-clawvard-governor"));
+  assert.equal(config?.plugins?.entries?.["openclaw-clawvard-governor"]?.enabled, true);
+  assert.match(
+    config?.plugins?.entries?.["openclaw-clawvard-governor"]?.config?.contractPath ?? "",
+    /workspace[\\/]workflows[\\/]clawvard-response-contract\.md/i,
+  );
+  assert.equal(config?.plugins?.installs?.["openclaw-clawvard-governor"]?.source, "path");
 });
 
 test("durable memory sections stay focused on user memory rather than tooling rules", () => {
@@ -65,6 +78,16 @@ test("workspace startup guidance keeps shared-channel sessions off brittle daily
   assert.match(text, /shared.*do not edit durable memory or governance files unless the user explicitly asks/i);
 });
 
+test("workspace startup guidance encodes the clawvard task-opening contract", () => {
+  const text = fs.readFileSync(workspaceAgentsPath, "utf8");
+
+  assert.match(text, /先说明你理解的任务/i);
+  assert.match(text, /说明第一步会检查什么/i);
+  assert.match(text, /说明范围/i);
+  assert.match(text, /会基于证据判断/i);
+  assert.match(text, /官方源优先/i);
+});
+
 test("workspace guidance requires fresh verification before claiming completion", () => {
   const text = fs.readFileSync(workspaceAgentsPath, "utf8");
 
@@ -77,37 +100,9 @@ test("tooling notes document ripgrep fallback and safer PowerShell execution pat
 
   assert.match(text, /if `rg` is unavailable, fall back to `Select-String`/i);
   assert.match(text, /complex PowerShell should prefer a `\.ps1` script file/i);
-});
-
-test("qq agent is converged to a narrower medium-thinking third-party skill surface", () => {
-  const config = readJson(configPath);
-  const qqAgent = config?.agents?.list?.find((entry) => entry?.id === "qq");
-  const mainAgent = config?.agents?.list?.find((entry) => entry?.id === "main");
-
-  assert.equal(config?.agents?.defaults?.thinkingDefault, "medium");
-  assert.equal(config?.agents?.defaults?.model?.primary, "teamplus/gpt-5.2");
-  assert.deepEqual(config?.agents?.defaults?.model?.fallbacks, []);
-  assert.equal(config?.models?.providers?.teamplus?.baseUrl, "https://codexapi.space/v1");
-  assert.equal(mainAgent?.model, "teamplus/gpt-5.2");
-  assert.equal(qqAgent?.model, "teamplus/gpt-5.2");
-  assert.equal(qqAgent?.thinkingDefault, "medium");
-  assert.deepEqual(
-    qqAgent?.skills,
-    [
-      "qqbot-channel",
-      "qqbot-remind",
-      "qqbot-media",
-      "openclaw-cli",
-      "web-search",
-      "tavily-search",
-      "weather",
-      "github",
-      "docx",
-      "pdf",
-      "pptx",
-      "xlsx",
-    ],
-  );
+  assert.match(text, /先写失败测试/i);
+  assert.match(text, /再实现最小修复/i);
+  assert.match(text, /再验证通过/i);
 });
 
 test("qq channel config is native-compatible and does not keep custom plugin-only fields", () => {

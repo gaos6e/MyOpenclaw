@@ -3,6 +3,7 @@
 这里存放本地治理与执行流程的轻量工作流说明。
 
 - `self-improve-loop.md`: 自我提升闭环
+- `clawvard-response-contract.md`: 默认回答契约与 8 维行为约束
 - `skills-governance.md`: skills 入场/更新治理
 - `automation-templates.md`: 自动化模板
 - `document-automation.md`: 文档/表格处理链

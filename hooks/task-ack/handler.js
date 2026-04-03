@@ -51,7 +51,7 @@ const handler = async (event) => {
   if (!isLikelyTask(content)) return;
 
   const short = excerpt(content);
-  event.messages.push(`开始做「${short}」了，哥哥～`);
+  event.messages.push(`收到，我先核对现状、相关文件和约束，再开始处理「${short}」。`);
 };
 
 module.exports = handler;
