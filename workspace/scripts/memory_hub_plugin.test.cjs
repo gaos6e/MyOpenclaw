@@ -114,6 +114,49 @@ test("memory-hub runtime reports an available manager for the selected workspace
   assert.equal(resolved.manager.status().provider, "openclaw-memory-hub");
 });
 
+test("memory-hub auxiliary mode keeps only non-overlapping tools and disables runtime slot registration", async () => {
+  const { default: plugin } = await import(moduleUrl);
+  let toolFactory = null;
+  let runtime = null;
+  let cliFactory = null;
+  const api = {
+    config: {},
+    pluginConfig: { mode: "auxiliary" },
+    logger: { info() {} },
+    registerTool(factory) {
+      toolFactory = factory;
+    },
+    registerCli(factory) {
+      cliFactory = factory;
+    },
+    registerMemoryRuntime(value) {
+      runtime = value;
+    },
+    on() {},
+  };
+
+  plugin.register(api);
+
+  assert.equal(runtime, null);
+  assert.equal(typeof cliFactory, "function");
+  assert.equal(typeof toolFactory, "function");
+
+  const tools = toolFactory({});
+  const names = tools.map((entry) => entry.name).sort();
+
+  assert.deepEqual(names, [
+    "memory_extract_candidates",
+    "memory_list_candidates",
+    "memory_promote_candidate",
+    "memory_vector_search",
+    "ontology_lookup",
+    "session_recall_get",
+    "session_recall_search",
+  ]);
+  assert.equal(names.includes("memory_search"), false);
+  assert.equal(names.includes("memory_get"), false);
+});
+
 test("memory_vector_search builds auxiliary vector index and logs semantic recall", async () => {
   const { default: plugin } = await import(moduleUrl);
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "memory-hub-vector-plugin-"));

@@ -12,7 +12,7 @@ _openclaw_root_completion() {
     "--profile[Use a named profile (isolates OPENCLAW_STATE_DIR/OPENCLAW_CONFIG_PATH under ~/.openclaw-<name>)]" \
     "--log-level[Global log level override for file + console (silent|fatal|error|warn|info|debug|trace)]" \
     "--no-color[Disable ANSI colors]" \
-    "1: :_values 'command' 'mcp[Manage OpenClaw MCP config and channel bridge]' 'completion[Generate shell completion script]' 'setup[Initialize the active OpenClaw config and agent workspace]' 'onboard[Interactive onboarding for the gateway, workspace, and skills]' 'configure[Interactive configuration for credentials, channels, gateway, and agent defaults]' 'config[Non-interactive config helpers (get/set/unset/file/schema/validate). Run without subcommand for guided setup.]' 'backup[Create and verify local backup archives for OpenClaw state]' 'doctor[Health checks + quick fixes for the gateway and channels]' 'dashboard[Open the Control UI with your current token]' 'reset[Reset local config/state (keeps the CLI installed)]' 'uninstall[Uninstall the gateway service + local data (CLI remains)]' 'message[Send, read, and manage messages and channel actions]' 'agent[Run an agent turn via the Gateway (use --local for embedded)]' 'agents[Manage isolated agents (workspaces + auth + routing)]' 'status[Show channel health and recent session recipients]' 'health[Fetch health from the running gateway]' 'sessions[List stored conversation sessions]' 'tasks[Inspect durable background task state]' 'acp[Run an ACP bridge backed by the Gateway]' 'gateway[Run, inspect, and query the WebSocket Gateway]' 'daemon[Manage the Gateway service (launchd/systemd/schtasks)]' 'logs[Tail gateway file logs via RPC]' 'system[System tools (events, heartbeat, presence)]' 'models[Model discovery, scanning, and configuration]' 'approvals[Manage exec approvals (gateway or node host)]' 'nodes[Manage gateway-owned nodes (pairing, status, invoke, and media)]' 'devices[Device pairing and auth tokens]' 'node[Run and manage the headless node host service]' 'sandbox[Manage sandbox containers (Docker-based agent isolation)]' 'tui[Open a terminal UI connected to the Gateway]' 'cron[Manage cron jobs (via Gateway)]' 'dns[DNS helpers for wide-area discovery (Tailscale + CoreDNS)]' 'docs[Search the live OpenClaw docs]' 'hooks[Manage internal agent hooks]' 'webhooks[Webhook helpers and integrations]' 'qr[Generate an iOS pairing QR code and setup code]' 'clawbot[Legacy clawbot command aliases]' 'browser[Manage OpenClaw'\''s dedicated browser (Chrome/Chromium)]' 'memory-hub[OpenClaw memory hub commands]' 'pairing[Secure DM pairing (approve inbound requests)]' 'plugins[Manage OpenClaw plugins and extensions]' 'channels[Manage connected chat channels and accounts]' 'directory[Lookup contact and group IDs (self, peers, groups) for supported chat channels]' 'security[Audit local config and state for common security foot-guns]' 'secrets[Secrets runtime controls]' 'skills[List and inspect available skills]' 'update[Update OpenClaw and inspect update channel status]'" \
+    "1: :_values 'command' 'mcp[Manage OpenClaw MCP config and channel bridge]' 'completion[Generate shell completion script]' 'setup[Initialize the active OpenClaw config and agent workspace]' 'onboard[Interactive onboarding for the gateway, workspace, and skills]' 'configure[Interactive configuration for credentials, channels, gateway, and agent defaults]' 'config[Non-interactive config helpers (get/set/unset/file/schema/validate). Run without subcommand for guided setup.]' 'backup[Create and verify local backup archives for OpenClaw state]' 'doctor[Health checks + quick fixes for the gateway and channels]' 'dashboard[Open the Control UI with your current token]' 'reset[Reset local config/state (keeps the CLI installed)]' 'uninstall[Uninstall the gateway service + local data (CLI remains)]' 'message[Send, read, and manage messages and channel actions]' 'agent[Run an agent turn via the Gateway (use --local for embedded)]' 'agents[Manage isolated agents (workspaces + auth + routing)]' 'status[Show channel health and recent session recipients]' 'health[Fetch health from the running gateway]' 'sessions[List stored conversation sessions]' 'tasks[Inspect durable background tasks and TaskFlow state]' 'acp[Run an ACP bridge backed by the Gateway]' 'gateway[Run, inspect, and query the WebSocket Gateway]' 'daemon[Manage the Gateway service (launchd/systemd/schtasks)]' 'logs[Tail gateway file logs via RPC]' 'system[System tools (events, heartbeat, presence)]' 'models[Model discovery, scanning, and configuration]' 'approvals[Manage exec approvals (gateway or node host)]' 'nodes[Manage gateway-owned nodes (pairing, status, invoke, and media)]' 'devices[Device pairing and auth tokens]' 'node[Run and manage the headless node host service]' 'sandbox[Manage sandbox containers (Docker-based agent isolation)]' 'tui[Open a terminal UI connected to the Gateway]' 'cron[Manage cron jobs (via Gateway)]' 'dns[DNS helpers for wide-area discovery (Tailscale + CoreDNS)]' 'docs[Search the live OpenClaw docs]' 'hooks[Manage internal agent hooks]' 'webhooks[Webhook helpers and integrations]' 'qr[Generate an iOS pairing QR code and setup code]' 'clawbot[Legacy clawbot command aliases]' 'browser[Manage OpenClaw'\''s dedicated browser (Chrome/Chromium)]' 'memory-hub[OpenClaw memory hub commands]' 'pairing[Secure DM pairing (approve inbound requests)]' 'plugins[Manage OpenClaw plugins and extensions]' 'channels[Manage connected chat channels and accounts]' 'directory[Lookup contact and group IDs (self, peers, groups) for supported chat channels]' 'security[Audit local config and state for common security foot-guns]' 'secrets[Secrets runtime controls]' 'skills[List and inspect available skills]' 'update[Update OpenClaw and inspect update channel status]'" \
     "*::arg:->args"
 
   case $state in
@@ -1096,7 +1096,7 @@ _openclaw_tasks_audit() {
   _arguments -C \
     "--json[Output as JSON]" \
     "--severity[Filter by severity (warn, error)]" \
-    "--code[Filter by finding code (stale_queued, stale_running, lost, delivery_failed, missing_cleanup, inconsistent_timestamps)]" \
+    "--code[Filter by finding code (stale_queued, stale_running, lost, delivery_failed, missing_cleanup, inconsistent_timestamps, restore_failed, stale_waiting, stale_blocked, cancel_stuck, missing_linked_tasks, blocked_task_missing)]" \
     "--limit[Limit displayed findings]"
 }
 
@@ -1121,6 +1121,42 @@ _openclaw_tasks_cancel() {
     
 }
 
+_openclaw_tasks_flow_list() {
+  _arguments -C \
+    "--json[Output as JSON]" \
+    "--status[Filter by status (queued, running, waiting, blocked, succeeded, failed, cancelled, lost)]"
+}
+
+_openclaw_tasks_flow_show() {
+  _arguments -C \
+    "--json[Output as JSON]"
+}
+
+_openclaw_tasks_flow_cancel() {
+  _arguments -C \
+    
+}
+
+_openclaw_tasks_flow() {
+  local -a commands
+  local -a options
+  
+  _arguments -C \
+     \
+    "1: :_values 'command' 'list[List tracked TaskFlows]' 'show[Show one TaskFlow by flow id or owner key]' 'cancel[Cancel a running TaskFlow]'" \
+    "*::arg:->args"
+
+  case $state in
+    (args)
+      case $line[1] in
+        (list) _openclaw_tasks_flow_list ;;
+        (show) _openclaw_tasks_flow_show ;;
+        (cancel) _openclaw_tasks_flow_cancel ;;
+      esac
+      ;;
+  esac
+}
+
 _openclaw_tasks() {
   local -a commands
   local -a options
@@ -1129,7 +1165,7 @@ _openclaw_tasks() {
     "--json[Output as JSON]" \
     "--runtime[Filter by kind (subagent, acp, cron, cli)]" \
     "--status[Filter by status (queued, running, succeeded, failed, timed_out, cancelled, lost)]" \
-    "1: :_values 'command' 'list[List tracked background tasks]' 'audit[Show stale or broken background task runs]' 'maintenance[Preview or apply task ledger maintenance]' 'show[Show one background task by task id, run id, or session key]' 'notify[Set task notify policy]' 'cancel[Cancel a running background task]'" \
+    "1: :_values 'command' 'list[List tracked background tasks]' 'audit[Show stale or broken background tasks and TaskFlows]' 'maintenance[Preview or apply tasks and TaskFlow maintenance]' 'show[Show one background task by task id, run id, or session key]' 'notify[Set task notify policy]' 'cancel[Cancel a running background task]' 'flow[Inspect durable TaskFlow state under tasks]'" \
     "*::arg:->args"
 
   case $state in
@@ -1141,6 +1177,7 @@ _openclaw_tasks() {
         (show) _openclaw_tasks_show ;;
         (notify) _openclaw_tasks_notify ;;
         (cancel) _openclaw_tasks_cancel ;;
+        (flow) _openclaw_tasks_flow ;;
       esac
       ;;
   esac

@@ -38,12 +38,13 @@
    - 优先复盘 .learnings/ERRORS.md 与 .learnings/LEARNINGS.md
    - 梳理定时任务/设置是否需要调整
    - 阅读本地文档（OpenClaw docs/skills）并更新操作流程
-   - 复盘近期对话，记录重要偏好/规则到 MEMORY.md
+   - 复盘近期对话，优先判断是否需要补强 Hindsight 的 durable memory 规则或本地 archive
    - 发现可改进点 → 执行优化 → 简要汇报
    - 关注 ClawHub/GitHub/Discord 新工具/插件（先询问再安装）
 5) **记录与留痕**
-   - 重要规则/偏好 → MEMORY.md
-   - canonical candidate flow：`memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
+   - runtime durable memory 主线 → `hindsight-openclaw`（auto-recall / auto-retain）
+   - 本地可读 archive → `MEMORY.md`
+   - local archive candidate flow：`memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate`
    - 候选抽取结果 → 先写入 `memory/inbox/*.jsonl`，再人工审核沉淀到 `MEMORY.md`
    - 操作流程/工具习惯/排障命令/路径治理 → `AGENTS.md` / `TOOLS.md`
    - `.openclaw` 环境卫生安全动作执行结果 → `self_improve_status.md`
@@ -76,7 +77,7 @@
 - 轻量校验脚本：`node scripts/validate-self-improve.cjs`
 - 目录卫生审计脚本：`node scripts/openclaw_hygiene_audit.cjs --json`
 - 修改 todo/status/quality 结构后，优先跑一次校验
-- 记忆系统变更后，优先跑一次 `openclaw memory-hub status --json` 与 `openclaw memory-hub candidates --json`
+- 记忆系统变更后，优先跑一次 `openclaw plugins list`、`openclaw memory-hub status --json`，并确认 Hindsight 外部 API 模式可用
 
 ## 7. 变更规则
 - 任何规则变更都需同步到 MEMORY.md 与 HEARTBEAT.md

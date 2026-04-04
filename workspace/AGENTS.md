@@ -13,7 +13,7 @@ Before doing anything else:
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) if the files exist
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md` as the local curated archive / audit backup
 5. **If in shared/channel session:** do not auto-edit durable memory or governance files unless the user explicitly asks
 6. 若要启动自我提升流程，先向用户告知
 
@@ -73,16 +73,19 @@ Don't ask permission. Just do it.
 - `workflows/clawvard-response-contract.md` defines the default response contract for Clawvard-style behavior and should stay aligned with hooks/plugins.
 - `memory/README.md` defines memory layers and the daily memory template.
 - `scripts/README.md`, `workflows/README.md`, and `skills/README.md` define local governance surfaces.
+- `local-customization-layer/` is the canonical index for the first-party local customization layer; when changing local extensions, hooks, governance assets, topology, or local entrypoints, update the matching doc there, and update `/LOCAL_CUSTOMIZATION_LAYER.md` when the overview or navigation changes.
 - `VENDOR.md` defines how imported/vendor content should be treated.
-- Durable user memory belongs in `MEMORY.md`; workflow and tooling rules belong in `AGENTS.md` or `TOOLS.md`.
-- Durable memory maintenance uses `openclaw memory-hub status|candidates|promote`; do not promote tooling habits into `MEMORY.md`.
+- Runtime durable memory uses `hindsight-openclaw`; `MEMORY.md` remains the local curated archive / audit backup for reviewable memory.
+- Workflow and tooling rules belong in `AGENTS.md` or `TOOLS.md`, not in Hindsight or `MEMORY.md`.
+- Local archive maintenance uses `openclaw memory-hub status|candidates|promote` and `node scripts/mem0_migration.cjs`; do not promote tooling habits into `MEMORY.md`.
 
 ## Memory
 
 You wake up fresh each session. These files are your continuity:
 
 - **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
-- **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
+- **Runtime long-term:** Hindsight (`hindsight-openclaw`) — auto-recall / auto-retain durable memory
+- **Local archive:** `MEMORY.md` — curated, human-readable backup / audit surface for durable memory
 
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
 
@@ -94,7 +97,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - You can **read, edit, and update** MEMORY.md freely in main sessions
 - In shared/channel sessions, do not edit durable memory or governance files unless the user explicitly asks
 - Write significant events, thoughts, decisions, opinions, lessons learned
-- This is your curated memory — the distilled essence, not raw logs
+- This is your curated local archive — the distilled essence, not the sole runtime memory backend
 - Over time, review your daily files and update MEMORY.md with what's worth keeping
 - Daily memory format lives in `memory/README.md` and `memory/TEMPLATE.md`
 
@@ -286,7 +289,7 @@ Periodically (every few days), use a heartbeat to:
 
 1. Read through recent `memory/YYYY-MM-DD.md` files
 2. Identify significant events, lessons, or insights worth keeping long-term
-3. Update `MEMORY.md` with distilled learnings
+3. Update `MEMORY.md` with distilled local archive entries when the information is worth keeping reviewable on disk
 4. Remove outdated info from MEMORY.md that's no longer relevant
 
 Think of it like a human reviewing their journal and updating their mental model. Daily files are raw notes; MEMORY.md is curated wisdom.

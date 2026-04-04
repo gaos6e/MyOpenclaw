@@ -95,7 +95,7 @@ _openclaw_completion() {
         return 0
         ;;
       tasks)
-        opts="list audit maintenance show notify cancel --json --runtime --status"
+        opts="list audit maintenance show notify cancel flow --json --runtime --status"
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
         return 0
         ;;

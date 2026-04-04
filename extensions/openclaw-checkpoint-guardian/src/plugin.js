@@ -83,6 +83,9 @@ function classifyToolCall(event) {
   if (toolName === "exec" && isCheckpointCommand(params.command)) {
     return "checkpoint";
   }
+  if (toolName === "memory_store" || toolName === "memory_update" || toolName === "memory_delete") {
+    return "checkpoint";
+  }
 
   if (
     toolName === "read"
@@ -118,7 +121,7 @@ function buildReminderText(session) {
   return [
     "Checkpoint Guardian",
     `- ${session.explorationSinceCheckpoint} exploration steps since the last durable checkpoint.`,
-    "- Before continuing, persist any stable learnings to MEMORY/self_improve/. Prefer memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate for durable memory.",
+    "- Before continuing, persist any stable learnings to Hindsight or the local MEMORY/self_improve archive. Use memory-hub candidate tools only when you are intentionally maintaining the local archive.",
     "- If nothing is worth keeping, continue without creating a fake checkpoint.",
   ].join("\n");
 }

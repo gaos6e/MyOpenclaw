@@ -1,12 +1,18 @@
 {
   "id": "openclaw-memory-hub",
-  "kind": "memory",
   "name": "OpenClaw Memory Hub",
   "description": "Scoped durable memory, session recall, ontology lookup, and candidate extraction.",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {
+      "mode": {
+        "type": "string",
+        "enum": [
+          "primary",
+          "auxiliary"
+        ]
+      },
       "dbPath": {
         "type": "string"
       },

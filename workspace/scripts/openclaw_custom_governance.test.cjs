@@ -22,12 +22,17 @@ function readSection(text, title) {
   return text.slice(start, next === -1 ? undefined : next);
 }
 
-test("config uses memory-hub as the sole active custom memory backend", () => {
+test("config uses hindsight as the active memory backend and keeps memory-hub in auxiliary mode", () => {
   const config = readJson(configPath);
 
-  assert.equal(config?.plugins?.slots?.memory, "openclaw-memory-hub");
+  assert.equal(config?.plugins?.slots?.memory, "hindsight-openclaw");
+  assert.equal(config?.plugins?.entries?.["hindsight-openclaw"]?.enabled, true);
+  assert.equal(config?.plugins?.entries?.["hindsight-openclaw"]?.config?.hindsightApiUrl, "https://api.hindsight.vectorize.io");
+  assert.ok(!Object.prototype.hasOwnProperty.call(config?.plugins?.entries?.["hindsight-openclaw"]?.config ?? {}, "hindsightApiToken"));
   assert.equal(config?.plugins?.entries?.["openclaw-memory-hub"]?.enabled, true);
-  assert.ok(!config?.plugins?.entries?.["memory-lancedb"]);
+  assert.equal(config?.plugins?.entries?.["openclaw-memory-hub"]?.config?.mode, "auxiliary");
+  assert.equal(config?.plugins?.entries?.["memory-lancedb"]?.enabled, false);
+  assert.ok(!config?.plugins?.entries?.["openclaw-mem0"]);
 });
 
 test("config hardens runtime approvals and pins plugin install specs", () => {
@@ -40,6 +45,7 @@ test("config hardens runtime approvals and pins plugin install specs", () => {
   assert.notDeepEqual(config?.channels?.qqbot?.allowFrom, ["*"]);
   assert.equal(config?.gateway?.controlUi?.enabled, true);
   assert.match(config?.gateway?.controlUi?.root ?? "", /workspace[\\/]control-ui-local/i);
+  assert.equal(config?.plugins?.installs?.["hindsight-openclaw"]?.source, "npm");
   assert.equal(config?.plugins?.installs?.["openclaw-memory-hub"]?.source, "path");
   assert.equal(config?.plugins?.installs?.["openclaw-context-engine"]?.source, "path");
   assert.equal(config?.plugins?.installs?.["openclaw-checkpoint-guardian"]?.source, "path");

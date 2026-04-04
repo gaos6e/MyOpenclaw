@@ -1,12 +1,15 @@
 $ErrorActionPreference = "Stop"
 
 $taskName = "OpenClaw Gateway"
-$root = "C:\Users\20961\.openclaw"
+$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $wrapper = Join-Path $root "gateway-hidden.vbs"
 $wscriptExe = Join-Path $env:SystemRoot "System32\wscript.exe"
 
 if (-not (Test-Path $wrapper)) {
     throw "Missing wrapper script: $wrapper"
+}
+if (-not (Test-Path $wscriptExe)) {
+    throw "Missing wscript.exe: $wscriptExe"
 }
 
 $taskCommand = "`"$wscriptExe`" //B //Nologo `"$wrapper`""

@@ -175,7 +175,6 @@ const plugin = {
   id: "openclaw-memory-hub",
   name: "OpenClaw Memory Hub",
   description: "Scoped durable memory, session recall, ontology lookup, and candidate extraction.",
-  kind: "memory",
   configSchema: {
     parse(value) {
       return value ?? {};
@@ -184,6 +183,7 @@ const plugin = {
       type: "object",
       additionalProperties: false,
       properties: {
+        mode: { type: "string", enum: ["primary", "auxiliary"] },
         dbPath: { type: "string" },
         vectorIndexPath: { type: "string" },
         manifestPath: { type: "string" },
@@ -200,7 +200,9 @@ const plugin = {
     },
   },
   register(api) {
-    if (typeof api.registerMemoryRuntime === "function") {
+    const auxiliaryMode = String(api.pluginConfig?.mode ?? "primary") === "auxiliary";
+
+    if (!auxiliaryMode && typeof api.registerMemoryRuntime === "function") {
       api.registerMemoryRuntime({
         async getMemorySearchManager({ cfg, agentId }) {
           const workspaceDir = resolveAgentWorkspaceDir(cfg, agentId);
@@ -228,7 +230,7 @@ const plugin = {
 
     api.registerTool(
       (ctx) => {
-        return [
+        const tools = [
           {
             name: "memory_search",
             label: "Memory Search",
@@ -512,6 +514,15 @@ const plugin = {
             },
           },
         ];
+        return auxiliaryMode
+          ? tools.filter(
+              (entry) =>
+                ![
+                  "memory_search",
+                  "memory_get",
+                ].includes(entry.name),
+            )
+          : tools;
       },
       {
         names: [

@@ -32,6 +32,8 @@
 - done | 自我提升执行（千问链路验证+卫生审计） | 2026-03-25 | 实测qwen视觉/embedding/ASR可用；hygiene审计并仅应用safeActions；更新cron异常定位与质量自检
 - done | 自我提升2（Moltbook/Moltcn排查 + NotebookLM/新闻/抖音流程固化） | 2026-03-28 | 复测moltbook=401/500、moltcn=401/403 对照；卫生审计并应用safeActions；补充 PowerShell/curl/browser/NotebookLM/news 经验到 TOOLS 与错误池
 - done | Clawvard skills 接入默认工作流 | 2026-04-03 | 将 office-hours / superpowers-writing-plans / qa-gate / summarize / humanizer / proactive-agent / superdesign 的触发规则写入 AGENTS/TOOLS；保留 pr-review 为未安装禁用态
+- done | 审计本机 OpenClaw 相关定时任务（cron + schtasks） | 2026-04-04 | 确认 OpenClaw cron 无专门清理 .openclaw 的任务；Windows 任务计划程序存在 `OpenClaw Daily Hygiene`（运行 run_openclaw_hygiene.ps1）及 OpenClawBackup/Daily Push/Gateway/Watchdog 等
+- done | Hindsight 主线切换 | 2026-04-04 | 安装官方 Hindsight OpenClaw 插件并切换 memory slot；保留 memory-hub 辅助层与本地 archive
 
 ## 规则
 - 新增事项先进入 todo

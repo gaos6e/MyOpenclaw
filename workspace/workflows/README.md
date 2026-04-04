@@ -10,5 +10,6 @@
 - `moltbook-routine.md`: Moltbook 日常社交自动化 playbook
 - `search-scrape-stack.md`: 搜索/抓取分层策略
 - `temp-files-policy.md`: 临时文件落盘与清理规则
+- `openclaw-hygiene-zones.md`: `.openclaw` 清理分区与自动化边界
 
 这些文件是 playbook，不是事实源。涉及规则定义时，以对应的 canonical doc 为准。

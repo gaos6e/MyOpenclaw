@@ -29,28 +29,34 @@
 - 自我提升治理: `self_improve_process.md`, `self_improve_todo.md`, `self_improve_status.md`, `self_improve_quality.md`
 - 工作流与脚本: `workflows/`, `scripts/`
 - skills 与 vendor 索引: `skills/`, `VENDOR.md`
+- 本地个性化能力层索引: `local-customization-layer/`
 
 ## Memory Model
 
 ### Human-readable memory
 
 - `workspace/memory/*.md`: 日记式原始事实
-- `workspace/MEMORY.md`: 长期沉淀、偏好、稳定上下文
+- `workspace/MEMORY.md`: 本地可读的 curated archive / audit backup / migration seed
 - `workspace/.learnings/*`: 错误/教训/需求池，本地运行态记录
+
+### Runtime durable memory
+
+- `hindsight-openclaw`: 主 runtime durable memory backend，负责 auto-recall / auto-retain
+- `workspace/MEMORY.md` 与 `workspace/memory/*.md`: 保留为本地可读归档与治理入口，不直接等价于 Hindsight 在线状态
 
 ### Retrieval-only memory
 
 - `memory/main.sqlite`: 旧检索索引（保留）
-- `memory/main.v2.sqlite`: memory hub v2 检索索引
+- `memory/main.v2.sqlite`: memory hub v2 本地辅助检索索引
 - `workspace/memory/ontology/schema.yaml`: ontology schema
-- `workspace/memory/ontology/graph.jsonl`: reviewed memory/history 派生出的 ontology graph
-- `workspace/memory/history.jsonl`: durable memory / ontology promotion history
-- `workspace/memory/inbox/*.jsonl`: candidate inbox（抽取结果待审核）
+- `workspace/memory/ontology/graph.jsonl`: curated archive / reviewed history 派生出的 ontology graph
+- `workspace/memory/history.jsonl`: 本地 archive promotion history
+- `workspace/memory/inbox/*.jsonl`: local archive candidate inbox（抽取结果待审核）
 - `workspace/memory/index-manifest.json`: memory v2 index 白名单/黑名单
 
 原则：
-- `MEMORY.md` 与 `workspace/memory/YYYY-MM-DD.md` 仍是事实真源
-- `memory/main*.sqlite` 都是可重建检索层，不是人工编辑事实源
+- Hindsight 是主 runtime recall backend；`MEMORY.md` / daily memory 是本地治理与审计面
+- `memory/main*.sqlite` 都是可重建辅助检索层，不是人工编辑事实源
 - `workspace/memory/ontology/graph.jsonl` 是派生视图，不是原始真源
 
 ## Self-improvement Model
@@ -66,4 +72,4 @@
 ## Vendor / Imported Content
 
 - `workspace/skills/` 是 mixed ownership 目录，不默认视为全部 first-party。
-- `workspace/Star-Office-UI/` 和 `workspace/_tmp_*` 属于 vendor/archive 类内容，优先本地保存和隔离治理。
+- `workspace/_tmp_*` 属于 vendor/archive 类内容，优先本地保存和隔离治理。

@@ -49,12 +49,14 @@
 约束：
 - 新的治理脚本优先放到 `workspace/scripts/`，不要散落到仓库根目录。
 - 新规则若会影响日常运行、记忆、自我提升、临时文件管理或技能治理，必须在 `workspace/` 的对应文档留入口说明。
+- 若改动会影响本地 first-party 个性化能力层的结构、职责、装配入口、治理关系或主机级入口脚本，必须同步更新 `workspace/local-customization-layer/` 下对应文档；若影响总览范围或阅读导航，再同步更新根目录 `LOCAL_CUSTOMIZATION_LAYER.md`。
 - `workspace/` 中的 Markdown 文档不是装饰物；它们是个性化能力层的正式治理面。
 
 ### 3. Extension / Hook Layer
 以下目录是 OpenClaw 个性化能力的正式扩展层：
 
-- `extensions/openclaw-memory-hub`：记忆抽取、候选、promotion、ontology、session recall
+- `extensions/hindsight-openclaw`：主 runtime durable memory backend（Hindsight）
+- `extensions/openclaw-memory-hub`：本地辅助层（local archive candidates、ontology、session recall、aux vector）
 - `extensions/openclaw-context-engine`：session-aware 上下文装配
 - `extensions/openclaw-checkpoint-guardian`：长探索链路提醒与 reset 审计
 - `extensions/openclaw-qqbot`：QQBot 通道、技能、主动消息、cron 能力
@@ -71,7 +73,6 @@
 以下内容默认不作为 first-party 主编辑面：
 
 - `workspace/skills/`：mixed ownership，很多目录是 vendor copy 或安装产物
-- `workspace/Star-Office-UI/`：外部或独立项目资产
 - `workspace/_tmp*`、根目录 `backup/`、`backups/`
 - `extensions/.openclaw-install-backups/`、`extensions/_quarantine_*`
 - 各类 `node_modules/`、生成目录 `dist/`
@@ -116,8 +117,8 @@
 
 ### 记忆系统
 - 记忆层分为“人类可读记忆”和“检索/索引记忆”；两者职责不能混淆。
-- 人类可读事实默认写入 `workspace/memory/*.md` 或 `workspace/MEMORY.md`；不要把长期事实只写进 SQLite 或 JSONL 派生层。
-- `openclaw-memory-hub` 负责 scoped durable memory、session recall、ontology lookup、candidate extraction；相关能力应继续围绕该插件扩展，而不是在别处复制一套。
+- 人类可读事实默认写入 `workspace/memory/*.md` 或 `workspace/MEMORY.md`；不要把长期事实只写进 SQLite / JSONL / 云端派生层。
+- `hindsight-openclaw` 负责主 runtime durable memory；`openclaw-memory-hub` 负责本地辅助 recall / ontology / candidate extraction，避免把两者职责混写。
 - 修改记忆 schema、promotion 规则、session scope、回填或索引行为时，要同步考虑 `workspace/memory/README.md`、ontology schema、索引清单与测试。
 
 ### 自我提升系统

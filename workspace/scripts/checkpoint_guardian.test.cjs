@@ -87,6 +87,36 @@ test("checkpoint guardian clears counters after a durable checkpoint write", asy
     assert.equal(result, undefined);
   }));
 
+test("checkpoint guardian also clears counters after an explicit mem0 memory store", async () =>
+  withTempWorkspace(async ({ workspaceDir }) => {
+    const hooks = await loadRegisteredHooks(workspaceDir);
+    const afterToolCall = hooks.get("after_tool_call");
+    const beforePromptBuild = hooks.get("before_prompt_build");
+
+    for (let i = 0; i < 6; i += 1) {
+      await afterToolCall(
+        { toolName: "read", params: { path: `file-${i}.md` }, result: { ok: true } },
+        { sessionKey: "agent:main:main", sessionId: "sess-mem0", workspaceDir },
+      );
+    }
+
+    await afterToolCall(
+      {
+        toolName: "memory_store",
+        params: { text: "Use QQ for communication" },
+        result: { ok: true },
+      },
+      { sessionKey: "agent:main:main", sessionId: "sess-mem0", workspaceDir },
+    );
+
+    const result = await beforePromptBuild(
+      { prompt: "继续排查", messages: [] },
+      { sessionKey: "agent:main:main", sessionId: "sess-mem0", workspaceDir },
+    );
+
+    assert.equal(result, undefined);
+  }));
+
 test("checkpoint guardian records reset audit for unresolved exploration streaks", async () =>
   withTempWorkspace(async ({ workspaceDir }) => {
     const hooks = await loadRegisteredHooks(workspaceDir);

@@ -198,7 +198,8 @@ function resolveWorkspaceGovernanceSnapshot(workspaceDir, scope, messages) {
   const memorySections = parseMarkdownSections(fileMap.get(memoryPath) ?? "");
   const lines = [
     "OpenClaw Context Snapshot",
-    "- Canonical memory flow: memory_extract_candidates -> memory_list_candidates -> memory_promote_candidate",
+    "- Runtime durable memory backend: hindsight-openclaw (Hindsight auto-recall / auto-retain).",
+    "- MEMORY.md is the local curated archive / audit backup; use memory-hub helpers when maintaining local archive state.",
     "- Ongoing context in MEMORY.md is human-readable only and should not be promoted directly.",
     "- Checkpoint discipline: persist durable learnings after extended exploration before continuing.",
     "- Execution guardrail: do not claim completion without fresh verification.",

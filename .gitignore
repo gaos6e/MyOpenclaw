@@ -36,11 +36,8 @@ workspace/.openclaw.lnk
 workspace/.learnings/
 workspace/memory/20*.md
 workspace/memory/ontology/graph.jsonl
-workspace/Star-Office-UI/
 workspace/_tmp_*/
 workspace/tmp_*.png
-workspace-*/skills/edict/
-
 # Dependencies and caches
 **/node_modules/
 **/.venv/

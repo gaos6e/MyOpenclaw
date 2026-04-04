@@ -2,10 +2,6 @@
 
 ## Local-only vendor directories
 
-- `workspace/Star-Office-UI/`
-  - 视为 vendor/local app mirror。
-  - 保留本地可访问性，但不作为本仓的核心治理内容维护。
-
 - `workspace/_tmp_cli_anything/`
   - 视为 archive/temp import。
   - 不参与长期治理；继续保持隔离。

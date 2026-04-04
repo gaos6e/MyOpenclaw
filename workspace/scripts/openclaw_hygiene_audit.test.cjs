@@ -26,11 +26,15 @@ test("hygiene audit classifies safe root backups and protected hotspots", () => 
   const tempDesktop = path.join(tempRoot, "desktop-temp");
 
   try {
+    mkdirp(path.join(tempRoot, "agents"));
     mkdirp(path.join(tempRoot, "backup"));
+    mkdirp(path.join(tempRoot, "memory"));
+    mkdirp(path.join(tempRoot, "flows"));
     mkdirp(path.join(tempRoot, "logs"));
     mkdirp(path.join(tempRoot, "qqbot", "downloads"));
     mkdirp(path.join(tempRoot, "workspace", "_tmp_cli_anything"));
 
+    writeFile(path.join(tempRoot, "LOCAL_CUSTOMIZATION_LAYER.md"), "# doc\n");
     writeFile(path.join(tempRoot, "openclaw.json"), "{}\n");
     writeFile(path.join(tempRoot, "openclaw.json.bak"), "{}\n");
     writeFile(path.join(tempRoot, "openclaw.json.clobbered.2026-04-02T06-59-27-679Z"), "{}\n");
@@ -61,6 +65,9 @@ test("hygiene audit classifies safe root backups and protected hotspots", () => 
     assert.ok(safePaths.has("env-backup-20260324-140437"));
     assert.ok(askFirstPaths.has(path.join("qqbot", "downloads")));
     assert.ok(askFirstPaths.has(path.join("workspace", "_tmp_cli_anything")));
+    assert.ok(payload.protectedRoots.some((entry) => entry.path === "memory"));
+    assert.equal(payload.zoneSummary["auto-clean"] >= 4, true);
+    assert.equal(payload.zoneSummary["protected-runtime"] >= 2, true);
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }

@@ -6,6 +6,7 @@
 ## 待做
 - [中] 清点 .openclaw 根目录的 openclaw.json.clobbered* / workspace-* 目录用途，决定保留/归档策略 -> 减少根目录杂物与误清风险
 - [中] 审计活跃 `openclaw-qqbot` 插件的 deep security findings，决定保留/替换/本地补丁策略 -> 降低当前渠道插件的代码级风险
+- [低] 恢复/替换 `workspace/scripts/star-office-state.ps1` 或移除所有引用 -> 避免状态更新脚本缺失导致 exec 失败
 
 ## 记录规则
 - 触发：出现可提升点但不适合立刻执行

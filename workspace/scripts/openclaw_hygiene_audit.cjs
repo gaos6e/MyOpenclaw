@@ -3,6 +3,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+const ZONES = Object.freeze({
+  AUTO_CLEAN: "auto-clean",
+  ARCHIVE_ONLY: "archive-only",
+  MANUAL_REVIEW: "manual-review",
+  PROTECTED_RUNTIME: "protected-runtime",
+});
 const SAFE_BACKUP_PATTERNS = [
   /^openclaw\.json\.bak(?:\.\d+)?$/i,
   /^openclaw\.json\.clobbered\./i,
@@ -40,11 +46,13 @@ const ROOT_ALLOWLIST = new Set([
   "exec-approvals.json",
   "extensions",
   "findings.md",
+  "flows",
   "gateway-hidden.ps1",
   "gateway-hidden.vbs",
   "gateway.cmd",
   "hooks",
   "identity",
+  "LOCAL_CUSTOMIZATION_LAYER.md",
   "logs",
   "media",
   "memory",
@@ -65,6 +73,17 @@ const ROOT_ALLOWLIST = new Set([
   "workspace",
 ]);
 const ROOT_ALLOWLIST_PATTERNS = [/^workspace-[\w]+$/i];
+const PROTECTED_RUNTIME_ROOTS = [
+  "agents",
+  "cron",
+  "delivery-queue",
+  "devices",
+  "identity",
+  "memory",
+  "qqbot",
+  "subagents",
+  "tasks",
+];
 
 function resolveDefaultTempRoot() {
   const desktopRoot = process.env.USERPROFILE
@@ -120,6 +139,7 @@ function makeEntry(kind, relativePath, reason, extra = {}) {
     kind,
     path: relativePath,
     reason,
+    zone: extra.zone || null,
     ...extra,
   };
 }
@@ -173,6 +193,7 @@ function scanRoot(rootPath, bucket) {
       bucket.safeActions.push(
         makeEntry("move_to_temp_root", relativePath, "Explicit root-level backup artifact", {
           destinationKind: "tempRoot",
+          zone: ZONES.AUTO_CLEAN,
         }),
       );
       continue;
@@ -182,6 +203,7 @@ function scanRoot(rootPath, bucket) {
       bucket.safeActions.push(
         makeEntry("move_to_temp_root", relativePath, "Unambiguous root-level temporary file", {
           destinationKind: "tempRoot",
+          zone: ZONES.AUTO_CLEAN,
         }),
       );
       continue;
@@ -189,9 +211,22 @@ function scanRoot(rootPath, bucket) {
 
     if (!isAllowedRootEntry(entry.name)) {
       bucket.askFirst.push(
-        makeEntry("review_root_entry", relativePath, "Unknown top-level entry; requires human review"),
+        makeEntry("review_root_entry", relativePath, "Unknown top-level entry; requires human review", {
+          zone: ZONES.MANUAL_REVIEW,
+        }),
       );
       continue;
+    }
+
+    if (PROTECTED_RUNTIME_ROOTS.includes(entry.name)) {
+      bucket.protectedRoots.push(
+        makeEntry(
+          "protected_runtime_root",
+          relativePath,
+          "Managed runtime/state root; never auto-clean without a targeted migration or recovery task",
+          { zone: ZONES.PROTECTED_RUNTIME },
+        ),
+      );
     }
 
     if (entry.name === "qqbot") {
@@ -202,6 +237,7 @@ function scanRoot(rootPath, bucket) {
             "review_download_cache",
             path.join("qqbot", "downloads"),
             "QQBot downloads require confirmation before cleanup or relocation",
+            { zone: ZONES.MANUAL_REVIEW },
           ),
         );
       }
@@ -217,7 +253,7 @@ function scanRoot(rootPath, bucket) {
               "move_to_temp_root",
               childRelativePath,
               "Unambiguous workspace temporary file",
-              { destinationKind: "tempRoot" },
+              { destinationKind: "tempRoot", zone: ZONES.AUTO_CLEAN },
             ),
           );
           continue;
@@ -229,6 +265,7 @@ function scanRoot(rootPath, bucket) {
               "review_workspace_temp_dir",
               childRelativePath,
               "Workspace temporary-looking directories may contain project/vendor content",
+              { zone: ZONES.MANUAL_REVIEW },
             ),
           );
         }
@@ -246,7 +283,7 @@ function scanRoot(rootPath, bucket) {
             "archive_stale_log",
             path.join("logs", child.name),
             `Low-value update log older than ${bucket.archiveAgeDays} days`,
-            { destinationKind: "logArchive" },
+            { destinationKind: "logArchive", zone: ZONES.AUTO_CLEAN },
           ),
         );
       }
@@ -261,11 +298,28 @@ function scanRoot(rootPath, bucket) {
             "backup_root_clutter",
             path.join("backup", child.name),
             "Backup file is already under backup/, but still flat in the backup root",
+            { zone: ZONES.ARCHIVE_ONLY },
           ),
         );
       }
     }
   }
+}
+
+function buildZoneSummary(bucket) {
+  const entries = [
+    ...bucket.safeActions,
+    ...bucket.askFirst,
+    ...bucket.reportOnly,
+    ...bucket.protectedRoots,
+  ];
+  const summary = {};
+
+  for (const zone of Object.values(ZONES)) {
+    summary[zone] = entries.filter((entry) => entry.zone === zone).length;
+  }
+
+  return summary;
 }
 
 function collectAudit(rootPath, options) {
@@ -275,9 +329,11 @@ function collectAudit(rootPath, options) {
     safeActions: [],
     askFirst: [],
     reportOnly: [],
+    protectedRoots: [],
   };
 
   scanRoot(rootPath, bucket);
+  bucket.zoneSummary = buildZoneSummary(bucket);
 
   return bucket;
 }
@@ -291,15 +347,22 @@ function renderHumanSummary(result, options) {
     `safeActions: ${result.safeActions.length}`,
     `askFirst: ${result.askFirst.length}`,
     `reportOnly: ${result.reportOnly.length}`,
+    `protectedRoots: ${result.protectedRoots.length}`,
   ];
 
-  for (const sectionName of ["safeActions", "askFirst", "reportOnly"]) {
+  lines.push("");
+  lines.push("zones:");
+  for (const zone of Object.values(ZONES)) {
+    lines.push(`- ${zone}: ${result.zoneSummary?.[zone] ?? 0}`);
+  }
+
+  for (const sectionName of ["safeActions", "askFirst", "reportOnly", "protectedRoots"]) {
     const entries = result[sectionName];
     if (entries.length === 0) continue;
     lines.push("");
     lines.push(`${sectionName}:`);
     for (const entry of entries) {
-      lines.push(`- ${entry.path} :: ${entry.reason}`);
+      lines.push(`- [${entry.zone}] ${entry.path} :: ${entry.reason}`);
     }
   }
 

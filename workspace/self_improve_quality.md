@@ -67,3 +67,5 @@
 - 2026-03-28 | 新闻多渠道核实 | 多渠道实际只有部分站点可抓全文，若不标注证据强度，用户会误以为所有来源同等可靠 | 可能放大不确定性 | 中 | 涉及政治/司法新闻时显式标注“全文来源 / 摘要交叉验证 / 待判决书确认”
 - 2026-03-31 | 心跳自检/安全审计 | elevated exec allowFrom 对 qqbot/webchat 为 "*"（critical），风险较高且未形成整改闭环 | 可能导致权限面过大/被滥用风险 | 高 | 已写入 self_improve_todo；下一步按你的 allowlist 收紧 + 评估关闭 autoAllowSkills
 - 2026-03-31 | 自我提升告知 | 本次收到心跳后未在执行前先“告知将开始自我提升”（违反偏好） | 体验下降/不透明 | 中 | 以后心跳触发自我提升前先发一句告知，再开始跑检查
+- 2026-04-04 | 定时清理排查 | 先前回答“没有定时清理 .openclaw”不够完整（遗漏 Windows 任务计划程序里的 OpenClaw Daily Hygiene 等任务） | 可能误导/漏审风险 | 中 | 排查定时清理需同时查 openclaw cron + Windows schtasks；结论需区分“OpenClaw cron”与“Windows Task Scheduler”
+- 2026-04-04 | 状态脚本依赖 | 自我提升流程中尝试调用 `workspace/scripts/star-office-state.ps1`，但脚本已不存在，导致一次 exec 失败 | 中断流程/增加噪音 | 低 | 以后更新状态优先用稳定入口；若需保留该能力则补回脚本或移除引用
