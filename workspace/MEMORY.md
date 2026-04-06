@@ -7,6 +7,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 - What to call them: 哥哥～
 - Pronouns: 
 - Timezone: Asia/Shanghai
+- 所属：广州大学
 - Hobbies: 数码/摄影、航拍、PC装机与硬件、音频、外设、AI人工智能相关、生物信息学相关（无优先级顺序）
 
 ## Preferences & setup

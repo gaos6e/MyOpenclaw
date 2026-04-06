@@ -335,6 +335,48 @@ test("completeVerification retries with a generator answer after an incorrect de
   ]);
 });
 
+test("completeVerification treats already-answered verification as idempotent success", async () => {
+  const calls = [];
+  const client = {
+    async postJson(endpoint, body) {
+      calls.push({ endpoint, body });
+      throw new Error("POST /verify failed (409): Already answered");
+    },
+  };
+
+  const result = await completeVerification({
+    client,
+    generator: {
+      async solveVerification() {
+        return "25.00";
+      },
+    },
+    submissionResult: {
+      success: true,
+      post: {
+        id: "post-409",
+        verification_status: "pending",
+        verification: {
+          verification_code: "verify-409",
+          challenge_text: "twenty plus five",
+          instructions: "Solve and return only the number with 2 decimal places.",
+        },
+      },
+    },
+    contentType: "post",
+  });
+
+  assert.equal(result.verified, true);
+  assert.notEqual(result.skipped, true);
+  assert.deepEqual(result.attemptedAnswers, ["25.00"]);
+  assert.deepEqual(calls, [
+    {
+      endpoint: "/verify",
+      body: { verification_code: "verify-409", answer: "25.00" },
+    },
+  ]);
+});
+
 test("normalizeVerificationAnswer extracts and formats numeric answers", () => {
   assert.equal(normalizeVerificationAnswer("15"), "15.00");
   assert.equal(normalizeVerificationAnswer("Answer: 15.5"), "15.50");
@@ -1552,6 +1594,115 @@ test("runSlot does not count a post as published when verification stays pending
   assert.match(result.summary, /pending/);
   const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltbook", "state.json"), "utf8"));
   assert.equal(state.daily_counts.posts, 0);
+});
+
+test("runSlot counts a post as published when pending status resolves after a longer delay", async () => {
+  const rootDir = makeTempRoot();
+  writeJson(path.join(rootDir, "moltbook", "credentials.json"), {
+    api_key: "test-key",
+    agent_name: "melancholic_claw",
+  });
+
+  let postChecks = 0;
+  const client = {
+    reads: [],
+    writes: [],
+    async getJson(endpoint) {
+      this.reads.push(endpoint);
+      const fixtures = {
+        "/agents/me": {
+          success: true,
+          agent: { id: "agent-1", name: "melancholic_claw", description: "desc" },
+        },
+        "/agents/status": { success: true, status: "claimed" },
+        "/home": {
+          your_account: { name: "melancholic_claw", karma: 7, unread_notification_count: 0 },
+          activity_on_your_posts: [],
+          your_direct_messages: { pending_request_count: "0", unread_message_count: "0" },
+          latest_moltbook_announcement: { title: "Announcement" },
+          posts_from_accounts_you_follow: { posts: [] },
+        },
+        "/feed?filter=following&sort=new&limit=5": { success: true, posts: [] },
+        "/feed?sort=new&limit=12": { success: true, posts: [] },
+        "/agents/dm/requests": { success: true, incoming: { requests: [] }, outgoing: { requests: [] } },
+        "/agents/dm/conversations": { success: true, conversations: { items: [] }, total_unread: "0" },
+        "/search?q=openclaw&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=agentops&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=debugging&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=memory&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=skills&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=workflow&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=automation&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=ai%20agents&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=tooling&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=productivity&type=posts&limit=3": { success: true, results: [] },
+        "/search?q=engineering&type=posts&limit=3": { success: true, results: [] },
+      };
+      if (endpoint === "/posts/delayed-post") {
+        postChecks += 1;
+        return {
+          success: true,
+          post: {
+            id: "delayed-post",
+            verification_status: postChecks >= 5 ? "verified" : "pending",
+            is_deleted: false,
+          },
+        };
+      }
+      if (!(endpoint in fixtures)) {
+        throw new Error(`Missing fixture for ${endpoint}`);
+      }
+      return JSON.parse(JSON.stringify(fixtures[endpoint]));
+    },
+    async postJson(endpoint, body) {
+      this.writes.push({ method: "POST", endpoint, body });
+      if (endpoint === "/posts") {
+        return {
+          success: true,
+          post: { id: "delayed-post", verification_status: "pending" },
+        };
+      }
+      throw new Error(`Unexpected POST ${endpoint}`);
+    },
+  };
+
+  const result = await runSlot({
+    slot: "evening",
+    dryRun: false,
+    rootDir,
+    now: new Date("2026-03-21T13:30:00.000Z"),
+    client,
+    generator: {
+      async buildPostCandidates() {
+        return [
+          {
+            title: "Delayed verified post",
+            content: "content",
+            submolt_name: "openclaw",
+            scores: { relevance: 9, novelty: 7, specificity: 8 },
+          },
+        ];
+      },
+      async replyToPostActivity() {
+        return "reply";
+      },
+      async replyToDm() {
+        return "dm";
+      },
+      async commentOnPost() {
+        return "comment";
+      },
+      async solveVerification() {
+        return "47.00";
+      },
+    },
+  });
+
+  assert.match(result.summary, /发帖 1/);
+  assert.doesNotMatch(result.summary, /发帖未发布成功：pending/);
+  assert.equal(postChecks >= 5, true);
+  const state = JSON.parse(fs.readFileSync(path.join(rootDir, "moltbook", "state.json"), "utf8"));
+  assert.equal(state.daily_counts.posts, 1);
 });
 
 test("runSlot stops post retries after a verification failure creates a pending post", async () => {

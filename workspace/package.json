@@ -20,5 +20,8 @@
   "type": "commonjs",
   "dependencies": {
     "mem0ai": "^2.4.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1"
   }
 }

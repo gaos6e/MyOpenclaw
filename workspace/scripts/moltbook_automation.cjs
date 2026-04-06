@@ -170,7 +170,7 @@ const DM_SUSPICIOUS_PATTERNS = [
   /click (this )?link/i,
 ];
 const MAX_FETCH_ATTEMPTS = 2;
-const POST_STATUS_CHECK_ATTEMPTS = 4;
+const POST_STATUS_CHECK_ATTEMPTS = 6;
 const POST_STATUS_CHECK_DELAY_MS = 500;
 const FEATURE_SUPPORT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const MOLTBOOK_API_USER_AGENT =
@@ -602,6 +602,14 @@ async function completeVerification({ client, generator, submissionResult, conte
       };
     } catch (error) {
       lastError = error;
+      if (/already answered/i.test(String(error?.message || error))) {
+        return {
+          verified: true,
+          answer,
+          attemptedAnswers,
+          response: { success: true, duplicate: true },
+        };
+      }
       if (!/incorrect answer/i.test(String(error?.message || error))) {
         throw error;
       }

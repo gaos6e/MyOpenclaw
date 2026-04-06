@@ -1,0 +1,154 @@
+[
+  {
+    "id": "26331f32-c1e2-4e03-9764-cd47c01f3f67",
+    "title": "2602.13791v1.pdf"
+  },
+  {
+    "id": "effac809-1410-4e86-8063-1cd26675df3b",
+    "title": "2602.13791v1.pdf"
+  },
+  {
+    "id": "6ad5fce0-8392-4377-b687-c611ca61f97d",
+    "title": "PD项目主文档.pdf"
+  },
+  {
+    "id": "199e5115-ee92-4890-ab06-ad2c64d911e4",
+    "title": "去年项目文档"
+  },
+  {
+    "id": "00d351b7-25ab-4878-8011-627de7f12d53",
+    "title": "参考-  Benchmarking algorithms for generalizable single-cell perturbation response prediction.pdf"
+  },
+  {
+    "id": "0e0f2ba1-c286-4f77-a5c9-fe4a43a076a2",
+    "title": "参考-  Benchmarking gene embeddings from sequence, expression, network, and text models for functional pred.pdf"
+  },
+  {
+    "id": "6366933b-8ea4-4d35-97a4-61b47a773585",
+    "title": "参考-  Benchmarking gene embeddings from sequence, expression, network, and text models for functional pred.pdf"
+  },
+  {
+    "id": "7b617f8f-2ad3-4330-ad7f-68ea5631a33c",
+    "title": "参考- Prototype rectification for zero-shot learning.pdf"
+  },
+  {
+    "id": "f318079d-eb26-41ad-8b62-baa3114a6a9a",
+    "title": "参考- Universal cell embeddings A foundation model for cell biology.pdf"
+  },
+  {
+    "id": "f3068c53-abd4-4b77-aeaf-c594483f01bb",
+    "title": "参考- Visual-Augmented Dynamic Semantic Prototype for Generative Zero-Shot Learning.pdf"
+  },
+  {
+    "id": "e54418a0-645c-4530-a80b-ed0eae35c9aa",
+    "title": "参考-CDN"
+  },
+  {
+    "id": "1a57500c-9547-4b44-a63a-8667c760aa3a",
+    "title": "参考-CellFM"
+  },
+  {
+    "id": "f4dc1292-e6fb-49f5-ad14-1e4cdbd8239c",
+    "title": "参考-Deep-learning-based gene perturbation effect prediction does not yet outperform simple linear baseli.pdf"
+  },
+  {
+    "id": "386fc814-e4bd-400f-8660-ca2d005ea05f",
+    "title": "参考-Deep-learning-based gene perturbation effect prediction does not yet outperform simple linear baselines - ResearchGate"
+  },
+  {
+    "id": "01b0fa5a-60b0-4994-8fd8-e7381c1ac96d",
+    "title": "参考-DrugCLIP"
+  },
+  {
+    "id": "68231754-b1c4-4145-bf97-56ade1b00017",
+    "title": "参考-ESM2"
+  },
+  {
+    "id": "3f5914eb-3e6d-4465-b33a-b63e8e3b6d71",
+    "title": "参考-Evolving Semantic Prototype Improves Generative Zero-Shot Learning.pdf"
+  },
+  {
+    "id": "4f1784dc-b41d-49e3-8915-aae072e8fa96",
+    "title": "参考-GEARS"
+  },
+  {
+    "id": "f8909f4d-5573-4f09-9ec8-95f81342bb88",
+    "title": "参考-GeneCompass"
+  },
+  {
+    "id": "6f0739bb-bad5-443f-b053-17dff4bda0f7",
+    "title": "参考-LCAT"
+  },
+  {
+    "id": "01b100bc-f623-48b2-bb30-ec78cf4e8c30",
+    "title": "参考-PDGrapher"
+  },
+  {
+    "id": "afe44207-eeb7-44fd-9b92-c1fdf4dc72dc",
+    "title": "参考-Predicting cellular responses to novel drug perturbations at a single-cell resolution.pdf"
+  },
+  {
+    "id": "b5ec60d0-aee9-4ed4-bda4-1b772e20c302",
+    "title": "参考-ProteinBERT"
+  },
+  {
+    "id": "76fd1f21-5d0a-4c36-b011-0ea88293822d",
+    "title": "参考-TwinCELL.pdf"
+  },
+  {
+    "id": "79b6af07-ec14-4850-808e-ecb5b00148f9",
+    "title": "参考-bulkformer"
+  },
+  {
+    "id": "5b6dc817-47ff-4b8d-afab-a2cc4c00ec06",
+    "title": "参考-scPRINT-2"
+  },
+  {
+    "id": "84f9b1bf-540e-4187-b925-f09eeb91aa07",
+    "title": "基因扰动结果"
+  },
+  {
+    "id": "f6c0e2b4-8ac4-4b8c-9bc6-01dcc1587e4b",
+    "title": "工作日志1——搭建表达谱预测扰动大致框架.pdf"
+  },
+  {
+    "id": "e2db1794-70ee-4b43-9383-9d1a8e5fd9cc",
+    "title": "工作日志2——对模型进行调整、测试、优化（一）.pdf"
+  },
+  {
+    "id": "4b7ed104-f773-4b7d-ab7c-afc8059bb46d",
+    "title": "工作日志3——对模型进行调整、测试、优化（二）.pdf"
+  },
+  {
+    "id": "ebe1d822-f71a-491b-ba6b-515aa23fb969",
+    "title": "工作日志4——对模型进行调整、测试、优化（三）.pdf"
+  },
+  {
+    "id": "8ac158d3-ff24-4fab-999b-c0526abd3a93",
+    "title": "工作日志5——对模型进行调整、测试、优化（四）.pdf"
+  },
+  {
+    "id": "6fe31ad3-3683-41cb-9a72-c1b1ba1b9a59",
+    "title": "工作日志6——对模型进行调整、测试、优化（五）.pdf"
+  },
+  {
+    "id": "dfdb4270-5399-4ad0-ba76-2b1cf7522505",
+    "title": "工作日志7——对于模型未见靶标重点优化"
+  },
+  {
+    "id": "252da652-d471-4f56-8a19-216d4dd6d34e",
+    "title": "结果-chemical"
+  },
+  {
+    "id": "dcc7469a-a67b-4274-a7b9-db1754fcacb3",
+    "title": "结果-compare"
+  },
+  {
+    "id": "d6b2b7c7-d139-4557-90b0-a513d1a22665",
+    "title": "结果-genetic"
+  },
+  {
+    "id": "3061faac-a7d1-440e-9561-dc5f4e29178f",
+    "title": "项目背景"
+  }
+]
