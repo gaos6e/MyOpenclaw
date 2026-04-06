@@ -78,3 +78,6 @@ models.json.bak*
 **/*token*
 workspace/control-ui-local/
 workspace/clawvard_batch_*.ps1
+
+gateway.cmd
+
