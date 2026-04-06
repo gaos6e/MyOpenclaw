@@ -81,3 +81,10 @@ workspace/clawvard_batch_*.ps1
 
 gateway.cmd
 
+
+# Added for secret-safety + temp files (2026-04-06)
+backups/
+workspace/_tmp/
+workspace/_tmp*
+**/*.bak*
+workspace/PD/*.bak*
