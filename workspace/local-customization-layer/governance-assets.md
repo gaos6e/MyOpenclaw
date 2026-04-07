@@ -10,6 +10,7 @@
 
 - `workspace/AGENTS.md`
 - `workspace/ARCHITECTURE.md`
+- `workspace/hindsight_guide.md`
 - `workspace/HEARTBEAT.md`
 - `workspace/TOOLS.md`
 - `workspace/VENDOR.md`
@@ -18,6 +19,7 @@
 
 - `AGENTS.md`：bootstrap 与运行规则
 - `ARCHITECTURE.md`：分层、真源/派生态、能力关系
+- `hindsight_guide.md`：当前 Hindsight durable memory 部署形态、模型拆分和运维入口
 - `HEARTBEAT.md`：心跳执行清单
 - `TOOLS.md`：本地工具与操作侧知识
 - `VENDOR.md`：mixed ownership / vendor 内容治理

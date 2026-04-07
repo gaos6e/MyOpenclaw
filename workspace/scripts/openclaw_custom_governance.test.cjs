@@ -27,7 +27,7 @@ test("config uses hindsight as the active memory backend and keeps memory-hub in
 
   assert.equal(config?.plugins?.slots?.memory, "hindsight-openclaw");
   assert.equal(config?.plugins?.entries?.["hindsight-openclaw"]?.enabled, true);
-  assert.equal(config?.plugins?.entries?.["hindsight-openclaw"]?.config?.hindsightApiUrl, "https://api.hindsight.vectorize.io");
+  assert.equal(config?.plugins?.entries?.["hindsight-openclaw"]?.config?.hindsightApiUrl, "http://127.0.0.1:18890");
   assert.ok(!Object.prototype.hasOwnProperty.call(config?.plugins?.entries?.["hindsight-openclaw"]?.config ?? {}, "hindsightApiToken"));
   assert.equal(config?.plugins?.entries?.["openclaw-memory-hub"]?.enabled, true);
   assert.equal(config?.plugins?.entries?.["openclaw-memory-hub"]?.config?.mode, "auxiliary");
@@ -38,10 +38,18 @@ test("config uses hindsight as the active memory backend and keeps memory-hub in
 test("config hardens runtime approvals and pins plugin install specs", () => {
   const config = readJson(configPath);
   const approvals = readJson(approvalsPath);
+  const agentProfiles = new Map(config?.agents?.list?.map((entry) => [entry?.id, entry?.tools?.profile]) ?? []);
+  const agentModels = new Map(config?.agents?.list?.map((entry) => [entry?.id, entry?.model]) ?? []);
 
   assert.equal(config?.tools?.profile, "coding");
   assert.equal(config?.tools?.fs?.workspaceOnly, true);
-  assert.equal(config?.agents?.list?.every((entry) => entry?.tools?.profile === "coding"), true);
+  assert.equal(config?.agents?.defaults?.model?.primary, "teamplus/gpt-5.2");
+  assert.equal(agentProfiles.get("main"), "coding");
+  assert.equal(agentProfiles.get("qq"), "coding");
+  assert.equal(agentProfiles.get("qq-public"), "messaging");
+  assert.equal(agentModels.get("main"), "teamplus/gpt-5.2");
+  assert.equal(agentModels.get("qq"), "teamplus/gpt-5.2");
+  assert.equal(agentModels.get("qq-public"), "teamplus/gpt-5.2");
   assert.notDeepEqual(config?.channels?.qqbot?.allowFrom, ["*"]);
   assert.equal(config?.gateway?.controlUi?.enabled, true);
   assert.match(config?.gateway?.controlUi?.root ?? "", /workspace[\\/]control-ui-local/i);

@@ -53,6 +53,7 @@
 ### 典型真源
 
 - `workspace/ARCHITECTURE.md`
+- `workspace/hindsight_guide.md`
 - `workspace/MEMORY.md`
 - `workspace/memory/*.md`
 - `workspace/self_improve_process.md`

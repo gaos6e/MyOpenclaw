@@ -16,15 +16,17 @@
 - gateway / control UI 配置
 - plugin allowlist、slot 绑定与本地 path install
 
+当前默认主模型维持 `teamplus/gpt-5.2`，视觉模型使用 `qwen/qwen3-vl-plus`；`memorySearch` 与本机 Hindsight 的 LLM / embeddings 则单独走 DashScope（`qwen3.5-plus` + `text-embedding-v4`）。
+
 ## 2. 本地插件装配
 
 ### allowlist 和 slot
 
 - `plugins.allow` 启用本地能力层里 4 个 `openclaw-*` 扩展
-- `plugins.slots.memory = openclaw-memory-hub`
+- `plugins.slots.memory = hindsight-openclaw`
 - `plugins.slots.contextEngine = openclaw-context-engine`
 
-这意味着 memory 和 context engine 都已经被本地 first-party 扩展接管，而不是沿用默认实现。
+这意味着 context engine 由本地 first-party 扩展接管，而 memory 主链已经切到 Hindsight；`openclaw-memory-hub` 保留为本地辅助层。
 
 ### plugin entries
 
@@ -35,7 +37,9 @@
 - `openclaw-context-engine`
   - 通过 `maxChars` 控制装配预算
 - `openclaw-memory-hub`
-  - 当前启用，承担 memory slot
+  - 当前启用，承担本地辅助 recall / archive / ontology 层
+- `hindsight-openclaw`
+  - 当前启用，承担主 memory slot，并通过本机 `Hindsight API` 接入本地 PostgreSQL
 - `qqbot`
   - 作为通道插件启用
 
@@ -136,6 +140,7 @@
 
 - 提供 Windows 本机下的 gateway 启动入口
 - 负责注入本地环境变量、端口、`CODEX_HOME` 或隐藏窗口启动行为
+- `gateway.cmd` 现在会先调用 `workspace/scripts/ensure_hindsight_local.ps1`，确保本地 `PostgreSQL + Hindsight API` 就绪，再启动 OpenClaw gateway
 
 维护边界：
 
@@ -143,6 +148,7 @@
 - 它们通常包含本地敏感配置，只记录职责和路径，不在文档里抄录值
 - Windows 登录自启动的 canonical 入口应是 `gateway-hidden.vbs`，由它以隐藏窗口方式启动 `gateway.cmd`；不要把计划任务重新绑回可见的 `gateway.cmd`
 - `gateway-hidden.ps1` 只保留为与 `gateway-hidden.vbs` 对齐的辅助启动器，不应再单独硬编码 `dist/index.js` 或 `dist/entry.js`
+- `gateway.cmd` 中如果要调整本地 Hindsight 启动逻辑，应优先改 `workspace/scripts/ensure_hindsight_local.ps1`，不要把整套 PostgreSQL / Hindsight 启动流程重新硬编码回根目录入口
 - 如果执行 `openclaw gateway install --force`、升级重装或其他 daemon reinstall 覆盖了 `OpenClaw Gateway` 任务动作，应重跑 `workspace/scripts/set_hidden_gateway_task.ps1` 恢复隐藏启动
 
 ### Watchdog

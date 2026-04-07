@@ -8,7 +8,7 @@
 
 - `agents/`: agent session/runtime state
 - `identity/`: device identity and local auth state
-- `memory/`: 检索索引和嵌入缓存
+- `memory/`: 检索索引、本地 Hindsight PostgreSQL 数据目录、Hindsight API runtime 日志与 pid
 - `cron/`: 本地任务定义和运行记录
 - `devices/`: 配对与待处理设备状态
 - `qqbot/`: QQBot runtime data
@@ -42,6 +42,9 @@
 ### Runtime durable memory
 
 - `hindsight-openclaw`: 主 runtime durable memory backend，负责 auto-recall / auto-retain
+- `workspace/scripts/ensure_hindsight_local.ps1`: 本机 Hindsight runtime 启动入口，负责确保本地 PostgreSQL、pgvector 和 Hindsight API 就绪
+- `memory/hindsight-pg/data`: 本机 Hindsight 的主持久化数据库目录
+- `memory/hindsight-api-runtime/logs/*`: 本机 Hindsight API 运行日志
 - `workspace/MEMORY.md` 与 `workspace/memory/*.md`: 保留为本地可读归档与治理入口，不直接等价于 Hindsight 在线状态
 
 ### Retrieval-only memory
@@ -56,6 +59,7 @@
 
 原则：
 - Hindsight 是主 runtime recall backend；`MEMORY.md` / daily memory 是本地治理与审计面
+- Hindsight 的 durable store 当前是本地 PostgreSQL；只有 LLM / embeddings 仍通过 DashScope Qwen 远程调用
 - `memory/main*.sqlite` 都是可重建辅助检索层，不是人工编辑事实源
 - `workspace/memory/ontology/graph.jsonl` 是派生视图，不是原始真源
 

@@ -11,11 +11,14 @@
 - `run_openclaw_hygiene.ps1`: Windows 计划任务入口，落日志到 `logs/openclaw-hygiene-task.log`
 - `register_openclaw_hygiene_task.ps1`: 注册每天定时运行的 Windows 计划任务，默认任务名 `OpenClaw Daily Hygiene`、时间 `03:30`
 - `set_hidden_gateway_task.ps1`: 把 `OpenClaw Gateway` 登录任务重注册为 `wscript.exe -> gateway-hidden.vbs` 的隐藏启动链；若 `openclaw gateway install --force`、升级重装或其他 service reinstall 覆盖了任务动作，需要重跑此脚本恢复无窗口常驻
+- `ensure_hindsight_local.ps1`: 启动并健康检查本地 `PostgreSQL + pgvector + Hindsight API` 运行链；当前固定使用 `qwen3.5-plus` 作为 Hindsight LLM、`text-embedding-v4` 作为 embeddings，供 `gateway.cmd` 在启动 OpenClaw 前调用
+- `stop_hindsight_local.ps1`: 停止本地 Hindsight API 进程并关闭本地 PostgreSQL 实例
 - `mem0_capture.js`: 历史遗留的低层 Mem0 SDK 调试 helper；当前不属于默认运行闭环
 - `mem0_bridge.js`: 已弃用的历史实验脚本；仅保留作兼容/排查用途
 - `mem0_migration.cjs`: 历史迁移脚本；当前主线已切到 Hindsight，不作为默认流程
 - `memory_hub_log_summary.cjs`: 汇总 `logs/memory-hub.jsonl` 中的每日抽取命中率、schema 命中和常见未命中类型
 - `memory_hub_vector.cjs`: 直连本地辅助向量层的入口，支持 `index` / `search`，用于 local archive / session hints
+- `hindsight_local_launcher.test.cjs`: 检查本地 Hindsight 启动脚本与 `gateway.cmd` 的关键装配约束，防止 gateway 回退到未启动 memory backend 的状态
 - `moltbook_automation.cjs`: Moltbook / Moltcn 例行自动化入口；默认跑 `moltbook`，可用 `--site moltbook|moltcn` 切站，分别落盘到 `moltbook/` 或 `moltcn/`；站点凭据优先读取根目录 `.env` 中的 `MOLTBOOK_*` / `MOLTCN_*` 变量，运行目录 `credentials.json` 仅作兜底
 - `sync_qwen_config.cjs`: 以 `openclaw.json` 中的 `custom.qwen` 为单一真源，同步派生视觉 provider、memorySearch embedding、以及音频 ASR CLI 配置
 - `clawvard_eval.cjs`: 本地 Clawvard 风格 8 维模拟评测入口；读取 `workspace/clawvard-eval/cases.json` 与响应文件，输出总分、维度分和提分建议

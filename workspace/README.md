@@ -14,6 +14,8 @@
 ## Architecture
 
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md): 系统分层、状态边界、机制关系
+- [`hindsight_guide.md`](./hindsight_guide.md): 当前 Hindsight durable memory 架构、部署形态和模型拆分
+- [`local-customization-layer/README.md`](./local-customization-layer/README.md): 本地个性化能力层总入口
 - [`VENDOR.md`](./VENDOR.md): vendor/imported 内容治理规则
 
 ## Working Sets

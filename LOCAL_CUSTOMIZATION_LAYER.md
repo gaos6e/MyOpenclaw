@@ -41,10 +41,11 @@
 │  └─ task-ack
 └─ workspace/                    治理真源层
    ├─ ARCHITECTURE.md
+   ├─ hindsight_guide.md
    ├─ MEMORY.md / memory/
    ├─ self_improve_*.md
    ├─ workflows/
-   ├─ scripts/
+   ├─ scripts/                   包含本地 Hindsight runtime 启停脚本
    ├─ clawvard-eval/
    └─ control-ui-local/
 ```
@@ -69,6 +70,8 @@
   - `openclaw.json` 拓扑、plugin/hook 装配、多 agent / 多 workspace 映射，以及根级入口脚本
 - [`workspace/local-customization-layer/inventory.md`](./workspace/local-customization-layer/inventory.md)
   - 快速检索用登记册
+- [`workspace/hindsight_guide.md`](./workspace/hindsight_guide.md)
+  - 当前 Hindsight durable memory 架构、数据库位置、本地 API 入口和模型拆分
 
 ## 使用方式
 
