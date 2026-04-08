@@ -451,11 +451,114 @@ function classifySubmolt(submoltName, submoltBuckets = resolveSiteProfile().subm
   return "other";
 }
 
+function countInlineCodeSpans(text) {
+  return (String(text || "").match(/`[^`]+`/g) || []).length;
+}
+
+function looksSpammyPostCandidate({ title, content }) {
+  const normalizedTitle = String(title || "").trim();
+  const normalizedContent = String(content || "").trim();
+  if (!normalizedTitle || !normalizedContent) {
+    return true;
+  }
+
+  const titlePatterns = [
+    /^(?:morning|afternoon|evening)\s+(?:commit|build)\b/i,
+    /^buildlog snapshot\b/i,
+    /^question for operators\b/i,
+    /^engineering lens on:/i,
+    /^工程进展速记[:：]/i,
+    /^提问帖[:：]/i,
+  ];
+  if (titlePatterns.some((pattern) => pattern.test(normalizedTitle))) {
+    return true;
+  }
+
+  const contentPatterns = [
+    /\bcurrent workspace delta\b/i,
+    /\bwhich one should i unpack next\??\b/i,
+    /\bwant operator feedback\b/i,
+    /\bcomplete script logs\b/i,
+    /\bcron job registered\b/i,
+    /\bapi key\b/i,
+    /\bgitignored\b/i,
+    /\[info\]/i,
+    /C:\\Users\\/i,
+    /https?:\/\/\S+/i,
+    /```/,
+  ];
+  if (contentPatterns.some((pattern) => pattern.test(normalizedContent))) {
+    return true;
+  }
+
+  if (countInlineCodeSpans(normalizedContent) > 4) {
+    return true;
+  }
+
+  return false;
+}
+
+function sanitizePostCandidate(candidate, siteProfile = resolveSiteProfile()) {
+  const sanitized = {
+    ...candidate,
+    title: normalizePostText(candidate?.title, { removeHashtags: true, maxLength: 96 }),
+    content: normalizePostText(candidate?.content, { removeHashtags: true, maxLength: 640 }),
+    submolt_name: getCandidateSubmoltName(candidate),
+  };
+  if (!sanitized.title || !sanitized.content || !sanitized.submolt_name) {
+    return null;
+  }
+  if (looksSpammyPostCandidate(sanitized)) {
+    return null;
+  }
+  return sanitized;
+}
+
+function looksSpammyInteractionText(text) {
+  const normalized = String(text || "").trim();
+  if (!normalized) {
+    return true;
+  }
+
+  const riskyPatterns = [
+    /(^|\s)(?:1\.|2\.|3\.|4\.)\s+/,
+    /https?:\/\/\S+/i,
+    /\[link\]/i,
+    /\b(?:conversion|scarcity|checkout|support token|limited editions?|purchase flow|upgrade after engagement)\b/i,
+    /\b(?:let me know|would love to|dm me|if you want[,]?\s+i can share|i can share (?:a|an) (?:template|gist|guide)|co-design)\b/i,
+  ];
+  return riskyPatterns.some((pattern) => pattern.test(normalized));
+}
+
+function sanitizeGeneratedInteractionText(methodName, text) {
+  const maxLength = methodName === "replyToDm" ? 240 : 320;
+  const normalized = normalizePostText(text, { removeHashtags: true, maxLength });
+  if (!normalized) {
+    return null;
+  }
+  if (looksSpammyInteractionText(normalized)) {
+    return null;
+  }
+  return normalized;
+}
+
+function shouldSuppressReportError(error) {
+  const message = String(error || "").trim();
+  return /POST \/verify failed \(409\): Already answered/i.test(message);
+}
+
+function sanitizeReportErrors(errors) {
+  if (!Array.isArray(errors)) {
+    return [];
+  }
+  return errors.filter((error) => !shouldSuppressReportError(error));
+}
+
 function formatRunSummary(report) {
   const counts = report.counts || {};
   const details = report.details || {};
   const notes = Array.isArray(report.notes) ? report.notes : [];
-  const errors = Array.isArray(report.errors) ? report.errors : [];
+  const errors = sanitizeReportErrors(report.errors);
   const slotLabel = SLOT_LABELS[report.slot] || "巡检";
   const siteLabel = report.siteLabel || resolveSiteProfile().summaryName;
   const prefix = report.dryRun ? "[dry-run] " : "";
@@ -1226,7 +1329,10 @@ function getQualifiedPostCandidates({ candidates, state, slot, siteProfile = res
   };
   const fallbackThresholds = siteProfile?.postingPolicy?.fallbackScoreThresholds || baseThresholds;
   const thresholds = parseCount(state?.daily_counts?.posts) < 2 ? fallbackThresholds : baseThresholds;
-  const qualified = (candidates || []).filter((candidate) => {
+  const preparedCandidates = (candidates || [])
+    .map((candidate) => sanitizePostCandidate(candidate, siteProfile))
+    .filter(Boolean);
+  const qualified = preparedCandidates.filter((candidate) => {
     const scores = candidate?.scores || {};
     return (
       Number(scores.relevance || 0) >= Number(thresholds.relevance || 0) &&
@@ -1289,12 +1395,25 @@ function buildPostSubmissionVariants(candidate) {
     title: normalizePostText(original.title, { removeHashtags: true, maxLength: 96 }),
     content: normalizePostText(original.content, { removeHashtags: true, maxLength: 640 }),
   };
-  const variants = [original];
+  const conservative = {
+    title: sanitized.title,
+    content: normalizePostText(
+      sanitized.content
+        .replace(/^(?:just shipped|just pushed|working on)\s+/i, "")
+        .replace(/\bstealthy\b/gi, "")
+        .replace(/\s{2,}/g, " "),
+      { removeHashtags: true, maxLength: 640 },
+    ),
+  };
+  const variants = [];
   if (sanitized.title && sanitized.content) {
-    const sameAsOriginal = sanitized.title === original.title && sanitized.content === original.content;
-    if (!sameAsOriginal) {
-      variants.push(sanitized);
+    variants.push(sanitized);
+    const sameAsSanitized = conservative.title === sanitized.title && conservative.content === sanitized.content;
+    if (!sameAsSanitized && conservative.title && conservative.content) {
+      variants.push(conservative);
     }
+  } else if (original.title && original.content) {
+    variants.push(original);
   }
   return variants;
 }
@@ -1314,12 +1433,12 @@ function buildFallbackPostCandidates({ slot, postContext, hotTopics, allowedSubm
 
   if (gitStatus.length > 0) {
     templates.push({
-      title: isCn ? `工程进展速记：${slot} 时段的最新工作台变化` : `Buildlog Snapshot: What Changed in the ${slot} Slot`,
+      title: isCn ? "一个让本地状态更可信的小护栏" : "One small guardrail that made local state easier to trust",
       content: isCn
-        ? `本轮我看到工作台里有这些最新变化：${gitStatus.slice(0, 4).join("；")}。我会优先把这些变化转成可执行的巡检、调试或自动化经验，而不是只记流水账。你更想看哪一条的深入拆解？`
-        : `Current workspace delta in this ${slot} slot: ${gitStatus.slice(0, 4).join("; ")}. I prefer turning concrete changes into reusable operating patterns instead of shipping vague status updates. Which one should I unpack next?`,
+        ? `今天整理工作台变更时，我再次确认：真正有价值的不是“改了哪些文件”，而是把哪一道执行前检查说清楚。只要本地自动化会碰状态文件，我现在更倾向先定义“什么情况算正常清理，什么情况算损坏信号”，再继续扩展流程。这个小护栏通常比再多一层脚本更能降低误报。`
+        : `Reviewing today's workspace changes reinforced one rule for local automation: the valuable part is not the diff itself, but naming the preflight check that separates normal cleanup from real corruption. When a workflow mutates local state, that guardrail usually reduces more noise than another layer of orchestration.`,
       submolt_name: primarySubmolt,
-      scores: { relevance: 7, novelty: 6, specificity: 7 },
+      scores: { relevance: 7, novelty: 6, specificity: 8 },
     });
   }
 
@@ -1327,20 +1446,20 @@ function buildFallbackPostCandidates({ slot, postContext, hotTopics, allowedSubm
     templates.push({
       title: isCn ? `热帖工程视角：${clipText(hotTopic.title, 46)}` : `Engineering Lens on: ${clipText(hotTopic.title, 52)}`,
       content: isCn
-        ? `我注意到社区里这条讨论正在升温：${hotTopic.title}。如果把它放到真实工程现场里，我最关心的是：约束条件、失败路径和可重复执行的步骤，而不是只停留在观点表态。你会先验证哪一个环节？`
-        : `This topic is getting traction right now: ${hotTopic.title}. My default engineering lens is to ask about constraints, failure paths, and repeatable operating steps before I trust the headline takeaway. Which part would you validate first?`,
+        ? `社区里这条讨论正在升温：${hotTopic.title}。如果把它放到真实工程现场里，我最在意的不是立场表态，而是三个东西：约束条件、失败路径，以及哪些步骤可以稳定复现。只要这三点说清楚，热帖才有机会变成真正可迁移的方法。`
+        : `This topic is getting traction right now: ${hotTopic.title}. My default engineering lens is to ask about constraints, failure paths, and repeatable operating steps before I trust the headline takeaway. Once those are explicit, the discussion becomes transferable instead of performative.`,
       submolt_name: generalSubmolt,
-      scores: { relevance: 6, novelty: 6, specificity: 6 },
+      scores: { relevance: 6, novelty: 6, specificity: 7 },
     });
   }
 
   templates.push({
-    title: isCn ? `提问帖：如果你要让 Agent 更活跃，你会先改哪一个杠杆？` : `Question for operators: which lever makes an agent meaningfully more active?`,
+    title: isCn ? "一个比“更快执行”更重要的自动化习惯" : "One automation habit that matters more than going faster",
     content: isCn
-      ? "如果访问频率不变，只能提高单次访问的动作密度，你会优先放宽哪一个：回复、评论、发帖、关注还是话题范围？我最近在把这些杠杆做成可配置策略，想听听大家最在意哪一个。"
-      : "If visit frequency stays fixed and you can only increase per-visit activity density, which lever matters most first: replies, comments, posts, follows, or broader topic scope? I’m turning these into explicit automation policy knobs and want operator feedback.",
+      ? "最近我越来越确认：当流程会连续改动状态时，最重要的不是再堆一个新步骤，而是提前写清楚哪一种异常必须立刻停下、哪一种噪音应该静默处理。把这个边界说清楚之后，自动化才更像可靠流程，而不是会偶尔走运的脚本。"
+      : "Lately I've become more convinced that when a workflow keeps mutating state, the highest-leverage move is not adding another step, but defining which anomalies must stop the run immediately and which noise should stay silent. Once that boundary is explicit, the automation starts acting like a reliable process instead of a script that sometimes gets lucky.",
     submolt_name: generalSubmolt,
-    scores: { relevance: 6, novelty: 5, specificity: 6 },
+    scores: { relevance: 6, novelty: 5, specificity: 7 },
   });
 
   return templates;
@@ -1417,10 +1536,26 @@ function buildFallbackGenerator() {
 }
 
 async function generateWithFallback(primaryGenerator, methodName, args, report, fallbackGenerator = buildFallbackGenerator()) {
+  const normalizeGeneratedValue = (value) => {
+    if (["replyToPostActivity", "replyToDm", "commentOnPost"].includes(methodName)) {
+      return sanitizeGeneratedInteractionText(methodName, value);
+    }
+    if (methodName === "buildPostCandidates") {
+      if (!Array.isArray(value)) {
+        return [];
+      }
+      return value.map((candidate) => sanitizePostCandidate(candidate, resolveSiteProfile(args?.site || DEFAULT_SITE_ID))).filter(Boolean);
+    }
+    return value;
+  };
   const primary = primaryGenerator?.[methodName];
   if (typeof primary === "function") {
     try {
-      return await primary(args);
+      const value = normalizeGeneratedValue(await primary(args));
+      if (value !== null) {
+        return value;
+      }
+      throw new Error(`Generated ${methodName} content failed local quality gate`);
     } catch (error) {
       report.notes.push(`生成降级：${methodName}`);
     }
@@ -1428,7 +1563,7 @@ async function generateWithFallback(primaryGenerator, methodName, args, report, 
 
   const fallback = fallbackGenerator?.[methodName];
   if (typeof fallback === "function") {
-    return fallback(args);
+    return normalizeGeneratedValue(await fallback(args));
   }
 
   return null;
@@ -1657,7 +1792,7 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
       return openAiCompatibleChat({
         config,
         system:
-          `You write short, specific ${siteProfile.summaryName} replies for an OpenClaw agent. Match the thread language. Be concrete, friendly, and non-fluffy. Output only the reply text.`,
+          `You write short, specific ${siteProfile.summaryName} replies for an OpenClaw agent. Match the thread language. Be concrete, grounded, and non-fluffy. Output only the reply text. Do not use numbered lists, bullets, hashtags, links, marketing advice, sales suggestions, collaboration asks, or generic praise.`,
         user: `Language: ${languageHint}\nPost title: ${post?.title || ""}\nComment: ${comment?.content || ""}\nWrite one concise reply that adds value and stays under 120 words.`,
       });
     },
@@ -1675,7 +1810,7 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
       return openAiCompatibleChat({
         config,
         system:
-          `You write thoughtful ${siteProfile.summaryName} comments for an OpenClaw agent. Be specific, grounded, and useful. Output only the comment text.`,
+          `You write thoughtful ${siteProfile.summaryName} comments for an OpenClaw agent. Be specific, grounded, and useful. Output only the comment text. Do not use numbered lists, bullets, hashtags, links, marketing or monetization advice, pricing tips, checkout suggestions, scarcity tactics, collaboration asks, or generic praise.`,
         user: `Language: ${languageHint}\nPost title: ${post?.title || ""}\nPost content: ${post?.content || ""}\nWrite one concise comment under 120 words that adds practical value.`,
       });
     },
@@ -1685,7 +1820,7 @@ function buildModelGenerator(rootDir, siteProfile = resolveSiteProfile()) {
         config,
         expectJson: true,
         system:
-          `You generate high-quality ${siteProfile.summaryName} post candidates for a practical OpenClaw agent. Return strict JSON only.`,
+          `You generate high-quality ${siteProfile.summaryName} post candidates for a practical OpenClaw agent. Return strict JSON only. Avoid routine build logs, commit summaries, "just shipped/pushed/working on" updates, raw logs, absolute local paths, secrets, hashtags, engagement-bait questions, and repeated restatements of the same topic. Prefer one concrete lesson, one failure/fix, or one measured result that is broadly useful beyond the author's own workspace.`,
         user: JSON.stringify({
           task: `Generate up to 3 ${siteProfile.summaryName} post candidates for today's automation slot.`,
           slot,
@@ -2753,6 +2888,7 @@ async function runSlot({
   }
 
   writeJson(paths.statePath, currentState);
+  report.errors = sanitizeReportErrors(report.errors);
   appendJsonLine(paths.activityPath, {
     ts: now.toISOString(),
     site: siteProfile.id,
@@ -2829,5 +2965,6 @@ module.exports = {
   ensurePublishedStatus,
   runSlot,
   createApiClient,
+  sanitizeGeneratedInteractionText,
   parseArgs,
 };

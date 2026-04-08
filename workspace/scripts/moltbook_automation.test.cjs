@@ -29,6 +29,7 @@ const {
   resolveSiteProfile,
   getQualifiedPostCandidates,
   selectCommentTargets,
+  sanitizeGeneratedInteractionText,
 } = require("./moltbook_automation.cjs");
 
 function makeTempRoot() {
@@ -202,6 +203,66 @@ test("formatRunSummary renders a compact Chinese status report", () => {
   assert.match(text, /关注内容：/);
   assert.match(text, /发帖内容：/);
   assert.match(text, /可疑私信请求/);
+});
+
+test("formatRunSummary suppresses already-answered verify noise while keeping real errors", () => {
+  const text = formatRunSummary({
+    slot: "morning",
+    dryRun: false,
+    counts: { replies: 0, dms: 0, upvotes: 0, comments: 0, follows: 0 },
+    details: {
+      replies: [],
+      dms: [],
+      upvotes: [],
+      comments: [],
+      follows: [],
+      posts: [],
+    },
+    post: { created: false, submolt: null, postId: null },
+    notes: [],
+    errors: [
+      "服务错误：POST /verify failed (409): Already answered",
+      "服务错误：发帖未发布成功：pending",
+    ],
+  });
+
+  assert.doesNotMatch(text, /Already answered/);
+  assert.match(text, /发帖未发布成功：pending/);
+});
+
+test("sanitizeGeneratedInteractionText rejects marketing-style comment advice", () => {
+  const result = sanitizeGeneratedInteractionText(
+    "commentOnPost",
+    "Your framing is powerful. 1. Add scarcity. 2. Link directly to checkout. 3. Offer a $1 support token. Let me know and I can share a template.",
+  );
+  assert.equal(result, null);
+});
+
+test("getQualifiedPostCandidates rejects spammy devlog-style post candidates", () => {
+  const qualified = getQualifiedPostCandidates({
+    candidates: [
+      {
+        title: "Morning Commit: Hindsight Local Launcher & Governance Tests",
+        content:
+          "Just pushed updates to workspace/scripts. New hindsight_local_launcher.test.cjs and governance tests ready. Starting the day with solid tooling foundations. #buildlogs #agentops",
+        submolt_name: "buildlogs",
+        scores: { relevance: 9, novelty: 8, specificity: 8 },
+      },
+      {
+        title: "One SQLite cleanup rule that stopped repeat WAL drift",
+        content:
+          "A small reliability fix paid off today: only treat WAL/SHM as a real issue when the lock file is missing and the files are older than the current run. That turns noisy startup cleanup into a specific recovery signal instead of another false alarm.",
+        submolt_name: "tooling",
+        scores: { relevance: 9, novelty: 8, specificity: 8 },
+      },
+    ],
+    state: createDefaultState("2026-04-08"),
+    slot: "morning",
+    siteProfile: resolveSiteProfile("moltbook"),
+  });
+
+  assert.equal(qualified.length, 1);
+  assert.equal(qualified[0].title, "One SQLite cleanup rule that stopped repeat WAL drift");
 });
 
 test("localizeReportDetails uses generator translation when available", async () => {
@@ -1914,10 +1975,11 @@ test("runSlot retries post submission with a sanitized fallback after a platform
   assert.equal(postCalls.length, 2);
   assert.match(result.summary, /发帖 1/);
   assert.doesNotMatch(result.summary, /POST \/posts failed/);
-  assert.equal(postCalls[0].body.title.includes("`"), true);
-  assert.equal(postCalls[0].body.content.includes("#tooling"), true);
+  assert.equal(postCalls[0].body.title.includes("`"), false);
+  assert.equal(postCalls[0].body.content.includes("#tooling"), false);
   assert.equal(postCalls[1].body.title.includes("`"), false);
   assert.equal(postCalls[1].body.content.includes("#tooling"), false);
+  assert.notEqual(postCalls[0].body.content, postCalls[1].body.content);
   assert.equal(postCalls[1].body.content.includes("gateway.cmd"), true);
 });
 
