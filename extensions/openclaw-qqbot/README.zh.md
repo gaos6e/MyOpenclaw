@@ -340,6 +340,30 @@ openclaw gateway restart
 - 每个账户都可以独立配置 `enabled`、`name`、`allowFrom`、`systemPrompt` 等字段
 - 也可以不配顶层默认账户，只在 `accounts` 里配置所有机器人
 
+本地部署时，推荐使用 `clientSecretFile` 把密钥放到本地文件，而不是直接写进 `openclaw.json`：
+
+```json
+{
+  "channels": {
+    "qqbot": {
+      "accounts": {
+        "public-bot": {
+          "enabled": true,
+          "appId": "222222222",
+          "clientSecretFile": "/path/to/qqbot-public.secret.txt",
+          "adminOpenIds": ["YOUR_ADMIN_OPENID"],
+          "slashCommandProfile": "public-safe"
+        }
+      }
+    }
+  }
+}
+```
+
+- `clientSecretFile` 会在运行时从本地文件读取密钥，避免把 secret 直接写进 JSON。
+- `adminOpenIds` 用来固定管理员身份；配置后不会再用“第一个私聊用户自动成为管理员”的兜底逻辑。
+- `slashCommandProfile: "public-safe"` 会把 `/bot-help`、`/bot-ping`、`/bot-version` 保持为公开指令，而 `/bot-upgrade`、`/bot-logs`、`/stop` 仅管理员可用。
+
 通过 CLI 添加第二个机器人（如果框架支持 `--account` 参数）：
 
 ```bash

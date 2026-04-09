@@ -15,6 +15,18 @@ const SLASH_ENTER_ORIGINAL_BRANCH =
 const SLASH_ENTER_PATCHED_BRANCH =
   "case`Tab`:n.preventDefault(),wC(X.slashMenuItems[X.slashMenuIndex],e,g);return;case`Enter`:n.preventDefault(),CC(X.slashMenuItems[X.slashMenuIndex],e,g,!0);return;case`Escape`:n.preventDefault(),X.slashMenuOpen=!1,xC(),g();return";
 
+const SLASH_ENTER_ORIGINAL_LOGIC_V2 =
+  "function jC(){X.slashMenuMode=`command`,X.slashMenuCommand=null,X.slashMenuArgItems=[],X.slashMenuItems=[]}function MC(e,t){let n=e.match(/^\\/(\\S+)\\s(.*)$/);if(n){let e=n[1].toLowerCase(),r=n[2].toLowerCase(),i=tC.find(t=>t.name===e);if(i?.argOptions?.length){let e=r?i.argOptions.filter(e=>e.toLowerCase().startsWith(r)):i.argOptions;if(e.length>0){X.slashMenuMode=`args`,X.slashMenuCommand=i,X.slashMenuArgItems=e,X.slashMenuOpen=!0,X.slashMenuIndex=0,X.slashMenuItems=[],t();return}}X.slashMenuOpen=!1,jC(),t();return}let r=e.match(/^\\/(\\S*)$/);if(r){let e=iC(r[1]);X.slashMenuItems=e,X.slashMenuOpen=e.length>0,X.slashMenuIndex=0,X.slashMenuMode=`command`,X.slashMenuCommand=null,X.slashMenuArgItems=[]}else X.slashMenuOpen=!1,jC();t()}function NC(e,t,n){if(e.argOptions?.length){t.onDraftChange(`/${e.name} `),X.slashMenuMode=`args`,X.slashMenuCommand=e,X.slashMenuArgItems=e.argOptions,X.slashMenuOpen=!0,X.slashMenuIndex=0,X.slashMenuItems=[],n();return}X.slashMenuOpen=!1,jC(),e.executeLocal&&!e.args?(t.onDraftChange(`/${e.name}`),n(),t.onSend()):(t.onDraftChange(`/${e.name} `),n())}function PC(e,t,n){if(e.argOptions?.length){t.onDraftChange(`/${e.name} `),X.slashMenuMode=`args`,X.slashMenuCommand=e,X.slashMenuArgItems=e.argOptions,X.slashMenuOpen=!0,X.slashMenuIndex=0,X.slashMenuItems=[],n();return}X.slashMenuOpen=!1,jC(),t.onDraftChange(e.args?`/${e.name} `:`/${e.name}`),n()}function FC(e,t,n,r){let i=X.slashMenuCommand?.name??``;X.slashMenuOpen=!1,jC(),t.onDraftChange(`/${i} ${e}`),n(),r&&t.onSend()}";
+
+const SLASH_ENTER_PATCHED_LOGIC_V2 =
+  "function jC(){X.slashMenuMode=`command`,X.slashMenuCommand=null,X.slashMenuArgItems=[],X.slashMenuItems=[]}function MC(e,t){let n=e.match(/^\\/(\\S+)\\s(.*)$/);if(n){let e=n[1].toLowerCase(),r=n[2].toLowerCase(),i=tC.find(t=>t.name===e);if(i?.argOptions?.length){let e=r?i.argOptions.filter(e=>e.toLowerCase().startsWith(r)):i.argOptions;if(e.length>0){X.slashMenuMode=`args`,X.slashMenuCommand=i,X.slashMenuArgItems=e,X.slashMenuOpen=!0,X.slashMenuIndex=0,X.slashMenuItems=[],t();return}}X.slashMenuOpen=!1,jC(),t();return}let r=e.match(/^\\/(\\S*)$/);if(r){let e=iC(r[1]);X.slashMenuItems=e,X.slashMenuOpen=e.length>0,X.slashMenuIndex=0,X.slashMenuMode=`command`,X.slashMenuCommand=null,X.slashMenuArgItems=[]}else X.slashMenuOpen=!1,jC();t()}function OCX(e,t){let n=(t??``).trim().toLowerCase();if(!n.startsWith(`/`))return!1;if(n===`/${e.name}`.toLowerCase())return!0;let r=Array.isArray(e.aliases)?e.aliases:[];return r.some(t=>`/${t}`.toLowerCase()===n)}function NC(e,t,n,r=!1){if(e.argOptions?.length){t.onDraftChange(`/${e.name} `),X.slashMenuMode=`args`,X.slashMenuCommand=e,X.slashMenuArgItems=e.argOptions,X.slashMenuOpen=!0,X.slashMenuIndex=0,X.slashMenuItems=[],n();return}let i=OCX(e,r===!0?t.draft:void 0),a=e.executeLocal&&!e.args,o=e.args&&!i;X.slashMenuOpen=!1,jC(),a?(t.onDraftChange(`/${e.name}`),n(),t.onSend()):o?(t.onDraftChange(`/${e.name} `),n()):(t.onDraftChange(`/${e.name}`),n(),r===!0&&t.onSend())}function PC(e,t,n){if(e.argOptions?.length){t.onDraftChange(`/${e.name} `),X.slashMenuMode=`args`,X.slashMenuCommand=e,X.slashMenuArgItems=e.argOptions,X.slashMenuOpen=!0,X.slashMenuIndex=0,X.slashMenuItems=[],n();return}X.slashMenuOpen=!1,jC(),t.onDraftChange(e.args?`/${e.name} `:`/${e.name}`),n()}function FC(e,t,n,r){let i=X.slashMenuCommand?.name??``;X.slashMenuOpen=!1,jC(),t.onDraftChange(`/${i} ${e}`),n(),r&&t.onSend()}";
+
+const SLASH_ENTER_ORIGINAL_BRANCH_V2 =
+  "case`Tab`:n.preventDefault(),PC(X.slashMenuItems[X.slashMenuIndex],e,g);return;case`Enter`:n.preventDefault(),NC(X.slashMenuItems[X.slashMenuIndex],e,g);return;case`Escape`:n.preventDefault(),X.slashMenuOpen=!1,jC(),g();return";
+
+const SLASH_ENTER_PATCHED_BRANCH_V2 =
+  "case`Tab`:n.preventDefault(),PC(X.slashMenuItems[X.slashMenuIndex],e,g);return;case`Enter`:n.preventDefault(),NC(X.slashMenuItems[X.slashMenuIndex],e,g,!0);return;case`Escape`:n.preventDefault(),X.slashMenuOpen=!1,jC(),g();return";
+
 const COMPACT_ORIGINAL_FUNCTION =
   "async function Fw(e,t){try{return await e.request(`sessions.compact`,{key:t}),{content:`Context compacted successfully.`,action:`refresh`}}catch(e){return{content:`Compaction failed: ${String(e)}`}}}";
 
@@ -23,6 +35,15 @@ const COMPACT_PATCHED_FUNCTION =
 
 const COMPACT_ORIGINAL_CASE = "case`compact`:return await Fw(e,t);";
 const COMPACT_PATCHED_CASE = "case`compact`:return await Fw(e,t,r);";
+
+const COMPACT_ORIGINAL_FUNCTION_V2 =
+  "async function Yw(e,t){try{return await e.request(`sessions.compact`,{key:t}),{content:`Context compacted successfully.`,action:`refresh`}}catch(e){return{content:`Compaction failed: ${String(e)}`}}}";
+
+const COMPACT_PATCHED_FUNCTION_V2 =
+  "async function Yw(e,t,n){try{let r=(n??``).trim(),i=await e.request(`chat.send`,{sessionKey:t,message:r?`/compact ${r}`:`/compact`,deliver:!1,idempotencyKey:cn()});return{content:`Compacting session...`,trackRunId:typeof i?.runId==`string`?i.runId:void 0}}catch(e){return{content:`Compaction failed: ${String(e)}`}}}";
+
+const COMPACT_ORIGINAL_CASE_V2 = "case`compact`:return await Yw(e,t);";
+const COMPACT_PATCHED_CASE_V2 = "case`compact`:return await Yw(e,t,r);";
 
 function resolveInstalledControlUiRoot() {
   return path.join(
@@ -64,50 +85,66 @@ function resolveControlUiFiles(root) {
 function patchSlashEnterSource(source) {
   if (
     source.includes("function OCX(e,t)") &&
-    source.includes("CC(X.slashMenuItems[X.slashMenuIndex],e,g,!0)")
+    (source.includes("CC(X.slashMenuItems[X.slashMenuIndex],e,g,!0)") ||
+      source.includes("NC(X.slashMenuItems[X.slashMenuIndex],e,g,!0)"))
   ) {
     return { source, changed: false };
   }
-  if (
-    !source.includes(SLASH_ENTER_ORIGINAL_LOGIC) ||
-    !source.includes(SLASH_ENTER_ORIGINAL_BRANCH)
-  ) {
-    throw new Error("Expected slash-enter signatures not found in Control UI bundle.");
+  if (source.includes(SLASH_ENTER_ORIGINAL_LOGIC) && source.includes(SLASH_ENTER_ORIGINAL_BRANCH)) {
+    return {
+      changed: true,
+      source: source
+        .replace(SLASH_ENTER_ORIGINAL_LOGIC, SLASH_ENTER_PATCHED_LOGIC)
+        .replace(SLASH_ENTER_ORIGINAL_BRANCH, SLASH_ENTER_PATCHED_BRANCH),
+    };
   }
-  return {
-    changed: true,
-    source: source
-      .replace(SLASH_ENTER_ORIGINAL_LOGIC, SLASH_ENTER_PATCHED_LOGIC)
-      .replace(SLASH_ENTER_ORIGINAL_BRANCH, SLASH_ENTER_PATCHED_BRANCH),
-  };
+  if (
+    source.includes(SLASH_ENTER_ORIGINAL_LOGIC_V2) &&
+    source.includes(SLASH_ENTER_ORIGINAL_BRANCH_V2)
+  ) {
+    return {
+      changed: true,
+      source: source
+        .replace(SLASH_ENTER_ORIGINAL_LOGIC_V2, SLASH_ENTER_PATCHED_LOGIC_V2)
+        .replace(SLASH_ENTER_ORIGINAL_BRANCH_V2, SLASH_ENTER_PATCHED_BRANCH_V2),
+    };
+  }
+  throw new Error("Expected slash-enter signatures not found in Control UI bundle.");
 }
 
 function patchCompactCommandSource(source) {
   if (
     source.includes("Compacting session...") &&
-    source.includes("case`compact`:return await Fw(e,t,r);")
+    (source.includes("case`compact`:return await Fw(e,t,r);") ||
+      source.includes("case`compact`:return await Yw(e,t,r);"))
   ) {
     return { source, changed: false };
   }
-  if (
-    !source.includes(COMPACT_ORIGINAL_FUNCTION) ||
-    !source.includes(COMPACT_ORIGINAL_CASE)
-  ) {
-    throw new Error("Expected compact-command signatures not found in Control UI bundle.");
+  if (source.includes(COMPACT_ORIGINAL_FUNCTION) && source.includes(COMPACT_ORIGINAL_CASE)) {
+    return {
+      changed: true,
+      source: source
+        .replace(COMPACT_ORIGINAL_FUNCTION, COMPACT_PATCHED_FUNCTION)
+        .replace(COMPACT_ORIGINAL_CASE, COMPACT_PATCHED_CASE),
+    };
   }
-  return {
-    changed: true,
-    source: source
-      .replace(COMPACT_ORIGINAL_FUNCTION, COMPACT_PATCHED_FUNCTION)
-      .replace(COMPACT_ORIGINAL_CASE, COMPACT_PATCHED_CASE),
-  };
+  if (
+    source.includes(COMPACT_ORIGINAL_FUNCTION_V2) &&
+    source.includes(COMPACT_ORIGINAL_CASE_V2)
+  ) {
+    return {
+      changed: true,
+      source: source
+        .replace(COMPACT_ORIGINAL_FUNCTION_V2, COMPACT_PATCHED_FUNCTION_V2)
+        .replace(COMPACT_ORIGINAL_CASE_V2, COMPACT_PATCHED_CASE_V2),
+    };
+  }
+  throw new Error("Expected compact-command signatures not found in Control UI bundle.");
 }
 
 function patchHtmlCacheBust(html, token = DEFAULT_CACHE_BUST_TOKEN) {
-  const next = html.replace(
-    /(\.\/assets\/[^"'?#]+\.(?:js|css))(?:\?v=[^"'#\s]+)?/g,
-    `$1?v=${token}`,
-  );
+  // Query tokens split Vite module identity and can re-execute shared entry chunks.
+  const next = html.replace(/(\.\/assets\/[^"'?#]+\.(?:js|css))(?:\?v=[^"'#\s]+)?/g, `$1`);
   return {
     html: next,
     changed: next !== html,

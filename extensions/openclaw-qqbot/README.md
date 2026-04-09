@@ -345,6 +345,30 @@ Edit `~/.openclaw/openclaw.json` and add an `accounts` field under `channels.qqb
 - Each account can independently configure `enabled`, `name`, `allowFrom`, `systemPrompt`, etc.
 - You may also skip the top-level default account and only configure bots inside `accounts`
 
+For local deployments, you can keep the secret out of `openclaw.json` by using `clientSecretFile`:
+
+```json
+{
+  "channels": {
+    "qqbot": {
+      "accounts": {
+        "public-bot": {
+          "enabled": true,
+          "appId": "222222222",
+          "clientSecretFile": "/path/to/qqbot-public.secret.txt",
+          "adminOpenIds": ["YOUR_ADMIN_OPENID"],
+          "slashCommandProfile": "public-safe"
+        }
+      }
+    }
+  }
+}
+```
+
+- `clientSecretFile` reads the secret from a local file at runtime instead of storing it in JSON.
+- `adminOpenIds` pins the admin identity and disables the "first private user becomes admin" fallback for that account.
+- `slashCommandProfile: "public-safe"` keeps `/bot-help`, `/bot-ping`, `/bot-version` public while restricting `/bot-upgrade`, `/bot-logs`, and `/stop` to admins.
+
 Add a second bot via CLI (if the framework supports the `--account` parameter):
 
 ```bash

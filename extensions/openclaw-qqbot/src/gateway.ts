@@ -6,7 +6,13 @@ import { loadSession, saveSession, clearSession } from "./session-store.js";
 import { recordKnownUser, flushKnownUsers } from "./known-users.js";
 import { getQQBotRuntime } from "./runtime.js";
 import { setRefIndex, getRefIndex, formatRefEntryForAgent, flushRefIndex, type RefAttachmentSummary } from "./ref-index-store.js";
-import { matchSlashCommand, type SlashCommandContext, type SlashCommandFileResult } from "./slash-commands.js";
+import {
+  getQQBotCommandAccess,
+  getQQBotCommandDeniedMessage,
+  matchSlashCommand,
+  type SlashCommandContext,
+  type SlashCommandFileResult,
+} from "./slash-commands.js";
 import { createMessageQueue, type QueuedMessage } from "./message-queue.js";
 import { triggerUpdateCheck } from "./update-checker.js";
 import { startImageServer, isImageServerRunning, type ImageServerConfig } from "./image-server.js";
@@ -193,7 +199,13 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
   // 使用模块级 isFirstReadyGlobal，确保只有进程级重启才发送问候语
   // health-monitor 重连不会重新初始化为 true
 
-  const adminCtx: AdminResolverContext = { accountId: account.accountId, appId: account.appId, clientSecret: account.clientSecret, log };
+  const adminCtx: AdminResolverContext = {
+    accountId: account.accountId,
+    appId: account.appId,
+    clientSecret: account.clientSecret,
+    configuredAdminOpenIds: account.config?.adminOpenIds,
+    log,
+  };
 
   // ============ P1-2: 尝试从持久化存储恢复 Session ============
   // 传入当前 appId，如果 appId 已变更（换了机器人），旧 session 自动失效
@@ -215,6 +227,19 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
   // 紧急命令列表：这些命令会立即执行，不进入斜杠匹配流程
   const URGENT_COMMANDS = ["/stop"];
 
+  const sendDirectReply = async (msg: QueuedMessage, replyText: string): Promise<void> => {
+    const token = await getAccessToken(account.appId, account.clientSecret);
+    if (msg.type === "c2c") {
+      await sendC2CMessage(token, msg.senderId, replyText, msg.messageId);
+    } else if (msg.type === "group" && msg.groupOpenid) {
+      await sendGroupMessage(token, msg.groupOpenid, replyText, msg.messageId);
+    } else if (msg.channelId) {
+      await sendChannelMessage(token, msg.channelId, replyText, msg.messageId);
+    } else if (msg.type === "dm") {
+      await sendC2CMessage(token, msg.senderId, replyText, msg.messageId);
+    }
+  };
+
   const trySlashCommandOrEnqueue = async (msg: QueuedMessage): Promise<void> => {
     const content = (msg.content ?? "").trim();
     if (!content.startsWith("/")) {
@@ -226,6 +251,14 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
     const contentLower = content.toLowerCase();
     const isUrgentCommand = URGENT_COMMANDS.some(cmd => contentLower.startsWith(cmd.toLowerCase()));
     if (isUrgentCommand) {
+      const access = getQQBotCommandAccess({
+        senderId: msg.senderId,
+        accountConfig: account.config,
+      }, "stop", { native: true });
+      if (!access.allowed) {
+        await sendDirectReply(msg, getQQBotCommandDeniedMessage());
+        return;
+      }
       log?.info(`[qqbot:${account.accountId}] Urgent command detected: ${content.slice(0, 20)}, executing immediately`);
       const peerId = msgQueue.getMessagePeerId(msg);
       const droppedCount = msgQueue.clearUserQueue(peerId);
@@ -266,7 +299,6 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
 
       // 命中插件级指令，直接回复
       log?.info(`[qqbot:${account.accountId}] Slash command matched: ${content}, replying directly`);
-      const token = await getAccessToken(account.appId, account.clientSecret);
 
       // 解析回复：纯文本 or 带文件的结果
       const isFileResult = typeof reply === "object" && reply !== null && "filePath" in reply;
@@ -274,15 +306,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
       const replyFile = isFileResult ? (reply as SlashCommandFileResult).filePath : null;
 
       // 先发送文本回复
-      if (msg.type === "c2c") {
-        await sendC2CMessage(token, msg.senderId, replyText, msg.messageId);
-      } else if (msg.type === "group" && msg.groupOpenid) {
-        await sendGroupMessage(token, msg.groupOpenid, replyText, msg.messageId);
-      } else if (msg.channelId) {
-        await sendChannelMessage(token, msg.channelId, replyText, msg.messageId);
-      } else if (msg.type === "dm") {
-        await sendC2CMessage(token, msg.senderId, replyText, msg.messageId);
-      }
+      await sendDirectReply(msg, replyText);
 
       // 如果有文件需要发送
       if (replyFile) {
@@ -691,9 +715,18 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
         // allowFrom: ["*"] 表示允许所有人，否则检查 senderId 是否在 allowFrom 列表中
         const allowFromList = account.config?.allowFrom ?? [];
         const allowAll = allowFromList.length === 0 || allowFromList.some((entry: string) => entry === "*");
-        const commandAuthorized = allowAll || allowFromList.some((entry: string) => 
+        let commandAuthorized = allowAll || allowFromList.some((entry: string) =>
           entry.toUpperCase() === event.senderId.toUpperCase()
         );
+        const rawCommandName = userContent.startsWith("/")
+          ? userContent.slice(1).split(/\s+/, 1)[0]?.trim().toLowerCase()
+          : "";
+        if ((account.config?.slashCommandProfile ?? "legacy") === "public-safe" && rawCommandName) {
+          commandAuthorized = getQQBotCommandAccess({
+            senderId: event.senderId,
+            accountConfig: account.config,
+          }, rawCommandName, { native: true }).allowed;
+        }
 
         // 分离 imageUrls 为本地路径和远程 URL，供 openclaw 原生媒体处理
         const localMediaPaths: string[] = [];

@@ -47,9 +47,11 @@ test("config hardens runtime approvals and pins plugin install specs", () => {
   assert.equal(agentProfiles.get("main"), "coding");
   assert.equal(agentProfiles.get("qq"), "coding");
   assert.equal(agentProfiles.get("qq-public"), "messaging");
+  assert.equal(agentProfiles.get("qq-timekeeper"), "messaging");
   assert.equal(agentModels.get("main"), "teamplus/gpt-5.2");
   assert.equal(agentModels.get("qq"), "teamplus/gpt-5.2");
   assert.equal(agentModels.get("qq-public"), "teamplus/gpt-5.2");
+  assert.equal(agentModels.get("qq-timekeeper"), "teamplus/gpt-5.2");
   assert.notDeepEqual(config?.channels?.qqbot?.allowFrom, ["*"]);
   assert.equal(config?.gateway?.controlUi?.enabled, true);
   assert.match(config?.gateway?.controlUi?.root ?? "", /workspace[\\/]control-ui-local/i);
@@ -129,4 +131,38 @@ test("qq channel config is native-compatible and does not keep custom plugin-onl
   assert.ok(!Object.prototype.hasOwnProperty.call(qqConfig, "updateCheckOnStartup"));
   assert.ok(!Object.prototype.hasOwnProperty.call(qqConfig, "logImageServerDisabled"));
   assert.ok(!Object.prototype.hasOwnProperty.call(qqConfig, "healthMonitor"));
+});
+
+test("timekeeper public qq account is isolated behind a dedicated agent and secret file", () => {
+  const config = readJson(configPath);
+  const accounts = config?.channels?.qqbot?.accounts ?? {};
+  const timekeeper = accounts.timekeeper;
+  const binding = (config?.bindings ?? []).find((entry) =>
+    entry?.match?.channel === "qqbot" && entry?.match?.accountId === "timekeeper");
+  const agent = (config?.agents?.list ?? []).find((entry) => entry?.id === "qq-timekeeper");
+
+  assert.equal(timekeeper?.enabled, true);
+  assert.equal(timekeeper?.name, "时光管家");
+  assert.equal(timekeeper?.appId, "1903782033");
+  assert.equal(timekeeper?.dmPolicy, "open");
+  assert.deepEqual(timekeeper?.allowFrom, ["__TIMEKEEPER_COMMANDS_DISABLED__"]);
+  assert.equal(typeof timekeeper?.clientSecretFile, "string");
+  assert.ok(!Object.prototype.hasOwnProperty.call(timekeeper ?? {}, "clientSecret"));
+  assert.deepEqual(timekeeper?.adminOpenIds, ["9A053C1350854286F832A03D38E111FD"]);
+  assert.equal(timekeeper?.slashCommandProfile, "public-safe");
+  assert.match(timekeeper?.systemPrompt ?? "", /不能操作当前电脑/);
+  assert.match(timekeeper?.systemPrompt ?? "", /文档理解|表格|PPT|图片|语音/);
+
+  assert.equal(binding?.agentId, "qq-timekeeper");
+  assert.equal(agent?.tools?.profile, "messaging");
+  assert.equal(agent?.tools?.elevated?.enabled, false);
+  assert.deepEqual(agent?.skills, [
+    "web-search",
+    "tavily-search",
+    "weather",
+    "pdf",
+    "docx",
+    "pptx",
+    "xlsx",
+  ]);
 });

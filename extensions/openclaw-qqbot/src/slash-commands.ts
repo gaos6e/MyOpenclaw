@@ -248,6 +248,86 @@ interface SlashCommand {
   handler: (ctx: SlashCommandContext) => SlashCommandResult | Promise<SlashCommandResult>;
 }
 
+type QQBotCommandAccess = {
+  allowed: boolean;
+  isAdmin: boolean;
+  profile: "legacy" | "public-safe";
+  reason?: "admin-only";
+};
+
+const PUBLIC_SAFE_PUBLIC_COMMANDS = new Set(["bot-help", "bot-ping", "bot-version"]);
+const PUBLIC_SAFE_ADMIN_COMMANDS = new Set(["bot-upgrade", "bot-logs", "stop"]);
+
+function normalizeCommandName(commandName: string): string {
+  return String(commandName ?? "").trim().toLowerCase().replace(/^\/+/, "");
+}
+
+function normalizeOpenId(value: string | undefined): string {
+  return String(value ?? "").trim().toUpperCase();
+}
+
+function isConfiguredAdmin(ctx: Pick<SlashCommandContext, "senderId" | "accountConfig">): boolean {
+  const senderId = normalizeOpenId(ctx.senderId);
+  const admins = Array.isArray(ctx.accountConfig?.adminOpenIds)
+    ? ctx.accountConfig.adminOpenIds.map((item) => normalizeOpenId(item)).filter(Boolean)
+    : [];
+  return admins.includes(senderId);
+}
+
+export function getQQBotCommandAccess(
+  ctx: Pick<SlashCommandContext, "senderId" | "accountConfig">,
+  commandName: string,
+  options: { native?: boolean } = {},
+): QQBotCommandAccess {
+  const profile = ctx.accountConfig?.slashCommandProfile ?? "legacy";
+  const normalizedName = normalizeCommandName(commandName);
+  const isAdmin = isConfiguredAdmin(ctx);
+
+  if (profile !== "public-safe") {
+    return {
+      allowed: true,
+      isAdmin,
+      profile,
+    };
+  }
+
+  if (PUBLIC_SAFE_PUBLIC_COMMANDS.has(normalizedName)) {
+    return {
+      allowed: true,
+      isAdmin,
+      profile,
+    };
+  }
+
+  if (PUBLIC_SAFE_ADMIN_COMMANDS.has(normalizedName)) {
+    return {
+      allowed: isAdmin,
+      isAdmin,
+      profile,
+      ...(isAdmin ? {} : { reason: "admin-only" }),
+    };
+  }
+
+  if (options.native) {
+    return {
+      allowed: false,
+      isAdmin,
+      profile,
+      reason: "admin-only",
+    };
+  }
+
+  return {
+    allowed: true,
+    isAdmin,
+    profile,
+  };
+}
+
+export function getQQBotCommandDeniedMessage(): string {
+  return "❌ 此指令仅管理员可用";
+}
+
 // ============ 指令注册表 ============
 
 const commands: Map<string, SlashCommand> = new Map();
@@ -302,18 +382,19 @@ registerCommand({
     `查看当前 QQBot 插件版本和 OpenClaw 框架版本。`,
     `同时检查是否有新版本可用。`,
   ].join("\n"),
-  handler: async () => {
+  handler: async (ctx) => {
     const frameworkVersion = getFrameworkVersion();
     const lines = [
       `🦞框架版本：${frameworkVersion}`,
       `🤖QQBot 插件版本：v${PLUGIN_VERSION}`,
     ];
     const info = await getUpdateInfo();
+    const canUpgrade = getQQBotCommandAccess(ctx, "bot-upgrade").allowed;
     if (info.checkedAt === 0) {
       lines.push(`⏳ 版本检查中...`);
     } else if (info.error) {
       lines.push(`⚠️ 版本检查失败`);
-    } else if (info.hasUpdate && info.latest) {
+    } else if (info.hasUpdate && info.latest && canUpgrade) {
       lines.push(`🆕最新可用版本：v${info.latest}，点击 <qqbot-cmd-input text="/bot-upgrade" show="/bot-upgrade"/> 查看升级指引`);
     } 
     lines.push(`🌟官方 GitHub 仓库：[点击前往](https://github.com/tencent-connect/openclaw-qqbot/)`);
@@ -333,9 +414,13 @@ registerCommand({
     `列出所有可用的 QQBot 插件内置指令及其简要说明。`,
     `使用 /指令名 ? 可查看某条指令的详细用法。`,
   ].join("\n"),
-  handler: () => {
+  handler: (ctx) => {
     const lines = [`### QQBot插件内置调试指令`, ``];
     for (const [name, cmd] of commands) {
+      const access = getQQBotCommandAccess(ctx, name);
+      if (!access.allowed && access.reason === "admin-only") {
+        continue;
+      }
       lines.push(`<qqbot-cmd-input text="/${name}" show="/${name}"/> ${cmd.description}`);
     }
     lines.push(``, `> 插件版本 v${PLUGIN_VERSION}`);
@@ -1285,6 +1370,11 @@ export async function matchSlashCommand(ctx: SlashCommandContext): Promise<Slash
 
   const cmd = commands.get(cmdName);
   if (!cmd) return null; // 不是插件级指令，交给框架
+
+  const access = getQQBotCommandAccess(ctx, cmdName);
+  if (!access.allowed) {
+    return getQQBotCommandDeniedMessage();
+  }
 
   // /指令 ? — 返回用法说明
   if (args === "?") {

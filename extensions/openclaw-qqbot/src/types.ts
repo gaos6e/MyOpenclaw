@@ -41,6 +41,10 @@ export interface QQBotAccountConfig {
   clientSecretFile?: string;
   dmPolicy?: "open" | "pairing" | "allowlist";
   allowFrom?: string[];
+  /** 显式指定管理员 openid 列表；配置后不再自动探测首个私聊用户 */
+  adminOpenIds?: string[];
+  /** 插件级斜杠命令访问策略 */
+  slashCommandProfile?: "legacy" | "public-safe";
   /** 系统提示词，会添加在用户消息前面 */
   systemPrompt?: string;
   /** 图床服务器公网地址，用于发送图片，例如 http://your-ip:18765 */

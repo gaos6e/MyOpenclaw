@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { ResolvedQQBotAccount, QQBotAccountConfig } from "./types.js";
 import type { OpenClawConfig } from "openclaw/plugin-sdk";
 
@@ -10,6 +12,32 @@ interface QQBotChannelConfig extends QQBotAccountConfig {
 function normalizeAppId(raw: unknown): string {
   if (raw === null || raw === undefined) return "";
   return String(raw).trim();
+}
+
+function normalizeFilePath(raw: unknown): string {
+  const value = String(raw ?? "").trim();
+  if (!value) {
+    return "";
+  }
+  if (value.startsWith("~")) {
+    const homeDir = process.env.HOME || process.env.USERPROFILE || "";
+    if (homeDir) {
+      return path.resolve(value.replace(/^~(?=[\\/]|$)/, homeDir));
+    }
+  }
+  return path.resolve(value);
+}
+
+function readClientSecretFromFile(filePath: unknown): string {
+  const resolvedPath = normalizeFilePath(filePath);
+  if (!resolvedPath) {
+    return "";
+  }
+  try {
+    return fs.readFileSync(resolvedPath, "utf8").trim();
+  } catch {
+    return "";
+  }
 }
 
 /**
@@ -79,6 +107,8 @@ export function resolveQQBotAccount(
       clientSecretFile: qqbot?.clientSecretFile,
       dmPolicy: qqbot?.dmPolicy,
       allowFrom: qqbot?.allowFrom,
+      adminOpenIds: qqbot?.adminOpenIds,
+      slashCommandProfile: qqbot?.slashCommandProfile,
       systemPrompt: qqbot?.systemPrompt,
       imageServerBaseUrl: qqbot?.imageServerBaseUrl,
       markdownSupport: qqbot?.markdownSupport ?? true,
@@ -98,7 +128,7 @@ export function resolveQQBotAccount(
     clientSecret = accountConfig.clientSecret;
     secretSource = "config";
   } else if (accountConfig.clientSecretFile) {
-    // 从文件读取（运行时处理）
+    clientSecret = readClientSecretFromFile(accountConfig.clientSecretFile);
     secretSource = "file";
   } else if (process.env.QQBOT_CLIENT_SECRET && resolvedAccountId === DEFAULT_ACCOUNT_ID) {
     clientSecret = process.env.QQBOT_CLIENT_SECRET;
@@ -151,7 +181,7 @@ export function applyQQBotAccountConfig(
         ...(input.clientSecret
           ? { clientSecret: input.clientSecret }
           : input.clientSecretFile
-            ? { clientSecretFile: input.clientSecretFile }
+            ? { clientSecretFile: normalizeFilePath(input.clientSecretFile) }
             : {}),
         ...(input.name ? { name: input.name } : {}),
         ...(input.imageServerBaseUrl ? { imageServerBaseUrl: input.imageServerBaseUrl } : {}),
@@ -177,7 +207,7 @@ export function applyQQBotAccountConfig(
             ...(input.clientSecret
               ? { clientSecret: input.clientSecret }
               : input.clientSecretFile
-                ? { clientSecretFile: input.clientSecretFile }
+                ? { clientSecretFile: normalizeFilePath(input.clientSecretFile) }
                 : {}),
             ...(input.name ? { name: input.name } : {}),
             ...(input.imageServerBaseUrl ? { imageServerBaseUrl: input.imageServerBaseUrl } : {}),

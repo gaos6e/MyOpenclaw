@@ -18,6 +18,7 @@ export interface AdminResolverContext {
   accountId: string;
   appId: string;
   clientSecret: string;
+  configuredAdminOpenIds?: string[];
   log?: {
     info: (msg: string) => void;
     error: (msg: string) => void;
@@ -55,6 +56,23 @@ export function saveAdminOpenId(accountId: string, openid: string): void {
   } catch { /* ignore */ }
 }
 
+function normalizeOpenId(value: string | undefined): string {
+  return String(value ?? "").trim().toUpperCase();
+}
+
+function getConfiguredAdminOpenId(configuredAdminOpenIds?: string[]): string | undefined {
+  if (!Array.isArray(configuredAdminOpenIds)) {
+    return undefined;
+  }
+  for (const candidate of configuredAdminOpenIds) {
+    const normalized = normalizeOpenId(candidate);
+    if (normalized) {
+      return normalized;
+    }
+  }
+  return undefined;
+}
+
 // ---- 升级问候目标 ----
 
 export function loadUpgradeGreetingTargetOpenId(accountId: string, appId: string): string | undefined {
@@ -87,7 +105,11 @@ export function clearUpgradeGreetingTargetOpenId(accountId: string, appId: strin
  * 1. 优先读持久化文件（稳定）
  * 2. fallback 取第一个私聊用户，并写入文件锁定
  */
-export function resolveAdminOpenId(ctx: Pick<AdminResolverContext, "accountId" | "log">): string | undefined {
+export function resolveAdminOpenId(ctx: Pick<AdminResolverContext, "accountId" | "log" | "configuredAdminOpenIds">): string | undefined {
+  const configured = getConfiguredAdminOpenId(ctx.configuredAdminOpenIds);
+  if (configured) {
+    return configured;
+  }
   const saved = loadAdminOpenId(ctx.accountId);
   if (saved) return saved;
   const first = listKnownUsers({ accountId: ctx.accountId, type: "c2c", sortBy: "firstSeenAt", sortOrder: "asc", limit: 1 })[0]?.openid;
