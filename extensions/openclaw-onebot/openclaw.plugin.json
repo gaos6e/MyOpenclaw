@@ -1,0 +1,66 @@
+{
+  "id": "openclaw-onebot",
+  "name": "OpenClaw OneBot",
+  "version": "1.1.0-local",
+  "description": "OneBot v11 protocol channel (NapCat/Lagrange via WebSocket)",
+  "author": "local",
+  "channels": ["onebot"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+      "wsUrl": { "type": "string", "description": "OneBot 正向 WS 地址" },
+      "selfId": { "type": "string", "description": "真实 QQ 号" },
+      "accessToken": { "type": "string", "description": "访问令牌" },
+      "accessTokenFile": { "type": "string", "description": "访问令牌文件路径" },
+      "aliases": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "用于群聊触发的昵称或别名"
+      },
+      "groupReplyPolicy": {
+        "type": "string",
+        "enum": ["@mentions-only", "@always-reply-plus-contextual", "@always-reply-plus-random-interject"],
+        "description": "群聊回复策略"
+      },
+      "proactiveCooldownMs": { "type": "number", "description": "主动插话冷却时间（毫秒）" },
+      "maxProactiveRepliesPerHour": { "type": "number", "description": "每小时主动插话上限" },
+      "proactiveInterjectChancePercent": { "type": "number", "description": "主动插话概率（0-100）" },
+      "accounts": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "selfId": { "type": "string" },
+            "wsUrl": { "type": "string" },
+            "accessToken": { "type": "string" },
+            "accessTokenFile": { "type": "string" },
+            "aliases": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "groupReplyPolicy": {
+              "type": "string",
+              "enum": ["@mentions-only", "@always-reply-plus-contextual", "@always-reply-plus-random-interject"]
+            },
+            "proactiveCooldownMs": { "type": "number" },
+            "maxProactiveRepliesPerHour": { "type": "number" },
+            "proactiveInterjectChancePercent": { "type": "number" }
+          }
+        }
+      }
+    }
+  },
+  "uiHints": {
+    "wsUrl": { "label": "WS 地址", "placeholder": "ws://127.0.0.1:30011" },
+    "selfId": { "label": "QQ 号", "placeholder": "3437738143" },
+    "accessToken": { "label": "Access Token", "sensitive": true },
+    "accessTokenFile": { "label": "Access Token 文件", "sensitive": true },
+    "groupReplyPolicy": { "label": "群回复策略" },
+    "proactiveCooldownMs": { "label": "主动插话冷却(ms)" },
+    "maxProactiveRepliesPerHour": { "label": "每小时主动插话上限" },
+    "proactiveInterjectChancePercent": { "label": "主动插话概率(%)" }
+  }
+}

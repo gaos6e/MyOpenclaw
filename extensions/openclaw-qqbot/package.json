@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "mpg123-decoder": "^1.0.3",
+    "proxy-agent": "^6.5.0",
     "silk-wasm": "^3.7.1",
     "ws": "^8.18.0"
   },

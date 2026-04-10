@@ -1,4 +1,4 @@
-import WebSocket from "ws";
+import WebSocket, { type ClientOptions } from "ws";
 import path from "node:path";
 import type { ResolvedQQBotAccount, WSPayload, C2CMessageEvent, GuildMessageEvent, GroupMessageEvent } from "./types.js";
 import { getAccessToken, getGatewayUrl, sendC2CMessage, sendChannelMessage, sendGroupMessage, clearTokenCache, initApiConfig, startBackgroundTokenRefresh, stopBackgroundTokenRefresh, sendC2CInputNotify, onMessageSent, PLUGIN_USER_AGENT } from "./api.js";
@@ -28,6 +28,7 @@ import { TypingKeepAlive, TYPING_INPUT_SECOND } from "./typing-keepalive.js";
 import { parseAndSendMediaTags, sendPlainReply, type DeliverEventContext, type DeliverAccountContext } from "./outbound-deliver.js";
 import { buildWorkspaceProjectHints, buildWorkspaceProjectPreviews, getQQChannelStabilityInstruction, resolveAgentWorkspaceDir } from "./context-hints.js";
 import { sanitizeQQOutboundText } from "./outbound-guardrails.js";
+import { describeConfiguredWebSocketProxy, resolveWebSocketAgent } from "./websocket-proxy.js";
 
 // QQ Bot intents - 按权限级别分组
 const INTENTS = {
@@ -40,9 +41,45 @@ const INTENTS = {
   GROUP_AND_C2C: 1 << 25,            // 群聊和 C2C 私聊（需申请）
 };
 
-// 固定使用完整权限（群聊 + 私信 + 频道），不做降级
-const FULL_INTENTS = INTENTS.PUBLIC_GUILD_MESSAGES | INTENTS.DIRECT_MESSAGE | INTENTS.GROUP_AND_C2C;
-const FULL_INTENTS_DESC = "群聊+私信+频道";
+type IntentPlan = {
+  intents: number;
+  desc: string;
+};
+
+// 按常见可用性从高到低降级：
+// 1) 群聊 + QQ 私聊 + 频道公域
+// 2) 群聊 + QQ 私聊
+// 3) 频道私信
+// 4) 频道公域
+const INTENT_PLANS: IntentPlan[] = [
+  {
+    intents: INTENTS.PUBLIC_GUILD_MESSAGES | INTENTS.GROUP_AND_C2C,
+    desc: "群聊+QQ私聊+频道公域",
+  },
+  {
+    intents: INTENTS.GROUP_AND_C2C,
+    desc: "群聊+QQ私聊",
+  },
+  {
+    intents: INTENTS.DIRECT_MESSAGE,
+    desc: "频道私信",
+  },
+  {
+    intents: INTENTS.PUBLIC_GUILD_MESSAGES,
+    desc: "频道公域",
+  },
+];
+
+function clampIntentPlanIndex(index: number | null | undefined): number {
+  if (!Number.isInteger(index)) {
+    return 0;
+  }
+  return Math.min(Math.max(index ?? 0, 0), INTENT_PLANS.length - 1);
+}
+
+function getIntentPlan(index: number): IntentPlan {
+  return INTENT_PLANS[clampIntentPlanIndex(index)];
+}
 
 // 重连配置
 const RECONNECT_DELAYS = [1000, 2000, 5000, 10000, 30000, 60000]; // 递增延迟
@@ -196,6 +233,8 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
   let isConnecting = false; // 防止并发连接
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null; // 重连定时器
   let shouldRefreshToken = false; // 下次连接是否需要刷新 token
+  let currentIntentPlanIndex = 0;
+  let currentHandshakeMode: "resume" | "identify" | null = null;
   // 使用模块级 isFirstReadyGlobal，确保只有进程级重启才发送问候语
   // health-monitor 重连不会重新初始化为 true
 
@@ -213,8 +252,27 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
   if (savedSession) {
     sessionId = savedSession.sessionId;
     lastSeq = savedSession.lastSeq;
+    currentIntentPlanIndex = clampIntentPlanIndex(savedSession.intentLevelIndex);
     log?.info(`[qqbot:${account.accountId}] Restored session from storage: sessionId=${sessionId}, lastSeq=${lastSeq}`);
   }
+
+  const getCurrentIntentPlan = (): IntentPlan => getIntentPlan(currentIntentPlanIndex);
+  const advanceIntentPlan = (reason: string): boolean => {
+    if (currentIntentPlanIndex >= INTENT_PLANS.length - 1) {
+      return false;
+    }
+    const previousPlan = getCurrentIntentPlan();
+    currentIntentPlanIndex += 1;
+    const nextPlan = getCurrentIntentPlan();
+    sessionId = null;
+    lastSeq = null;
+    clearSession(account.accountId);
+    shouldRefreshToken = true;
+    log?.info(
+      `[qqbot:${account.accountId}] ${reason}; fallback intents from ${previousPlan.desc} (${previousPlan.intents}) to ${nextPlan.desc} (${nextPlan.intents})`,
+    );
+    return true;
+  };
 
   // ============ 按用户并发的消息队列 ============
   const msgQueue = createMessageQueue({
@@ -412,7 +470,17 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
 
       log?.info(`[qqbot:${account.accountId}] Connecting to ${gatewayUrl}`);
 
-      const ws = new WebSocket(gatewayUrl, { headers: { "User-Agent": PLUGIN_USER_AGENT } });
+      const wsOptions: ClientOptions = { headers: { "User-Agent": PLUGIN_USER_AGENT } };
+      const wsAgent = resolveWebSocketAgent();
+      if (wsAgent) {
+        wsOptions.agent = wsAgent;
+        const proxyDescription = describeConfiguredWebSocketProxy();
+        if (proxyDescription) {
+          log?.info(`[qqbot:${account.accountId}] WebSocket proxy enabled via ${proxyDescription}`);
+        }
+      }
+
+      const ws = new WebSocket(gatewayUrl, wsOptions);
       currentWs = ws;
 
       const pluginRuntime = getQQBotRuntime();
@@ -1183,7 +1251,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
                 sessionId,
                 lastSeq,
                 lastConnectedAt: lastConnectTime,
-                intentLevelIndex: 0,
+                intentLevelIndex: currentIntentPlanIndex,
                 accountId: account.accountId,
                 savedAt: Date.now(),
                 appId: account.appId,
@@ -1199,6 +1267,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
               
               // 如果有 session_id，尝试 Resume
               if (sessionId && lastSeq !== null) {
+                currentHandshakeMode = "resume";
                 log?.info(`[qqbot:${account.accountId}] Attempting to resume session ${sessionId}`);
                 ws.send(JSON.stringify({
                   op: 6, // Resume
@@ -1209,13 +1278,14 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
                   },
                 }));
               } else {
-                // 新连接，发送 Identify，始终使用完整权限
-                log?.info(`[qqbot:${account.accountId}] Sending identify with intents: ${FULL_INTENTS} (${FULL_INTENTS_DESC})`);
+                currentHandshakeMode = "identify";
+                const intentPlan = getCurrentIntentPlan();
+                log?.info(`[qqbot:${account.accountId}] Sending identify with intents: ${intentPlan.intents} (${intentPlan.desc})`);
                 ws.send(JSON.stringify({
                   op: 2,
                   d: {
                     token: `QQBot ${accessToken}`,
-                    intents: FULL_INTENTS,
+                    intents: intentPlan.intents,
                     shard: [0, 1],
                   },
                 }));
@@ -1237,13 +1307,15 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
               if (t === "READY") {
                 const readyData = d as { session_id: string };
                 sessionId = readyData.session_id;
-                log?.info(`[qqbot:${account.accountId}] Ready with ${FULL_INTENTS_DESC}, session: ${sessionId}`);
+                const intentPlan = getCurrentIntentPlan();
+                currentHandshakeMode = null;
+                log?.info(`[qqbot:${account.accountId}] Ready with ${intentPlan.desc}, session: ${sessionId}`);
                 // P1-2: 保存新的 Session 状态
                 saveSession({
                   sessionId,
                   lastSeq,
                   lastConnectedAt: Date.now(),
-                  intentLevelIndex: 0,
+                  intentLevelIndex: currentIntentPlanIndex,
                   accountId: account.accountId,
                   savedAt: Date.now(),
                   appId: account.appId,
@@ -1259,6 +1331,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
                   sendStartupGreetings(adminCtx, "READY");
                 } // end isFirstReady
               } else if (t === "RESUMED") {
+                currentHandshakeMode = null;
                 log?.info(`[qqbot:${account.accountId}] Session resumed`);
                 onReady?.(d); // 通知框架连接已恢复，避免 health-monitor 误判 disconnected
                 // RESUMED 也属于首次启动（gateway restart 通常走 resume）
@@ -1272,7 +1345,7 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
                     sessionId,
                     lastSeq,
                     lastConnectedAt: Date.now(),
-                    intentLevelIndex: 0,
+                    intentLevelIndex: currentIntentPlanIndex,
                     accountId: account.accountId,
                     savedAt: Date.now(),
                     appId: account.appId,
@@ -1380,16 +1453,24 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
 
             case 9: // Invalid Session
               const canResume = d as boolean;
-              log?.error(`[qqbot:${account.accountId}] Invalid session (${FULL_INTENTS_DESC}), can resume: ${canResume}, raw: ${rawData}`);
+              const intentPlan = getCurrentIntentPlan();
+              log?.error(`[qqbot:${account.accountId}] Invalid session (${intentPlan.desc}), can resume: ${canResume}, raw: ${rawData}`);
               
               if (!canResume) {
+                if (currentHandshakeMode === "identify" && advanceIntentPlan("identify rejected")) {
+                  currentHandshakeMode = null;
+                  cleanup();
+                  scheduleReconnect(1000);
+                  break;
+                }
                 sessionId = null;
                 lastSeq = null;
                 // P1-2: 清除持久化的 Session
                 clearSession(account.accountId);
                 shouldRefreshToken = true;
-                log?.info(`[qqbot:${account.accountId}] Will refresh token and retry with full intents (${FULL_INTENTS_DESC})`);
+                log?.info(`[qqbot:${account.accountId}] Will refresh token and retry with intents (${intentPlan.desc})`);
               }
+              currentHandshakeMode = null;
               cleanup();
               // Invalid Session 后等待一段时间再重连
               scheduleReconnect(3000);
@@ -1401,6 +1482,11 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
       });
 
       ws.on("close", (code, reason) => {
+        if (currentWs !== ws) {
+          log?.debug?.(`[qqbot:${account.accountId}] Ignore stale WebSocket close: ${code} ${reason.toString()}`);
+          return;
+        }
+        currentWs = null;
         log?.info(`[qqbot:${account.accountId}] WebSocket closed: ${code} ${reason.toString()}`);
         isConnecting = false; // 释放锁
         
