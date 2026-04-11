@@ -50,7 +50,7 @@ test("sanitizeQQOutboundText trims internal runtime context from status output",
   const { sanitizeQQOutboundText } = await importOutboundGuardrailsModule();
   const raw = [
     "🦞 OpenClaw 2026.3.31 (213a704)",
-    "🧠 Model: teamplus/gpt-5.2",
+    "🧠 Model: teamplus/gpt-5.4",
     "📌 Tasks: 0 active · 2 total · cli · [Thu 2026-04-02 00:39 GMT+8] OpenClaw runtime context (internal):",
     "This context is runtime-generated, not user-authored. Keep internal details private.",
     "",

@@ -42,7 +42,7 @@ async function importConfigModule() {
 test("resolveQQBotAccount reads named-account clientSecretFile and preserves public-safe metadata", async () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-qqbot-config-"));
   try {
-    const secretPath = path.join(tempRoot, "timekeeper.secret.txt");
+    const secretPath = path.join(tempRoot, "publicbot.secret.txt");
     fs.writeFileSync(secretPath, "super-secret-value\n", "utf8");
 
     const cfg = {
@@ -50,13 +50,13 @@ test("resolveQQBotAccount reads named-account clientSecretFile and preserves pub
         qqbot: {
           enabled: true,
           accounts: {
-            timekeeper: {
+            publicbot: {
               enabled: true,
-              name: "时光管家",
-              appId: "1903782033",
+              name: "公共机器人",
+              appId: "1903000000",
               clientSecretFile: secretPath,
               dmPolicy: "open",
-              allowFrom: ["__TIMEKEEPER_COMMANDS_DISABLED__"],
+              allowFrom: ["__PUBLICBOT_COMMANDS_DISABLED__"],
               adminOpenIds: ["9A053C1350854286F832A03D38E111FD"],
               slashCommandProfile: "public-safe",
               systemPrompt: "public assistant",
@@ -67,9 +67,9 @@ test("resolveQQBotAccount reads named-account clientSecretFile and preserves pub
     };
 
     const { resolveQQBotAccount } = await importConfigModule();
-    const account = resolveQQBotAccount(cfg, "timekeeper");
+    const account = resolveQQBotAccount(cfg, "publicbot");
 
-    assert.equal(account.accountId, "timekeeper");
+    assert.equal(account.accountId, "publicbot");
     assert.equal(account.secretSource, "file");
     assert.equal(account.clientSecret, "super-secret-value");
     assert.equal(account.config.clientSecretFile, secretPath);

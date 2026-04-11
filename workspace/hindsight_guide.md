@@ -16,7 +16,7 @@
 
 ## 模型与后端拆分
 
-- OpenClaw 主模型当前维持 `teamplus/gpt-5.2`
+- OpenClaw 主模型当前为 `teamplus/gpt-5.4`
 - Hindsight 自己的 LLM 后端单独使用 DashScope Qwen：`qwen3.5-plus`
 - Hindsight embeddings 单独使用 DashScope：`text-embedding-v4`
 - 这意味着 durable memory 服务和数据库是本地的，但 Hindsight 的抽取、整合和 embedding 计算仍依赖远程模型接口

@@ -120,8 +120,8 @@ function makeContext(overrides = {}) {
     receivedAt: Date.now(),
     rawContent: "/bot-help",
     args: "",
-    accountId: "timekeeper",
-    appId: "1903782033",
+    accountId: "publicbot",
+    appId: "1903000000",
     accountConfig: {
       slashCommandProfile: "public-safe",
       adminOpenIds: ["ADMIN_OPENID"],

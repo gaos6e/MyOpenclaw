@@ -16,7 +16,7 @@
 - gateway / control UI 配置
 - plugin allowlist、slot 绑定与本地 path install
 
-当前默认主模型维持 `teamplus/gpt-5.2`，视觉模型使用 `qwen/qwen3-vl-plus`；`memorySearch` 与本机 Hindsight 的 LLM / embeddings 则单独走 DashScope（`qwen3.5-plus` + `text-embedding-v4`）。
+当前默认主模型为 `teamplus/gpt-5.4`，视觉模型使用 `qwen/qwen3-vl-plus`；`memorySearch` 与本机 Hindsight 的主配置仍优先走 DashScope（`qwen3.5-plus` + `text-embedding-v4`），但 `ensure_hindsight_local.ps1` 现在带有启动时降级：当 DashScope 侧 embeddings / LLM 校验导致 Hindsight API 起不来时，会自动退回到本地 embeddings + `LLM provider=none` 的 chunk-store 模式，优先保证 gateway 可用。
 
 ## 2. 本地插件装配
 
@@ -141,6 +141,9 @@
 - 提供 Windows 本机下的 gateway 启动入口
 - 负责注入本地环境变量、端口、`CODEX_HOME` 或隐藏窗口启动行为
 - `gateway.cmd` 现在会先调用 `workspace/scripts/ensure_hindsight_local.ps1`，确保本地 `PostgreSQL + Hindsight API` 就绪，再启动 OpenClaw gateway
+- `workspace/scripts/ensure_hindsight_local.ps1` 当前采用“双 profile 启动”：
+  - 优先尝试 DashScope Qwen + `text-embedding-v4`
+  - 若远端 provider 不可用，则自动切到本地 1024 维 embeddings（优先匹配现有库维度）+ `LLM provider=none`，以避免远端账单/鉴权问题阻塞整个 gateway
 
 维护边界：
 

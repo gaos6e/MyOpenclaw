@@ -17,11 +17,22 @@ test("ensure_hindsight_local wires PostgreSQL and Hindsight to local Qwen-backed
 
   assert.match(source, /openclaw-hindsight-pg/i);
   assert.match(source, /hindsight-api-venv/i);
-  assert.match(source, /postgresql:\/\/hindsight@127\.0\.0\.1:55432\/hindsight/i);
+  assert.match(source, /HINDSIGHT_API_DATABASE_URL/i);
+  assert.match(source, /postgresql:\/\/hindsight@127\.0\.0\.1:\$PostgresPort\/hindsight/i);
   assert.match(source, /qwen3\.5-plus/i);
   assert.match(source, /text-embedding-v4/i);
   assert.match(source, /HINDSIGHT_API_RERANKER_PROVIDER/i);
   assert.match(source, /rrf/i);
+});
+
+test("ensure_hindsight_local includes a degraded fallback profile for startup-safe local memory", () => {
+  const source = readUtf8(ensureScriptPath);
+
+  assert.match(source, /HINDSIGHT_API_LLM_PROVIDER/i);
+  assert.match(source, /none/i);
+  assert.match(source, /HINDSIGHT_API_EMBEDDINGS_PROVIDER/i);
+  assert.match(source, /local/i);
+  assert.match(source, /HINDSIGHT_API_EMBEDDINGS_LOCAL_FORCE_CPU/i);
 });
 
 test("stop_hindsight_local stops both API and PostgreSQL runtime", () => {

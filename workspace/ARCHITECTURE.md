@@ -59,7 +59,7 @@
 
 原则：
 - Hindsight 是主 runtime recall backend；`MEMORY.md` / daily memory 是本地治理与审计面
-- Hindsight 的 durable store 当前是本地 PostgreSQL；只有 LLM / embeddings 仍通过 DashScope Qwen 远程调用
+- Hindsight 的 durable store 当前是本地 PostgreSQL；主 profile 下 LLM / embeddings 优先通过 DashScope Qwen 远程调用，但 `workspace/scripts/ensure_hindsight_local.ps1` 现在提供启动时自动降级：若远端 provider 让 Hindsight API 无法健康启动，则退回到本地 embeddings + `LLM provider=none` 的 chunk-store 模式，优先保证 gateway 可启动
 - `memory/main*.sqlite` 都是可重建辅助检索层，不是人工编辑事实源
 - `workspace/memory/ontology/graph.jsonl` 是派生视图，不是原始真源
 
