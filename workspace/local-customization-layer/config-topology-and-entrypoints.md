@@ -16,7 +16,7 @@
 - gateway / control UI 配置
 - plugin allowlist、slot 绑定与本地 path install
 
-当前默认主模型为 `teamplus/gpt-5.4`，视觉模型使用 `qwen/qwen3-vl-plus`；`memorySearch` 与本机 Hindsight 的主配置仍优先走 DashScope（`qwen3.5-plus` + `text-embedding-v4`），但 `ensure_hindsight_local.ps1` 现在带有启动时降级：当 DashScope 侧 embeddings / LLM 校验导致 Hindsight API 起不来时，会自动退回到本地 embeddings + `LLM provider=none` 的 chunk-store 模式，优先保证 gateway 可用。
+当前默认主模型为 `teamplus/gpt-5.4`，视觉模型也使用已实测可用的 `teamplus/gpt-5.4`；`qwen/qwen3-vl-plus` 仍保留在 provider 配置中，但 2026-04-15 直连 DashScope 返回 `400 Arrearage`，暂不作为默认视觉模型。`memorySearch` 与本机 Hindsight 的主配置仍优先走 DashScope（`qwen3.5-plus` + `text-embedding-v4`），但 `ensure_hindsight_local.ps1` 现在带有启动时降级：当 DashScope 侧 embeddings / LLM 校验导致 Hindsight API 起不来时，会自动退回到本地 embeddings + `LLM provider=none` 的 chunk-store 模式，优先保证 gateway 可用。
 
 ## 2. 本地插件装配
 

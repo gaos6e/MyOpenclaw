@@ -53,6 +53,20 @@ function buildVisionModel(vision) {
   };
 }
 
+function mergeVisionModel(existingModels, visionModel) {
+  const models = Array.isArray(existingModels) ? existingModels.filter(Boolean) : [];
+  const idx = models.findIndex((model) => model?.id === visionModel.id);
+  if (idx >= 0) {
+    const next = models.slice();
+    next[idx] = {
+      ...next[idx],
+      ...visionModel,
+    };
+    return next;
+  }
+  return [...models, visionModel];
+}
+
 function buildAudioToolModel(profile, repoRoot) {
   const baseUrl = requireString(profile?.remote?.baseUrl, "remote.baseUrl");
   const apiKey = requireEnvApiKey(profile?.remote?.apiKey);
@@ -91,10 +105,42 @@ function buildMemorySearch(profile, existing = {}) {
 
 function getQwenProfile(config) {
   const profile = config?.custom?.qwen;
-  if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
-    throw new Error("custom.qwen profile is missing");
+  if (profile && typeof profile === "object" && !Array.isArray(profile)) {
+    return profile;
   }
-  return profile;
+
+  const qwenProvider = config?.models?.providers?.qwen;
+  const visionModel = Array.isArray(qwenProvider?.models)
+    ? qwenProvider.models.find((model) => Array.isArray(model?.input) && model.input.includes("image"))
+    : undefined;
+  const memorySearch = config?.agents?.defaults?.memorySearch;
+  const audioArgs = config?.tools?.media?.audio?.models?.[0]?.args;
+  const modelArgIndex = Array.isArray(audioArgs) ? audioArgs.indexOf("--model") : -1;
+  const audioModel = modelArgIndex >= 0 ? audioArgs[modelArgIndex + 1] : undefined;
+
+  if (!qwenProvider || !visionModel || !memorySearch || !audioModel) {
+    throw new Error("custom.qwen profile is missing and existing qwen config is incomplete");
+  }
+
+  return {
+    remote: {
+      baseUrl: qwenProvider.baseUrl,
+      apiKey: qwenProvider.apiKey,
+    },
+    vision: {
+      id: visionModel.id,
+      name: visionModel.name ?? visionModel.id,
+      contextWindow: visionModel.contextWindow,
+      maxTokens: visionModel.maxTokens,
+    },
+    embedding: {
+      id: memorySearch.model,
+      provider: memorySearch.provider,
+    },
+    audio: {
+      id: audioModel,
+    },
+  };
 }
 
 function syncQwenConfig(config, options = {}) {
@@ -104,18 +150,22 @@ function syncQwenConfig(config, options = {}) {
   const models = ensureObject(next, "models");
   const providers = ensureObject(models, "providers");
   const qwenProvider = {
+    ...providers.qwen,
     baseUrl: requireString(profile?.remote?.baseUrl, "remote.baseUrl"),
     apiKey: requireEnvApiKey(profile?.remote?.apiKey),
     api: "openai-completions",
-    models: [buildVisionModel(profile.vision)],
   };
+  qwenProvider.models = mergeVisionModel(providers.qwen?.models, buildVisionModel(profile.vision));
   providers.qwen = qwenProvider;
 
   const agents = ensureObject(next, "agents");
   const defaults = ensureObject(agents, "defaults");
+  const currentImagePrimary = String(defaults.imageModel?.primary ?? "").trim();
   defaults.imageModel = {
     ...defaults.imageModel,
-    primary: `qwen/${qwenProvider.models[0].id}`,
+    primary: currentImagePrimary && !currentImagePrimary.startsWith("qwen/")
+      ? currentImagePrimary
+      : `qwen/${qwenProvider.models[0].id}`,
   };
   defaults.memorySearch = buildMemorySearch(profile, defaults.memorySearch);
 

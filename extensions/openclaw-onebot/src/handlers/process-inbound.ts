@@ -9,6 +9,7 @@ import {
     getTextFromSegments,
     getReplyMessageId,
     getTextFromMessageContent,
+    collectImageSegmentsFromContent,
     isMentioned,
 } from "../message.js";
 import { decideGroupReplyTrigger } from "../group-reply-policy.js";
@@ -41,6 +42,7 @@ import {
 import { setActiveReplyTarget, clearActiveReplyTarget, setActiveReplySessionId, setForwardSuppressDelivery, setActiveReplySelfId } from "../reply-context.js";
 import { loadPluginSdk, getSdk } from "../sdk.js";
 import { handleGroupIncrease } from "./group-increase.js";
+import { processInboundImages } from "../inbound-media.js";
 
 const DEFAULT_HISTORY_LIMIT = 20;
 export const sessionHistories = new Map<string, Array<{ sender: string; body: string; timestamp: number; messageId: string }>>();
@@ -160,6 +162,8 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
     }
 
     const replyId = getReplyMessageId(msg);
+    const currentImageRefs = collectImageSegmentsFromContent(msg.message, "current");
+    let quoteImageRefs: ReturnType<typeof collectImageSegmentsFromContent> = [];
     let messageText: string;
     let quotedSenderId: number | undefined;
     if (replyId != null) {
@@ -167,6 +171,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         try {
             const quoted = await getMsg(replyId);
             quotedSenderId = quoted?.sender?.user_id;
+            quoteImageRefs = collectImageSegmentsFromContent(quoted?.message, "quote");
             const quotedText = quoted ? getTextFromMessageContent(quoted.message) : "";
             const senderLabel = quoted?.sender?.nickname ?? quoted?.sender?.user_id ?? "某人";
             messageText = quotedText.trim()
@@ -178,9 +183,13 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
     } else {
         messageText = getRawText(msg);
     }
-    if (!messageText?.trim()) {
+    const imageRefs = [...currentImageRefs, ...quoteImageRefs];
+    if (!messageText?.trim() && imageRefs.length === 0) {
         api.logger?.info?.(`[onebot] ignoring empty message`);
         return;
+    }
+    if (!messageText?.trim() && imageRefs.length > 0) {
+        messageText = "[图片]";
     }
 
     const isGroup = msg.message_type === "group";
@@ -322,9 +331,18 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
                 }) ?? { content: [{ type: "text", text: entry.body }] },
         })
         : formattedBody;
-    const bodyForAgent = config.systemPrompt
-        ? `${config.systemPrompt}\n\n${messageText}`
-        : messageText;
+    const processedImages = await processInboundImages(imageRefs, {
+        log: api.logger,
+    });
+    const dynamicMediaContext = processedImages.contextLines.length > 0
+        ? processedImages.contextLines.join("\n")
+        : "";
+    const bodyForAgentParts = [
+        config.systemPrompt,
+        dynamicMediaContext,
+        messageText,
+    ].filter((part) => typeof part === "string" && part.trim());
+    const bodyForAgent = bodyForAgentParts.join("\n\n");
 
     if (recordPendingHistoryEntry) {
         recordPendingHistoryEntry({
@@ -367,6 +385,12 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
             accountId: config.accountId ?? "default",
         },
         BodyForAgent: bodyForAgent,
+        ...(processedImages.mediaPaths.length > 0 ? {
+            MediaPaths: processedImages.mediaPaths,
+            MediaPath: processedImages.mediaPaths[0],
+            MediaTypes: processedImages.mediaTypes,
+            MediaType: processedImages.mediaTypes[0],
+        } : {}),
         _onebot: { userId, groupId, isGroup },
     };
 

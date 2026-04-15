@@ -4,6 +4,26 @@
 
 import type { OneBotMessage } from "./types.js";
 
+export interface OneBotImageReference {
+  source: string;
+  origin: "current" | "quote";
+}
+
+export function collectImageSegmentsFromContent(
+  content: unknown,
+  origin: OneBotImageReference["origin"],
+): OneBotImageReference[] {
+  if (!Array.isArray(content)) return [];
+  const images: OneBotImageReference[] = [];
+  for (const m of content) {
+    const seg = m as { type?: string; data?: Record<string, unknown> };
+    if (seg?.type !== "image") continue;
+    const source = String(seg.data?.url ?? seg.data?.file ?? "").trim();
+    if (source) images.push({ source, origin });
+  }
+  return images;
+}
+
 /** 从消息段数组中提取引用/回复的消息 ID（OneBot reply 段） */
 export function getReplyMessageId(msg: OneBotMessage): number | undefined {
   if (!msg?.message || !Array.isArray(msg.message)) return undefined;

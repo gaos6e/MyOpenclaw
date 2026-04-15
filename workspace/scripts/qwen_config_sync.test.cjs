@@ -91,3 +91,41 @@ test("syncQwenConfig expands custom qwen profile into vision, embedding, and aud
     "qwen3-asr-flash",
   ]);
 });
+
+test("syncQwenConfig preserves an explicit non-Qwen image model", () => {
+  const repoRoot = path.join("C:", "repo", "openclaw");
+  const config = {
+    custom: {
+      qwen: {
+        remote: {
+          baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+          apiKey: {
+            source: "env",
+            id: "ALT_QWEN_KEY",
+          },
+        },
+        vision: {
+          id: "qwen3-vl-plus",
+          name: "Qwen3 VL Plus",
+        },
+        embedding: {
+          id: "text-embedding-v4",
+        },
+        audio: {
+          id: "qwen3-asr-flash",
+        },
+      },
+    },
+    agents: {
+      defaults: {
+        imageModel: {
+          primary: "teamplus/gpt-5.4",
+        },
+      },
+    },
+  };
+
+  const next = syncQwenConfig(config, { repoRoot });
+
+  assert.equal(next.agents.defaults.imageModel.primary, "teamplus/gpt-5.4");
+});

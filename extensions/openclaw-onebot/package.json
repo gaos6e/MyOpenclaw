@@ -60,6 +60,7 @@
   "scripts": {
     "openclaw": "openclaw",
     "build": "tsc",
+    "test": "node --import tsx --test test/*.test.ts",
     "test:connect": "npx tsx scripts/test-connect.ts",
     "test:group-welcome": "npx tsx scripts/test-group-welcome.ts",
     "test:group-increase-handler": "npx tsx scripts/test-group-increase-handler.ts",
