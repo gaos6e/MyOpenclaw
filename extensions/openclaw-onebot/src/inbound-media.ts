@@ -17,6 +17,7 @@ const DOWNLOAD_TIMEOUT_MS = 30_000;
 
 export interface ProcessInboundImagesOptions {
   rootDir?: string;
+  workspaceDir?: string;
   maxBytes?: number;
   timeoutMs?: number;
   log?: {
@@ -49,6 +50,12 @@ function getMediaRoot(options?: ProcessInboundImagesOptions): string {
 
 function getDownloadDir(options?: ProcessInboundImagesOptions): string {
   return path.join(getMediaRoot(options), "onebot", "downloads");
+}
+
+function getWorkspaceMirrorDir(options?: ProcessInboundImagesOptions): string | null {
+  const workspaceDir = options?.workspaceDir?.trim();
+  if (!workspaceDir) return null;
+  return path.join(path.resolve(workspaceDir), ".openclaw-inbound-media", "onebot");
 }
 
 function normalizeLocalPath(source: string): string | null {
@@ -184,6 +191,18 @@ async function materializeImage(ref: OneBotImageReference, options?: ProcessInbo
   };
 }
 
+async function mirrorImageIntoWorkspace(
+  sourcePath: string,
+  options?: ProcessInboundImagesOptions,
+): Promise<string | null> {
+  const mirrorDir = getWorkspaceMirrorDir(options);
+  if (!mirrorDir) return null;
+  await fsp.mkdir(mirrorDir, { recursive: true });
+  const targetPath = path.join(mirrorDir, path.basename(sourcePath));
+  await fsp.copyFile(sourcePath, targetPath);
+  return fs.realpathSync.native(targetPath);
+}
+
 function originLabel(origin: OneBotImageReference["origin"]): string {
   return origin === "quote" ? "引用图片" : "当前图片";
 }
@@ -199,14 +218,19 @@ export async function processInboundImages(
   for (const ref of refs) {
     try {
       const materialized = await materializeImage(ref, options);
-      const normalizedPath = fs.realpathSync.native(materialized.path);
-      mediaPaths.push(normalizedPath);
+      const storedPath = fs.realpathSync.native(materialized.path);
+      const mirroredPath = await mirrorImageIntoWorkspace(storedPath, options);
+      const promptPath = mirroredPath ?? storedPath;
+      mediaPaths.push(promptPath);
       mediaTypes.push(materialized.mime);
-      contextLines.push(`- ${originLabel(ref.origin)}: ${normalizedPath}`);
-      options.log?.info?.(`[onebot] inbound image saved: ${normalizedPath}`);
+      contextLines.push(`- ${originLabel(ref.origin)}已附加，可直接查看`);
+      options.log?.info?.(`[onebot] inbound image saved: ${storedPath}`);
+      if (mirroredPath) {
+        options.log?.info?.(`[onebot] inbound image mirrored for workspace access: ${mirroredPath}`);
+      }
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      contextLines.push(`- ${originLabel(ref.origin)}: ${ref.source} (下载失败: ${reason})`);
+      contextLines.push(`- ${originLabel(ref.origin)}附加失败（${reason}）`);
       options.log?.warn?.(`[onebot] inbound image skipped: ${reason}`);
     }
   }

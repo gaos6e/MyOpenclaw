@@ -33,6 +33,7 @@ test("quoted image references keep quote origin for context", async () => {
 
   assert.equal(refs[0].origin, "quote");
   assert.match(result.contextLines[0], /引用图片/);
+  assert.doesNotMatch(result.contextLines[0], /onebot-.*\.png/i);
 });
 
 test("processInboundImages stores base64 image in OpenClaw media-compatible directory", async () => {
@@ -47,17 +48,45 @@ test("processInboundImages stores base64 image in OpenClaw media-compatible dire
   assert.equal(fs.existsSync(result.mediaPaths[0]), true);
 });
 
+test("processInboundImages mirrors images into workspace when workspace-only access is enabled", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "onebot-media-root-"));
+  const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "onebot-workspace-"));
+  const result = await processInboundImages([
+    { source: `base64://${ONE_PIXEL_PNG_BASE64}`, origin: "current" },
+  ], {
+    rootDir: root,
+    workspaceDir: workspace,
+  });
+
+  assert.equal(result.mediaPaths.length, 1);
+  assert.match(result.mediaPaths[0], /\.openclaw-inbound-media[\\/]onebot[\\/]/);
+  assert.equal(fs.existsSync(result.mediaPaths[0]), true);
+  const savedDownloads = fs.readdirSync(path.join(root, "onebot", "downloads"));
+  assert.equal(savedDownloads.length, 1);
+});
+
 test("processInboundMessage passes image-only private messages as media context", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "onebot-process-test-"));
+  const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "onebot-process-workspace-"));
   process.env.OPENCLAW_ONEBOT_MEDIA_ROOT = root;
 
   let capturedCtx: any;
   const api = {
     config: {
+      agents: {
+        defaults: {
+          workspace,
+        },
+      },
       channels: {
         onebot: {
           wsUrl: "ws://127.0.0.1:30011",
           selfId: "3437738143",
+        },
+      },
+      tools: {
+        fs: {
+          workspaceOnly: true,
         },
       },
     },
@@ -98,7 +127,9 @@ test("processInboundMessage passes image-only private messages as media context"
   assert.equal(capturedCtx.MediaPaths.length, 1);
   assert.equal(capturedCtx.MediaPath, capturedCtx.MediaPaths[0]);
   assert.deepEqual(capturedCtx.MediaTypes, ["image/png"]);
+  assert.match(capturedCtx.MediaPaths[0], /\.openclaw-inbound-media[\\/]onebot[\\/]/);
   assert.match(capturedCtx.BodyForAgent, /当前图片/);
+  assert.doesNotMatch(capturedCtx.BodyForAgent, /[A-Z]:\\|\.openclaw\\media\\onebot/i);
 
   delete process.env.OPENCLAW_ONEBOT_MEDIA_ROOT;
 });

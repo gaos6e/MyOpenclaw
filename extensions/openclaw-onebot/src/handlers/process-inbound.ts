@@ -50,6 +50,32 @@ const groupReplyStates = new Map<number, { lastBotReplyAt: number; proactiveRepl
 const CONTEXTUAL_REPLY_WINDOW_MS = 3 * 60 * 1000;
 const PROACTIVE_HISTORY_WINDOW_MS = 60 * 60 * 1000;
 
+function resolveAgentWorkspaceDir(cfg: any, agentId: string): string | undefined {
+    const agents = cfg?.agents?.list;
+    if (Array.isArray(agents)) {
+        const matched = agents.find((agent: any) => String(agent?.id ?? "").trim() === agentId);
+        if (typeof matched?.workspace === "string" && matched.workspace.trim()) {
+            return matched.workspace.trim();
+        }
+    }
+    const defaultWorkspace = cfg?.agents?.defaults?.workspace;
+    return typeof defaultWorkspace === "string" && defaultWorkspace.trim()
+        ? defaultWorkspace.trim()
+        : undefined;
+}
+
+function resolveWorkspaceOnlyFsPolicy(cfg: any, agentId: string): boolean {
+    const agents = cfg?.agents?.list;
+    if (Array.isArray(agents)) {
+        const matched = agents.find((agent: any) => String(agent?.id ?? "").trim() === agentId);
+        const agentWorkspaceOnly = matched?.tools?.fs?.workspaceOnly;
+        if (typeof agentWorkspaceOnly === "boolean") {
+            return agentWorkspaceOnly;
+        }
+    }
+    return cfg?.tools?.fs?.workspaceOnly === true;
+}
+
 function getGroupReplyState(groupId: number) {
     let state = groupReplyStates.get(groupId);
     if (!state) {
@@ -283,6 +309,8 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         channel: "onebot",
         accountId: config.accountId ?? "default",
     }) ?? { agentId: "main" };
+    const agentWorkspaceDir = resolveAgentWorkspaceDir(cfg, route.agentId);
+    const workspaceOnlyFs = resolveWorkspaceOnlyFsPolicy(cfg, route.agentId);
 
     // 修复构造符合 OpenClaw 规范的全局 SessionKey格式必须为 agent:{agentId}:{channel}:{type}:{id}，否则下方的dispatchReplyWithBufferedBlockDispatcher会触发自动兜底机制，直接在 main 代理下“克隆”出一个一模一样的会话，导致多agent配置达不到效果
     const sessionId = `agent:${route.agentId}:${tempSessionId}`;
@@ -333,6 +361,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         : formattedBody;
     const processedImages = await processInboundImages(imageRefs, {
         log: api.logger,
+        workspaceDir: workspaceOnlyFs ? agentWorkspaceDir : undefined,
     });
     const dynamicMediaContext = processedImages.contextLines.length > 0
         ? processedImages.contextLines.join("\n")
