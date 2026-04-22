@@ -15,6 +15,7 @@ export const DEFAULT_ONEBOT_ACCOUNT_ID = "default";
 
 const DEFAULT_GROUP_REPLY_POLICY = "@always-reply-plus-contextual";
 const DEFAULT_PROACTIVE_COOLDOWN_MS = 10 * 60 * 1000;
+const MIN_PROACTIVE_COOLDOWN_MS = 5_000;
 const DEFAULT_MAX_PROACTIVE_REPLIES_PER_HOUR = 3;
 const DEFAULT_PROACTIVE_INTERJECT_CHANCE_PERCENT = 30;
 
@@ -118,7 +119,7 @@ export function resolveGroupReplyPolicy(input: OneBotAccountInput | undefined) {
     : DEFAULT_GROUP_REPLY_POLICY;
 
   const proactiveCooldownMs = typeof input?.proactiveCooldownMs === "number" && Number.isFinite(input.proactiveCooldownMs)
-    ? Math.max(30_000, Math.round(input.proactiveCooldownMs))
+    ? Math.max(MIN_PROACTIVE_COOLDOWN_MS, Math.round(input.proactiveCooldownMs))
     : DEFAULT_PROACTIVE_COOLDOWN_MS;
 
   const maxProactiveRepliesPerHour = typeof input?.maxProactiveRepliesPerHour === "number" && Number.isFinite(input.maxProactiveRepliesPerHour)

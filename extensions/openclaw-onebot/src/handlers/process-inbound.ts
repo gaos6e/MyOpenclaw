@@ -43,6 +43,7 @@ import { setActiveReplyTarget, clearActiveReplyTarget, setActiveReplySessionId, 
 import { loadPluginSdk, getSdk } from "../sdk.js";
 import { handleGroupIncrease } from "./group-increase.js";
 import { processInboundImages } from "../inbound-media.js";
+import { buildSenderRuleContext } from "../sender-rules.js";
 
 const DEFAULT_HISTORY_LIMIT = 20;
 export const sessionHistories = new Map<string, Array<{ sender: string; body: string; timestamp: number; messageId: string }>>();
@@ -326,6 +327,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         || msg.sender?.nickname?.trim()
         || "";
     const fromLabel = senderNickname || String(userId);
+    const senderRuleContext = buildSenderRuleContext(agentWorkspaceDir, userId);
 
     // 添加日志：打印插件接收到的原始消息内容
     api.logger?.info?.(`[onebot] received message from user ${userId}: "${messageText}"`);
@@ -368,6 +370,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         : "";
     const bodyForAgentParts = [
         config.systemPrompt,
+        senderRuleContext,
         dynamicMediaContext,
         messageText,
     ].filter((part) => typeof part === "string" && part.trim());
@@ -414,6 +417,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
             accountId: config.accountId ?? "default",
         },
         BodyForAgent: bodyForAgent,
+        ...(senderRuleContext ? { SenderRuleContext: senderRuleContext } : {}),
         ...(processedImages.mediaPaths.length > 0 ? {
             MediaPaths: processedImages.mediaPaths,
             MediaPath: processedImages.mediaPaths[0],

@@ -19,6 +19,7 @@ _This file stores long-term, distilled memory. Keep it concise._
 ## Stable facts
 - 暗号约定：用户说“你给了？”，助手回“他非要~”。 
 - 允许将关键 source 的抽取文本/结构化摘要落地到 workspace/PD 以便检索
+- OneBot 稳定称呼规则真源在 `workspace/onebot_sender_rules.json`：`2096157181 -> 哥哥～`，`2164955274 -> 儿子～`
 
 ## Ongoing context
 - PD 项目（你的 NotebookLM 项目；已落地到本地 PD 文件夹，作为项目持久记忆）：
@@ -46,4 +47,3 @@ _This file stores long-term, distilled memory. Keep it concise._
   - 日结：每天 22:00 输出总结
   - 记忆沉淀：每 2 天从 daily memory 提炼到 `MEMORY.md`
 - 用量监控规则：5小时额度剩余≤20%则降频；每周额度按“剩余天数×10%”留底，若剩余额度低于保留阈值则降频，额度充足或接近刷新可更充分使用但不乱用。
-

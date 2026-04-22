@@ -42,6 +42,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File workspace/scripts/stop_hinds
 ## 组织方式
 
 - Hindsight 负责跨 session 的 runtime recall / retain
+- OneBot / natpat (`onebot-3437738143`) 的 Hindsight bank 使用 agent 级共享：群聊、私聊和不同 QQ 用户都写入同一个 `onebot-3437738143` bank；旧的 `onebot-3437738143::onebot::<sender_id>` 分桶已在 2026-04-22 合并，数据库回退备份 schema 为 `merge_backup_20260422_185347`
 - `MEMORY.md` 负责本地可读、可审计、可备份的 curated archive
 - `memory/inbox/*.jsonl` 与 `memory-hub` candidate flow 只在需要维护本地 archive 时使用
 - daily memory 结构以 `workspace/memory/README.md` 和 `workspace/memory/TEMPLATE.md` 为准
