@@ -34,6 +34,7 @@
 - done | Clawvard skills 接入默认工作流 | 2026-04-03 | 将 office-hours / superpowers-writing-plans / qa-gate / summarize / humanizer / proactive-agent / superdesign 的触发规则写入 AGENTS/TOOLS；保留 pr-review 为未安装禁用态
 - done | 审计本机 OpenClaw 相关定时任务（cron + schtasks） | 2026-04-04 | 确认 OpenClaw cron 无专门清理 .openclaw 的任务；Windows 任务计划程序存在 `OpenClaw Daily Hygiene`（运行 run_openclaw_hygiene.ps1）及 OpenClawBackup/Daily Push/Gateway/Watchdog 等
 - done | Hindsight 主线切换 | 2026-04-04 | 安装官方 Hindsight OpenClaw 插件并切换 memory slot；保留 memory-hub 辅助层与本地 archive
+- doing | auth / 403 / `auth_unavailable` / TLS 握手失败 | 2026-04-23 | API key 401 与 auth_unavailable 已复现，继续排查凭据源与认证可用性
 
 ## 规则
 - 新增事项先进入 todo
