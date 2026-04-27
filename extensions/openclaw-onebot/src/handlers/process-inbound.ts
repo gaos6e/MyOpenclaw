@@ -50,6 +50,18 @@ export const sessionHistories = new Map<string, Array<{ sender: string; body: st
 const groupReplyStates = new Map<number, { lastBotReplyAt: number; proactiveReplyTimestamps: number[] }>();
 const CONTEXTUAL_REPLY_WINDOW_MS = 3 * 60 * 1000;
 const PROACTIVE_HISTORY_WINDOW_MS = 60 * 60 * 1000;
+const COMMON_GROUP_SLASH_COMMANDS = new Set([
+    "/compact",
+    "/status",
+    "/stop",
+    "/tasks",
+    "/usage",
+    "/fast",
+    "/tts",
+    "/plugins",
+    "/mcp",
+    "/help",
+]);
 
 function resolveAgentWorkspaceDir(cfg: any, agentId: string): string | undefined {
     const agents = cfg?.agents?.list;
@@ -107,6 +119,15 @@ function looksLikeContextualFollowUp(text: string): boolean {
     if (!normalized) return false;
     return /[?？]$/.test(normalized)
         || /^(那|那我|那要|那怎么|所以|然后|继续|还有|另外|顺便|要不|能不能|怎么|为什么|咋|是否)/.test(normalized);
+}
+
+function extractCommonSlashCommandText(text: string): string | undefined {
+    const trimmed = text.trim();
+    if (!trimmed.startsWith("/")) return undefined;
+    const match = /^\/[A-Za-z][A-Za-z0-9_-]*/.exec(trimmed);
+    if (!match) return undefined;
+    const commandName = match[0].toLowerCase();
+    return COMMON_GROUP_SLASH_COMMANDS.has(commandName) ? trimmed : undefined;
 }
 
 function recordGroupReply(groupId: number, now: number, proactive: boolean) {
@@ -224,6 +245,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
     const groupPolicy = resolveGroupReplyPolicy(config);
     const aliases = getAliases(cfg, config.accountId);
     let triggerReason = isGroup ? "" : "private";
+    let commonSlashCommandText: string | undefined;
 
     // 触发检查逻辑
     if (isGroup) {
@@ -256,6 +278,9 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
             return;
         }
         triggerReason = decision.reason;
+        if (isAtMentioned || repliedToBot) {
+            commonSlashCommandText = extractCommonSlashCommandText(textFromMsg);
+        }
 
         api.logger?.info?.(`[onebot] group trigger matched by ${triggerReason}`);
     }
@@ -328,6 +353,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         || "";
     const fromLabel = senderNickname || String(userId);
     const senderRuleContext = buildSenderRuleContext(agentWorkspaceDir, userId);
+    const effectiveMessageText = commonSlashCommandText ?? messageText;
 
     // 添加日志：打印插件接收到的原始消息内容
     api.logger?.info?.(`[onebot] received message from user ${userId}: "${messageText}"`);
@@ -337,11 +363,11 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
             channel: "OneBot",
             from: fromLabel,
             timestamp: Date.now(),
-            body: messageText,
+            body: effectiveMessageText,
             chatType,
             sender: { name: fromLabel, id: String(userId) },
             envelope: envelopeOptions,
-        }) ?? { content: [{ type: "text", text: messageText }] };
+        }) ?? { content: [{ type: "text", text: effectiveMessageText }] };
 
     const body = buildPendingHistoryContextFromMap
         ? buildPendingHistoryContextFromMap({
@@ -368,13 +394,14 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
     const dynamicMediaContext = processedImages.contextLines.length > 0
         ? processedImages.contextLines.join("\n")
         : "";
-    const bodyForAgentParts = [
-        config.systemPrompt,
-        senderRuleContext,
-        dynamicMediaContext,
-        messageText,
-    ].filter((part) => typeof part === "string" && part.trim());
-    const bodyForAgent = bodyForAgentParts.join("\n\n");
+    const bodyForAgent = commonSlashCommandText
+        ? commonSlashCommandText
+        : [
+            config.systemPrompt,
+            senderRuleContext,
+            dynamicMediaContext,
+            effectiveMessageText,
+        ].filter((part) => typeof part === "string" && part.trim()).join("\n\n");
 
     if (recordPendingHistoryEntry) {
         recordPendingHistoryEntry({
@@ -382,7 +409,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
             historyKey: sessionId,
             entry: {
                 sender: fromLabel,
-                body: messageText,
+                body: effectiveMessageText,
                 timestamp: Date.now(),
                 messageId: `onebot-${Date.now()}`,
             },
@@ -395,7 +422,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
     const replyTarget = isGroup ? `onebot:group:${groupId}` : `onebot:${userId}`;
     const ctxPayload = {
         Body: body,
-        RawBody: messageText,
+        RawBody: effectiveMessageText,
         From: isGroup ? `onebot:group:${groupId}` : `onebot:${userId}`,
         To: replyTarget,
         SessionKey: sessionId,
@@ -411,6 +438,7 @@ export async function processInboundMessage(api: any, msg: OneBotMessage): Promi
         OriginatingChannel: "onebot",
         OriginatingTo: replyTarget,
         CommandAuthorized: true,
+        ...(commonSlashCommandText ? { CommandBody: commonSlashCommandText } : {}),
         DeliveryContext: {
             channel: "onebot",
             to: replyTarget,

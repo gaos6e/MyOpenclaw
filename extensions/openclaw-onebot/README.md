@@ -70,6 +70,8 @@ openclaw onebot setup
 2. 重启 Gateway：`openclaw gateway restart`
 3. 在 QQ 私聊或群聊中发消息（群聊需 @ 机器人，或配置关键字触发）
 
+群聊中可通过真实 @ 机器人执行常用 OpenClaw 指令，例如 `@机器人 /compact`、`@机器人 /status`。当前仅放行常用运维指令：`/compact`、`/status`、`/stop`、`/tasks`、`/usage`、`/fast`、`/tts`、`/plugins`、`/mcp`、`/help`。
+
 ## 关键字触发回复
 
 除了 @ 机器人外，还可以配置关键字检测，当群消息中包含指定关键字时自动触发回复（无需 @）。

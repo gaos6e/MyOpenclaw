@@ -1,0 +1,298 @@
+[
+  {
+    "name": "Reuters",
+    "url": "https://www.reutersagency.com/feed/?best-regions=world&post_type=best",
+    "items": []
+  },
+  {
+    "name": "BBC",
+    "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "items": [
+      {
+        "title": "Trump and officials 'likely' targets of press dinner shooting suspect, authorities believe",
+        "desc": "The suspect is expected to be charged with assault of a federal officer and using a firearm during a crime of violence, officials have said.",
+        "link": "https://www.bbc.com/news/articles/c2d8dg57rzdo?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "I was in the room with Trump and heard the low thudding sound of gunfire",
+        "desc": "The BBC's Gary O'Donoghue describes the moment he and others dived for cover as shots rang out at the venue.",
+        "link": "https://www.bbc.com/news/articles/c62j23wzeqeo?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "Trump cancels US envoys' trip to Pakistan for talks on Iran war",
+        "desc": "Iran had earlier said there were no plans for a direct meeting with a US delegation led by Steve Witkoff and Jared Kushner.",
+        "link": "https://www.bbc.com/news/articles/c4g6nyvl29po?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "Mali defence minister killed as country hit by wave of rebel attacks",
+        "desc": "A wave of coordinated attacks by jihadist militants and separatists has spread through the country.",
+        "link": "https://www.bbc.com/news/articles/c5yvy7v66ndo?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "Netanyahu orders army to 'vigorously attack' Hezbollah in Lebanon",
+        "desc": "The Israeli PM's directive comes as six people were killed by strikes in Lebanon despite a ceasefire being extended by three weeks.",
+        "link": "https://www.bbc.com/news/articles/c5yv1nvd4gjo?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "Mexico says US agents killed in crash weren't permitted to operate there",
+        "desc": "The two Americans who reportedly worked for the CIA died in a car crash after a Mexican-led operation to destroy a drug lab.",
+        "link": "https://www.bbc.com/news/articles/cx2491we011o?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "Palestinians in West Bank and some in Gaza vote in local elections",
+        "desc": "Local elections have been held in the occupied West Bank and in one Gazan city, though Hamas and other groups are not taking part.",
+        "link": "https://www.bbc.com/news/articles/cn4vej3x0wxo?at_medium=RSS&at_campaign=rss"
+      },
+      {
+        "title": "Rights groups critical as Venezuela prisoner release scheme 'coming to an end'",
+        "desc": "More than 500 political prisoners are thought to still be in jail, despite the releases since the amnesty law was brought in.",
+        "link": "https://www.bbc.com/news/articles/c0kr62z7z6lo?at_medium=RSS&at_campaign=rss"
+      }
+    ]
+  },
+  {
+    "name": "NYT",
+    "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    "items": [
+      {
+        "title": "U.S. Mint Buys Drug Cartel Gold and Sells It as ‘American’",
+        "desc": "As prices for the precious metal soar, the industry’s guardrails have broken down.",
+        "link": "https://www.nytimes.com/2026/04/26/world/americas/us-mint-gold-drug-cartel-colombia.html"
+      },
+      {
+        "title": "Israel’s President, Putting Off Decision on Pardon for Netanyahu, Will Push for Plea Deal",
+        "desc": "President Isaac Herzog of Israel has decided not to issue a pardon to Prime Minister Benjamin Netanyahu in his corruption case at this time, and instead will seek mediation, officials say.",
+        "link": "https://www.nytimes.com/2026/04/26/world/middleeast/israel-netanyahu-pardon-herzog.html"
+      },
+      {
+        "title": "Iran and U.S. Sink Into Awkward Limbo of ‘No War, No Peace’",
+        "desc": "Each side is betting it can last longer than the other, analysts say. But there are risks in a stalemate without a deal.",
+        "link": "https://www.nytimes.com/2026/04/26/world/middleeast/iran-united-states-israel-war-truce.html"
+      },
+      {
+        "title": "Israel and Hezbollah Trade Strikes in Lebanon, as Iran Talks Remain on Hold",
+        "desc": "Cease-fires in Lebanon and Iran are on shaky ground, with military attacks flaring and direct talks between Washington and Tehran to end their war stalled.",
+        "link": "https://www.nytimes.com/2026/04/26/world/middleeast/iranian-negotiators-set-to-return-to-pakistan-to-try-to-revive-truce-talks.html"
+      },
+      {
+        "title": "What Happened After The New York Times Found a Cartel Mine on a Colombian Military Base",
+        "desc": "Officers denied that an illegal, large-scale gold operation was underway within earshot of their posts. But we had seen it with our own eyes.",
+        "link": "https://www.nytimes.com/2026/04/26/world/americas/colombia-cartel-illegal-gold-mining-military-base.html"
+      },
+      {
+        "title": "40 Years After the Meltdown, War Layers Another Disaster on Chernobyl",
+        "desc": "Ideas have been floated for how the contaminated zone could bring economic benefits to Ukraine. But for the foreseeable future, it will be an army-controlled security belt.",
+        "link": "https://www.nytimes.com/2026/04/26/world/europe/chernobyl-anniversary.html"
+      },
+      {
+        "title": "Islamabad Reopens After U.S.-Iran Talks Fail to Materialize",
+        "desc": "Officials had locked the city down, anticipating talks between U.S. and Iranian delegations. But they didn’t happen. “What did I close my business for?” one business owner asked.",
+        "link": "https://www.nytimes.com/2026/04/26/world/asia/islamabad-talks-iran-us.html"
+      },
+      {
+        "title": "How Nieves González’s Painting of Lily Allen Made Her Famous",
+        "desc": "Nieves González, a 29-year-old painter, once worked in relative obscurity in Andalusia. Her picture of the British singer Lily Allen changed that.",
+        "link": "https://www.nytimes.com/2026/04/26/world/europe/nieves-gonzalez-lily-allen-artist-west-end-girl-spain.html"
+      }
+    ]
+  },
+  {
+    "name": "Guardian",
+    "url": "https://www.theguardian.com/world/rss",
+    "items": [
+      {
+        "title": "Mali defence minister killed amid flurry of insurgent attacks",
+        "desc": "<p>Car bomb kills Sadio Camara at home during coordinated assaults by rebel groups including West African al-Qaida affiliate</p><p>Mali’s defence minister was killed in an attack on his residence, the government said on Sunday, a high-profile fatality during coordinated assaults staged the previous day by insurgents including the West African affiliate of al-Qaida.</p><p>A car laden with explosives driven by a suicide attacker drove into Sadio Camara’s residence in the town of Kati, the spokesperson, Issa Ousmane Coulibaly, said in a statement read out on state television. A firefight ensued, and Camara sustained injuries from which he later died in a hospital, Coulibaly said, adding that Mali would observe two days of mourning.</p> <a href=\"https://www.theguardian.com/world/2026/apr/26/mali-defence-minister-killed-amid-flurry-of-insurgent-attacks\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/world/2026/apr/26/mali-defence-minister-killed-amid-flurry-of-insurgent-attacks"
+      },
+      {
+        "title": "Militants and separatists launch coordinated attacks across Mali",
+        "desc": "<p>Al-Qaida-linked group JNIM claims responsibility for strikes on airport in capital, Bamako and four other cities</p><p>Islamic militants and separatists attacked several locations in Mali’s capital and other cities on Saturday in one of the largest coordinated attacks in the country in recent years.</p><p>The al-Qaida-linked militant group <a href=\"https://www.theguardian.com/world/2025/jun/25/jihadist-ghost-enemy-jnim-sahel\">JNIM</a> claimed responsibility for the attacks on Bamako’s international airport and four other cities in central and northern Mali on its website, Az-Zallaqa. It said the attacks were carried out jointly with the Azawad Liberation Front, a Tuareg-led separatist group.</p> <a href=\"https://www.theguardian.com/world/2026/apr/25/militants-and-separatists-launch-coordinated-attacks-across-mali\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/world/2026/apr/25/militants-and-separatists-launch-coordinated-attacks-across-mali"
+      },
+      {
+        "title": "‘Astonishing’ discovery could help save children from deadly disfiguring condition",
+        "desc": "<p>A previously unknown species of bacteria found in patients with noma could be key to creating treatments for the neglected tropical disease</p><p>The “astonishing” discovery of a new bacterium could open the door to better ways to prevent, detect and treat a fatal and disfiguring childhood disease, researchers hope.</p><p>Noma, which is <a href=\"https://www.who.int/news-room/fact-sheets/detail/noma\">fatal in 90% of cases without treatment</a>, begins as a sore on the gums but goes on to destroy the tissues of the mouth and face.</p> <a href=\"https://www.theguardian.com/global-development/2026/apr/25/discovery-children-fatal-disfiguring-disease-noma-unknown-bacteria\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/global-development/2026/apr/25/discovery-children-fatal-disfiguring-disease-noma-unknown-bacteria"
+      },
+      {
+        "title": "US millionaire big-game hunter dies after being crushed by elephants",
+        "desc": "<p>Ernie Dosio, a 75-year-old vineyard owner, was hunting an antelope species in Africa when the incident occured</p><ul><li><p><a href=\"https://www.theguardian.com/news/2026/feb/17/sign-up-for-the-breaking-news-us-email-to-get-newsletter-alerts-direct-to-your-inbox?utm_medium=ACQUISITIONS_STANDFIRST&amp;utm_campaign=BN22326&amp;utm_content=signup&amp;utm_term=standfirst&amp;utm_source=GUARDIAN_WEB\">Sign up for the Breaking News US email to get newsletter alerts in your inbox</a></p></li></ul><p>An American millionaire big-game hunter has died after being crushed by a group of elephants during a hunting expedition in Gabon.</p><p>Ernie Dosio, a 75-year-old vineyard owner, was hunting yellow-backed duiker, an antelope species, in the central African country of Gabon when the incident occurred last Friday. While in the Lope-Okanda rainforest, he and his guide unexpectedly came across five female elephants accompanied by a calf.</p> <a href=\"https://www.theguardian.com/us-news/2026/apr/24/millionaire-hunter-dies-elephants-gabon\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/us-news/2026/apr/24/millionaire-hunter-dies-elephants-gabon"
+      },
+      {
+        "title": "British woman died in Ghana trying to recoup money from scammers, inquest told",
+        "desc": "<p>Janet Fordham died in crash after travelling to see man who claimed he would help to recover money from earlier scams</p><p>A British woman who was scammed out of up to £1m in a string of so-called romance frauds died in a road crash after travelling to west Africa to try to recoup some of her lost fortune, an inquest in Devon has heard.</p><p>Janet Fordham was cheated of her life savings and her home over a period of five years by fraudsters apparently based in the UK, Germany, the US and Ghana, the inquest in Exeter was told.</p> <a href=\"https://www.theguardian.com/uk-news/2026/apr/22/british-woman-died-in-ghana-trying-to-recoup-money-from-scammers-inquest-told\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/uk-news/2026/apr/22/british-woman-died-in-ghana-trying-to-recoup-money-from-scammers-inquest-told"
+      },
+      {
+        "title": "US strike kills three on alleged narco boat as campaign death toll hits 185",
+        "desc": "<p>Military video shows boat moving swiftly in water before explosion leaves it in flames</p><p>The US military said on Sunday three men were killed when it struck a boat it claimed was “engaged in narco-trafficking operations” in the Eastern Pacific Ocean.</p><p>This latest strike – which follows dozens of similar attacks on alleged drug boats in recent months – brings the US campaign’s death toll to at least 185, according to a tally compiled by Agence France-Presse.</p> <a href=\"https://www.theguardian.com/us-news/2026/apr/27/us-three-killed-boat-alleged-narco-eastern-pacific\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/us-news/2026/apr/27/us-three-killed-boat-alleged-narco-eastern-pacific"
+      },
+      {
+        "title": "What counts as the woods? Judge axes Nova Scotia’s ban that defied ‘commonsense definitions’",
+        "desc": "<p>The court sided with a Canadian hiker who deliberately challenged the order imposed to curb spread of wildfires</p><p>As wildfires raged across Nova Scotia last summer, the <a href=\"https://www.theguardian.com/world/canada\">Canadian</a> province made a simple plea to residents: stay away from the woods.</p><p>As the situation deteriorated, authorities turned the request<a href=\"https://www.theguardian.com/world/2026/mar/18/jeffrey-evely-canada-hike-woods-ban-nova-scotia-court\"> into a prohibition</a>: anyone caught hiking under the shade of the forest canopy faced a C$25,000 fine – a figure more than half the average worker’s yearly salary.</p> <a href=\"https://www.theguardian.com/world/2026/apr/25/canada-nova-scotia-wildfire-woods-ban\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/world/2026/apr/25/canada-nova-scotia-wildfire-woods-ban"
+      },
+      {
+        "title": "Altman apologizes after OpenAI failed to alert police before fatal Canada shooting",
+        "desc": "<p>OpenAI said the company had identified an account using abuse-detection efforts, but determined at the time it didn’t meet threshold for legal referral</p><p>The head of OpenAI has written a letter apologizing that his company didn’t alert law enforcement about the online behavior of a person who shot and killed eight people in Tumbler Ridge, British Columbia.</p><p>In the letter posted on Friday, <a href=\"https://www.theguardian.com/technology/sam-altman\">Sam Altman</a> expressed his deepest condolences to the entire community.</p> <a href=\"https://www.theguardian.com/us-news/2026/apr/25/altman-apologizes-after-openai-failed-to-alert-police-before-fatal-canada-shooting\">Continue reading...</a>",
+        "link": "https://www.theguardian.com/us-news/2026/apr/25/altman-apologizes-after-openai-failed-to-alert-police-before-fatal-canada-shooting"
+      }
+    ]
+  },
+  {
+    "name": "Al Jazeera",
+    "url": "https://www.aljazeera.com/xml/rss/all.xml",
+    "items": [
+      {
+        "title": "Satellite images show scale of Israeli destruction of south Lebanon towns",
+        "desc": "Satellite images taken reveal the Israeli military&#039;s massive scale of damage to towns in south Lebanon.",
+        "link": "https://www.aljazeera.com/video/newsfeed/2026/4/27/satellite-images-show-scale-of-israeli-destruction-of-south-lebanon-towns?traffic_source=rss"
+      },
+      {
+        "title": "Oil prices rise amid stalled US-Iran peace talks",
+        "desc": "Brent crude rises more than 2 percent after Washington and Tehran fail to hold second round of talks in Pakistan.",
+        "link": "https://www.aljazeera.com/economy/2026/4/27/oil-prices-rise-higher-amid-stalled-us-iran-peace-talks?traffic_source=rss"
+      },
+      {
+        "title": "Iran war live: Araghchi to meet Putin; Trump says Tehran can call for talks",
+        "desc": "Iran&#039;s foreign minister heads to Russia as Trump says Iranian leaders can call on the phone if they want to talk.",
+        "link": "https://www.aljazeera.com/news/liveblog/2026/4/27/iran-war-live-araghchi-to-meet-putin-trump-says-tehran-can-call-for-talks?traffic_source=rss"
+      },
+      {
+        "title": "Video: Israeli ‘ceasefire’ violations on the rise in Gaza",
+        "desc": "Israel has violated the so-called Gaza “ceasefire” more than 2,400 times. Al Jazeera’s Hala Al Shami explains.",
+        "link": "https://www.aljazeera.com/video/newsfeed/2026/4/26/video-israeli-ceasefire-violations-on-the-rise-in-gaza?traffic_source=rss"
+      },
+      {
+        "title": "Iran’s foreign minister leaves Pakistan, heads to Russia for more talks",
+        "desc": "Abbas Araghchi will speak with &#039;senior officials&#039; in Moscow, Iran&#039;s Foreign Ministry says.",
+        "link": "https://www.aljazeera.com/news/2026/4/26/irans-foreign-minister-leaves-pakistan-en-route-to-russia-for-more-talks?traffic_source=rss"
+      },
+      {
+        "title": "Israeli settler attacks Hebron activist’s home as soldier looks on",
+        "desc": "An Israeli settler was filmed throwing rocks and trying to break into the home of Palestinian activist Issa Amro.",
+        "link": "https://www.aljazeera.com/video/newsfeed/2026/4/26/israeli-settler-attacks-hebron-activists-home-as-soldier-looks-on?traffic_source=rss"
+      },
+      {
+        "title": "What’s driving attacks against gov’t and Russian forces in Mali?",
+        "desc": "Opponents, including al-Qaeda-linked group, join forces.",
+        "link": "https://www.aljazeera.com/video/inside-story/2026/4/26/whats-driving-attacks-against-govt-and-russian-forces-in-mali?traffic_source=rss"
+      },
+      {
+        "title": "Bomb attack on Colombia highway kills 19 ahead of election",
+        "desc": "Highway bombing in Colombia’s Cauca kills 19, injures dozens amid a surge in violence ahead of next month’s election.",
+        "link": "https://www.aljazeera.com/gallery/2026/4/26/bomb-attack-on-colombia-highway-kills-19-ahead-of-election?traffic_source=rss"
+      }
+    ]
+  },
+  {
+    "name": "CNN",
+    "url": "https://rss.cnn.com/rss/cnn_world.rss",
+    "error": "fetch failed"
+  },
+  {
+    "name": "Economist",
+    "url": "https://www.economist.com/international/rss.xml",
+    "items": [
+      {
+        "title": "Europe’s defence startups face even bigger hurdles than America’s",
+        "desc": "They must contend with a fragmented market and hesitant customers",
+        "link": "https://www.economist.com/international/2026/04/23/europes-defence-startups-face-even-bigger-hurdles-than-americas"
+      },
+      {
+        "title": "There is no better spur to military innovation than war",
+        "desc": "Defence firms in Ukraine make new weapons much faster and cheaper than most Western companies",
+        "link": "https://www.economist.com/international/2026/04/23/there-is-no-better-spur-to-military-innovation-than-war"
+      },
+      {
+        "title": "A dangerous blind spot in Donald Trump’s Iran war strategy",
+        "desc": "America sets too little store by foreigners’ beliefs and values. It’s a costly mistake, each time",
+        "link": "https://www.economist.com/international/2026/04/21/a-dangerous-blind-spot-in-donald-trumps-iran-war-strategy"
+      },
+      {
+        "title": "Anduril, Palantir and SpaceX are changing how America wages war",
+        "desc": "The Trump administration is cosying up to a new clique of “neo-primes”",
+        "link": "https://www.economist.com/international/2026/04/20/anduril-palantir-and-spacex-are-changing-how-america-wages-war"
+      },
+      {
+        "title": "The game theory behind violating ceasefires",
+        "desc": "Truces like the one in the Gulf get broken all the time. But they still work",
+        "link": "https://www.economist.com/international/2026/04/16/the-game-theory-behind-violating-ceasefires"
+      },
+      {
+        "title": "Millions will go hungry if the Strait of Hormuz stays closed",
+        "desc": "Expensive fuel and fertiliser will lead to smaller harvests and higher prices",
+        "link": "https://www.economist.com/international/2026/04/16/millions-will-go-hungry-if-the-strait-of-hormuz-stays-closed"
+      },
+      {
+        "title": "If it starts, a nuclear-arms race will be unstoppable",
+        "desc": "A sobering interview with the head of the International Atomic Energy Agency",
+        "link": "https://www.economist.com/international/2026/04/14/if-it-starts-a-nuclear-arms-race-will-be-unstoppable"
+      },
+      {
+        "title": "Hospitals are stuck in a deadly doom loop",
+        "desc": "They never recovered from covid-19",
+        "link": "https://www.economist.com/international/2026/04/09/hospitals-are-stuck-in-a-deadly-doom-loop"
+      }
+    ]
+  },
+  {
+    "name": "Der Spiegel",
+    "url": "https://www.spiegel.de/international/index.rss",
+    "items": [
+      {
+        "title": "Terror Records in German Hands: ISIS and the Bureaucracy of Evil",
+        "desc": "DER SPIEGEL has learned that German authorities have obtained detailed membership lists kept by the terror group Islamic State. Some suspected terrorists are apparently still living in Germany.",
+        "link": "https://www.spiegel.de/international/world/terror-records-in-german-hands-isis-and-the-bureaucracy-of-evil-a-b4ce77d2-774b-4ad5-8c8c-8cb2943e6737#ref=rss"
+      },
+      {
+        "title": "The War in Ukraine: As Russian Losses Mount, Signing Bonuses for Recruits Are Skyrocketing",
+        "desc": "It is becoming increasingly difficult for Russian officials to meet the recruitment quotas set by Moscow. In response, bonuses are rising and standards are plummeting, as DER SPIEGEL has learned.",
+        "link": "https://www.spiegel.de/international/world/the-war-in-ukraine-as-russian-losses-mount-signing-bonuses-for-recruits-are-skyrocketing-a-b1c752f6-0edb-4304-a24b-2869730b4248#ref=rss"
+      },
+      {
+        "title": "Defense in Orbit: Germany Goes Big in the Military Space Race",
+        "desc": "Berlin was long content to ignore space as a military frontier. But now, the Merz government is investing 35 billion euros in an array of new systems. The race for lucrative contracts has begun.",
+        "link": "https://www.spiegel.de/international/germany/defense-in-orbit-germany-goes-big-in-the-military-space-race-a-0b1f15e2-740e-4c8b-b759-52d8a49fab31#ref=rss"
+      },
+      {
+        "title": "Trump's Blockade: The Lights Are Going Out in Cuba",
+        "desc": "U.S. President Donald Trump is forcing Cuba to its knees. Power outages are the norm and people are having trouble making ends meet. Many say, though, that the problems are homemade.",
+        "link": "https://www.spiegel.de/international/world/trumps-blockade-the-lights-are-going-out-in-cuba-a-936fdecc-18e2-4700-83bd-d8ae417c7ec6#ref=rss"
+      },
+      {
+        "title": "Donald Trump Has Run Out of Options in Iran",
+        "desc": "Trump has started a war he can no longer end. None of the options for exiting the current morass are palatable. And with Iran now attacking the global economy, the United States is on the defensive.",
+        "link": "https://www.spiegel.de/international/world/short-term-excursion-trump-has-run-out-of-options-in-iran-a-b76cef19-aabc-45de-8b1e-a0f33f607496#ref=rss"
+      },
+      {
+        "title": "Ukrainians Soldiers Who Have Abandoned the Fight: All Quiet on the Eastern Front",
+        "desc": "When the Russians launched their attack, Taras, Maksym and Lew fought hard to repel the invaders. Now, they have had enough of killing and suffering - and have gone underground as deserters.",
+        "link": "https://www.spiegel.de/international/world/ukrainians-soldiers-who-have-abandoned-the-fight-all-quiet-on-the-eastern-front-a-2f51d902-1ba5-4714-b95f-da2ff1c1ad2b#ref=rss"
+      },
+      {
+        "title": "U.S. Military Expert on Oil Tanker Convoys in the Strait of Hormuz: \"Iran Must Only Succeed Once to Trigger a Catastrophe\"",
+        "desc": "How can Iran's blockade of the Strait of Hormuz be broken? Retired General S. Clinton Hinote has addressed precisely that question as the former Air Force chief strategist. His conclusion? Difficult.",
+        "link": "https://www.spiegel.de/international/world/u-s-military-expert-on-oil-tanker-convoys-in-the-strait-of-hormuz-iran-must-only-succeed-once-to-trigger-a-catastrophe-a-1b4f4521-01dd-4711-8a5e-8da225d053b5#ref=rss"
+      },
+      {
+        "title": "Indigenous Activist Nick Tilsen: \"Trump Wants to Hear Nothing about the Genocide against Indigenous Nations\"",
+        "desc": "The United States this year is celebrating its 250th anniversary, and President Donald Trump is turning 80. The site of the party may be a sacred site in the Black Hills - and Indigenous activist Nick Tilsen is in no mood to join in.",
+        "link": "https://www.spiegel.de/international/world/indigenous-activist-nick-tilsen-trump-wants-to-hear-nothing-about-the-genocide-against-indigenous-nations-a-7dd75e1c-ebec-4da8-b228-d6d0770258ed#ref=rss"
+      }
+    ]
+  },
+  {
+    "name": "NHK",
+    "url": "https://www3.nhk.or.jp/nhkworld/en/news/rss/",
+    "items": []
+  },
+  {
+    "name": "联合早报",
+    "url": "https://www.zaobao.com.sg/rss/zaobao_recommended.xml",
+    "items": []
+  }
+]
