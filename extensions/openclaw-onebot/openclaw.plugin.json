@@ -53,6 +53,56 @@
       }
     }
   },
+  "channelConfigs": {
+    "onebot": {
+      "label": "OneBot",
+      "description": "OneBot v11 protocol channel for NapCat/Lagrange via WebSocket.",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "selfId": { "type": "string" },
+          "wsUrl": { "type": "string" },
+          "accessToken": { "type": "string" },
+          "accessTokenFile": { "type": "string" },
+          "systemPrompt": { "type": "string" },
+          "aliases": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "groupReplyPolicy": {
+            "type": "string",
+            "enum": ["@mentions-only", "@always-reply-plus-contextual", "@always-reply-plus-random-interject"]
+          },
+          "proactiveCooldownMs": { "type": "number" },
+          "maxProactiveRepliesPerHour": { "type": "number" },
+          "proactiveInterjectChancePercent": { "type": "number" },
+          "renderMarkdownToPlain": { "type": "boolean" },
+          "collapseDoubleNewlines": { "type": "boolean" },
+          "longMessageMode": { "type": "string" },
+          "longMessageThreshold": { "type": "number" },
+          "accounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "defaultAccount": { "type": "string" }
+        }
+      },
+      "uiHints": {
+        "wsUrl": { "label": "WS 地址", "placeholder": "ws://127.0.0.1:30011" },
+        "selfId": { "label": "QQ 号", "placeholder": "3437738143" },
+        "accessToken": { "label": "Access Token", "sensitive": true },
+        "accessTokenFile": { "label": "Access Token 文件", "sensitive": true },
+        "groupReplyPolicy": { "label": "群回复策略" }
+      }
+    }
+  },
   "uiHints": {
     "wsUrl": { "label": "WS 地址", "placeholder": "ws://127.0.0.1:30011" },
     "selfId": { "label": "QQ 号", "placeholder": "3437738143" },

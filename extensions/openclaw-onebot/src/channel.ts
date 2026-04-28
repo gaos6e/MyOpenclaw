@@ -11,6 +11,8 @@
 
 import { getOneBotConfig, listAccountIds, resolveGroupReplyPolicy, resolveOneBotAccount } from "./config.js";
 import { sendTextMessage, sendMediaMessage } from "./send.js";
+import { getWs } from "./connection.js";
+import { runOneBotGatewayAccount } from "./service.js";
 
 const meta = {
     id: "onebot",
@@ -70,6 +72,17 @@ export const OneBotChannelPlugin = {
         resolveAccount: (cfg: any, accountId?: string) => {
             return resolveOneBotAccount(cfg, accountId);
         },
+        isConfigured: (account: any) => Boolean(account?.wsUrl && account?.host && account?.port),
+        unconfiguredReason: () => "OneBot wsUrl is not configured",
+        describeAccount: (account: any) => ({
+            accountId: account.accountId,
+            enabled: account.enabled,
+            configured: Boolean(account?.wsUrl && account?.host && account?.port),
+            statusState: account.enabled === false ? "disabled" : "configured",
+            mode: account.type,
+            port: account.port,
+            secretSource: account.secretSource,
+        }),
     },
     groups: {
         resolveRequireMention: (cfg: any, accountId?: string) =>
@@ -162,5 +175,56 @@ export const OneBotChannelPlugin = {
                 return { channel: "onebot", ok: false, messageId: "", error: e instanceof Error ? e : new Error(String(e)) };
             }
         },
+    },
+    gateway: {
+        startAccount: async (ctx: any) => {
+            const api = (globalThis as any).__onebotApi;
+            await runOneBotGatewayAccount(api, ctx);
+        },
+        stopAccount: async () => {
+            const { stopConnection } = await import("./connection.js");
+            stopConnection();
+        },
+    },
+    status: {
+        defaultRuntime: {
+            accountId: "default",
+            running: false,
+            connected: false,
+            lastConnectedAt: null,
+            lastTransportActivityAt: null,
+            lastInboundAt: null,
+            lastOutboundAt: null,
+            lastError: null,
+        },
+        probeAccount: async () => {
+            const socket = getWs();
+            const connected = socket?.readyState === 1;
+            return { ok: connected, connected };
+        },
+        buildChannelSummary: ({ snapshot }: { snapshot: any }) => ({
+            configured: snapshot.configured ?? false,
+            running: snapshot.running ?? false,
+            connected: snapshot.connected ?? false,
+            lastConnectedAt: snapshot.lastConnectedAt ?? null,
+            lastError: snapshot.lastError ?? null,
+        }),
+        buildAccountSnapshot: ({ account, runtime }: { account: any; runtime?: any }) => ({
+            accountId: account?.accountId ?? "default",
+            enabled: account?.enabled !== false,
+            configured: Boolean(account?.wsUrl && account?.host && account?.port),
+            running: runtime?.running ?? false,
+            connected: runtime?.connected ?? false,
+            lastConnectedAt: runtime?.lastConnectedAt ?? null,
+            lastDisconnectedAt: runtime?.lastDisconnectedAt ?? null,
+            lastTransportActivityAt: runtime?.lastTransportActivityAt ?? null,
+            lastInboundAt: runtime?.lastInboundAt ?? null,
+            lastOutboundAt: runtime?.lastOutboundAt ?? null,
+            lastError: runtime?.lastError ?? null,
+            statusState: runtime?.connected ? "connected" : "configured",
+            mode: account?.type,
+            port: account?.port,
+            secretSource: account?.secretSource,
+        }),
     },
 };

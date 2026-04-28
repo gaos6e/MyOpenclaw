@@ -5,7 +5,7 @@ Set shell = CreateObject("WScript.Shell")
 Set env = shell.Environment("PROCESS")
 
 root = "C:\Users\20961\.openclaw"
-env("CODEX_HOME") = root & "\.codex-openclaw"
+env("CODEX_HOME") = "C:\Users\20961\.codex"
 env("OPENCLAW_GATEWAY_PORT") = "18789"
 
 cmdExe = shell.ExpandEnvironmentStrings("%SystemRoot%\System32\cmd.exe")

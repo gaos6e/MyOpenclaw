@@ -1,0 +1,122 @@
+{
+  "gateway": {
+    "mode": "local",
+    "bind": "loopback",
+    "port": 18789,
+    "auth": {
+      "mode": "token",
+      "token": "37dfdda849c9e25e07f883cb2be644435d3325432891d195"
+    }
+  },
+  "auth": {
+    "profiles": {
+      "openai-codex:default": {
+        "provider": "openai-codex",
+        "mode": "oauth"
+      },
+      "openai-codex:gaoshuai6e@163.com": {
+        "provider": "openai-codex",
+        "mode": "oauth"
+      }
+    },
+    "order": {
+      "openai-codex": [
+        "openai-codex:gaoshuai6e@163.com",
+        "openai-codex:default"
+      ]
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openai-codex/gpt-5.5",
+        "fallbacks": []
+      },
+      "imageModel": {
+        "primary": "openai-codex/gpt-5.5",
+        "fallbacks": []
+      },
+      "thinkingDefault": "low",
+      "timeoutSeconds": 180,
+      "workspace": "C:\\Users\\20961\\.openclaw",
+      "agentRuntime": {
+        "id": "codex"
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "name": "main",
+        "workspace": "C:\\Users\\20961\\.openclaw",
+        "model": "openai-codex/gpt-5.5",
+        "thinkingDefault": "low",
+        "fastModeDefault": false,
+        "agentRuntime": {
+          "id": "codex"
+        }
+      },
+      {
+        "id": "onebot-3437738143",
+        "name": "OneBot nap3437",
+        "workspace": "C:\\Users\\20961\\.openclaw",
+        "model": "openai-codex/gpt-5.5",
+        "thinkingDefault": "low",
+        "fastModeDefault": false,
+        "agentRuntime": {
+          "id": "codex"
+        }
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "type": "route",
+      "agentId": "onebot-3437738143",
+      "match": {
+        "channel": "onebot",
+        "accountId": "nap3437"
+      }
+    }
+  ],
+  "channels": {
+    "onebot": {
+      "accounts": {
+        "nap3437": {
+          "enabled": true,
+          "selfId": "3437738143",
+          "wsUrl": "ws://127.0.0.1:30011",
+          "accessTokenFile": "C:\\Users\\20961\\.openclaw\\identity\\napcat-3437738143.access-token.txt",
+          "groupReplyPolicy": "@mentions-only",
+          "renderMarkdownToPlain": true,
+          "collapseDoubleNewlines": true,
+          "longMessageMode": "normal",
+          "longMessageThreshold": 300
+        }
+      }
+    }
+  },
+  "plugins": {
+    "enabled": true,
+    "allow": [
+      "openai",
+      "codex",
+      "openclaw-onebot"
+    ],
+    "entries": {
+      "openai": {
+        "enabled": true
+      },
+      "codex": {
+        "enabled": true
+      },
+      "openclaw-onebot": {
+        "enabled": true
+      }
+    }
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.4.26",
+    "lastTouchedAt": "2026-04-28T14:45:10.778Z"
+  }
+}

@@ -10,14 +10,18 @@
  */
 
 import { OneBotChannelPlugin } from "./channel.js";
-import { registerService } from "./service.js";
 import { startImageTempCleanup } from "./connection.js";
 import { startForwardCleanupTimer } from "./handlers/process-inbound.js";
 import { registerOneBotCli } from "./cli-commands.js";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const pkg = require("../package.json");
+let pkg: { name?: string; version?: string };
+try {
+  pkg = require("../package.json");
+} catch {
+  pkg = require("../../package.json");
+}
 
 export default function register(api: any): void {
   (globalThis as any).__onebotApi = api;
@@ -55,8 +59,6 @@ export default function register(api: any): void {
       { commands: ["onebot"] }
     );
   }
-
-  registerService(api);
 
   if (logger?.info) {
     logger.info(`[${pluginName}] v${pluginVersion} 加载完成`);
